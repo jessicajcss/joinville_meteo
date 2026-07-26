@@ -45,7 +45,7 @@
   <div class="rail" id="rail"></div>
   <div class="main">
     <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
-      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+      </div>
     <div class="head">
       <div class="htitle">Risco Hidro-climático<small id="hsub">Desastres registrados por bairro — SEPROT / Defesa Civil</small></div>
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
@@ -181,7 +181,8 @@ function timeline(){
   const order=D.tipos.slice().sort((a,b)=>{const A={'Chuvas Intensas':0,'Enxurrada':1,'Inundação':2,'Alagamentos':3,'Vendaval':4,'Granizo':5};return (A[a]??9)-(A[b]??9);});
   let bars='';years.forEach((y,i)=>{let acc=0;const x=PL+i*bw+bw*0.16,w=bw*0.68;
     order.forEach(t=>{const c=byYT[y][t]||0;if(!c)return;const h=c/mx*plotH;const yy=PT+plotH-(acc+c)/mx*plotH;
-      bars+=`<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${tcolor(t)}" rx="1.5"/>`;acc+=c;});});
+      const tip=`${y} · ${t}: ${c} ${c===1?'evento':'eventos'} (total do ano: ${totals[i]})`;
+      bars+=`<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${tcolor(t)}" rx="1.5" style="cursor:default"><title>${tip}</title></rect>`;acc+=c;});});
   // intelligent x-axis: pick a year step so labels never overlap (approx label width / bar width),
   // keeping a readable font and always showing the first and last year
   const fs=9, labW=fs*2.6, step=Math.max(1,Math.ceil(labW/bw));

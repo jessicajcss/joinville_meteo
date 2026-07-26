@@ -44,7 +44,7 @@
   <div class="rail" id="rail"></div>
   <div class="main">
     <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
-      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+      </div>
     <div class="head">
       <div class="htitle">Histórico · estação<small>Rede de estações, condições e download por estação</small></div>
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
@@ -187,17 +187,24 @@ async function init(){
   buildMaps();
   renderStation();
 }
+let STB=null;
+function fitStations(){
+  if(!STB) STB=L.latLngBounds(DATA.stations.map(s=>[s.lat,s.lon]));  // bounds of every station
+  [mapSt,mapWind].forEach(m=>{ if(m){ m.invalidateSize(); m.fitBounds(STB,{padding:[26,26],maxZoom:12}); } });
+}
 function buildMaps(){
   const opts={zoomControl:true,scrollWheelZoom:false,attributionControl:false};
   mapSt=L.map('mapSt',opts); mapWind=L.map('mapWind',opts);
-  const stb=L.latLngBounds(DATA.stations.map(s=>[s.lat,s.lon]));   // center/zoom on the stations
   [mapSt,mapWind].forEach(m=>{
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(m);
     if(LIMITE) L.geoJSON(LIMITE,{style:{color:'#fff',weight:1.4,fill:false,opacity:0.65}}).addTo(m);
-    m.fitBounds(stb,{padding:[34,34]});
   });
   layerSt=L.layerGroup().addTo(mapSt); layerWind=L.layerGroup().addTo(mapWind);
   renderStationsMap(); renderWind();
+  fitStations();
+  // re-fit once the layout has settled (Leaflet mis-sizes if the column isn't final yet) + on resize
+  setTimeout(fitStations,250); setTimeout(fitStations,800);
+  window.addEventListener('resize',()=>{clearTimeout(window._stfit);window._stfit=setTimeout(fitStations,200);});
 }
 function renderStationsMap(){
   layerSt.clearLayers();

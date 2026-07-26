@@ -53,7 +53,7 @@
   <div class="rail" id="rail"></div>
   <div class="main">
     <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
-      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+      </div>
     <div class="head">
       <div class="htitle">Previsão · WRF<small>Chuva, temperatura e vento previstos (CPTEC/INPE WRF 7 km) — por bacia e por bairro</small></div>
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
@@ -64,25 +64,27 @@
     <!-- 0 · alerta de risco de chuva (previsão) — fase de teste -->
     <div class="card" id="fcalert" style="margin-bottom:16px;display:none"></div>
 
-    <!-- 1 · mapa local -->
-    <div class="card">
-      <div class="ct">Mapa de previsão <span class="mut" id="mapsub"></span></div>
-      <div class="pick">
-        <div class="fg"><label>Variável</label><div class="seg" id="segVar"></div></div>
-        <div class="fg"><label>Instante</label><select id="selStep"></select></div>
-        <div class="fg" style="flex:1;min-width:200px"><label>&nbsp;</label><input type="range" id="slStep" min="0" max="0" value="0" style="width:100%"></div>
-      </div>
-      <div id="wmap"></div>
-      <div class="capt" id="mapcapt"></div>
-    </div>
-
-    <!-- 2+3 · por bacia | por bairro (lado a lado) -->
+    <!-- 1+2+3 · [mapa + por bacia]  |  por bairro -->
     <div class="twocol">
-      <div class="card">
-        <div class="ct">Previsão por bacia hidrográfica <span class="mut" id="totsub"></span></div>
-        <div class="bwrap" id="bars"></div>
-        <div class="capt" id="barcapt"></div>
+      <!-- coluna esquerda: mapa de previsão + previsão por bacia -->
+      <div>
+        <div class="card">
+          <div class="ct">Mapa de previsão <span class="mut" id="mapsub"></span></div>
+          <div class="pick">
+            <div class="fg"><label>Variável</label><div class="seg" id="segVar"></div></div>
+            <div class="fg"><label>Instante</label><select id="selStep"></select></div>
+            <div class="fg" style="flex:1;min-width:160px"><label>&nbsp;</label><input type="range" id="slStep" min="0" max="0" value="0" style="width:100%"></div>
+          </div>
+          <div id="wmap"></div>
+          <div class="capt" id="mapcapt"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="ct">Previsão por bacia hidrográfica <span class="mut" id="totsub"></span></div>
+          <div class="bwrap" id="bars"></div>
+          <div class="capt" id="barcapt"></div>
+        </div>
       </div>
+      <!-- coluna direita: previsão por bairro -->
       <div class="card">
         <div class="ct">Previsão por bairro <span class="mut" id="bairrosub"></span></div>
         <div id="bairromap"></div>
@@ -157,7 +159,7 @@ const VARS={
   wind:{label:'Vento', color:'#225ea8', ramp:WINDR, accum:false, unit:'m/s', sUnit:'m/s', bunit:'m/s',
         bval:b=>b.wind.mean_ms, blabel:'média', series:b=>b.wind.series, vlims:(V)=>[0, V.spd_max], field:(V,view)=>V.spd_hourly[view]}};
 
-let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', PROJ, PROJB;
+let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', PROJ, PROJB, BCOL={};
 
 function mkproj(bb,W,padFrac){padFrac=padFrac==null?0.06:padFrac;
   const px=(bb[2]-bb[0])*padFrac+0.01, py=(bb[3]-bb[1])*padFrac+0.01;
@@ -189,12 +191,20 @@ function drawGrid(pr,lat,lon,field,rmp,lo,hi,unit,zeroWhite){const rng=(hi-lo)||
   const cw=Math.abs(P(pr,lon[1],lat[0])[0]-P(pr,lon[0],lat[0])[0])||pr.W/nlon, ch=Math.abs(P(pr,lon[0],lat[0])[1]-P(pr,lon[0],lat[1])[1])||pr.H/nlat;
   let s='';for(let i=0;i<nlat;i++)for(let j=0;j<nlon;j++){const v=field[i][j];const [cx,cy]=P(pr,lon[j],lat[i]);
     const t=(v-lo)/rng, show=zeroWhite?v>0.05:true, fill=show?rmp(t):'#fbfdff';
-    s+=`<rect x="${(cx-cw/2).toFixed(1)}" y="${(cy-ch/2).toFixed(1)}" width="${(cw+0.6).toFixed(1)}" height="${(ch+0.6).toFixed(1)}" fill="${fill}"><title>${lat[i].toFixed(2)}, ${lon[j].toFixed(2)}: ${v.toFixed(1)} ${unit}</title></rect>`;}
+    const vtxt=(unit==='mm'&&Math.abs(v)<1)?v.toFixed(2):v.toFixed(1);
+    s+=`<rect x="${(cx-cw/2).toFixed(1)}" y="${(cy-ch/2).toFixed(1)}" width="${(cw+0.6).toFixed(1)}" height="${(ch+0.6).toFixed(1)}" fill="${fill}"><title>${lat[i].toFixed(2)}, ${lon[j].toFixed(2)}: ${vtxt} ${unit}</title></rect>`;}
   return {s,cw,ch};}
-function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/16));let a='';
+function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/14));let a='';
+  const cell=Math.min(cw,ch), L=cell*0.92, ah=cell*0.42;   // longer shaft + a real arrowhead
   for(let i=0;i<nlat;i+=s)for(let j=0;j<nlon;j+=s){const uu=U[i][j],vv=V[i][j],sp=Math.hypot(uu,vv);if(sp<0.3)continue;
-    const [cx,cy]=P(pr,lon[j],lat[i]);const L=Math.min(cw,ch)*0.7,ex=cx+uu/sp*L,ey=cy-vv/sp*L;
-    a+=`<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#12233a" stroke-width="1.1" opacity="0.7"/><circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="1.2" fill="#12233a" opacity="0.75"/>`;}
+    const [cx0,cy0]=P(pr,lon[j],lat[i]);                    // draw centred: tail behind, tip ahead
+    const dx=uu/sp, dy=-vv/sp;                              // screen dir (y down)
+    const cx=cx0-dx*L*0.45, cy=cy0-dy*L*0.45, ex=cx0+dx*L*0.55, ey=cy0+dy*L*0.55;
+    const ang=Math.atan2(ey-cy,ex-cx);
+    const h1x=ex-ah*Math.cos(ang-0.42), h1y=ey-ah*Math.sin(ang-0.42);
+    const h2x=ex-ah*Math.cos(ang+0.42), h2y=ey-ah*Math.sin(ang+0.42);
+    a+=`<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#12233a" stroke-width="1.5" opacity="0.8"/>`
+      +`<path d="M${h1x.toFixed(1)} ${h1y.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${h2x.toFixed(1)} ${h2y.toFixed(1)}" fill="none" stroke="#12233a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>`;}
   return a;}
 
 // ---- 1. local map ----
@@ -203,18 +213,18 @@ function drawMap(){
   const [lo,hi]=M.vlims(V,view), g=drawGrid(pr,RUN.lat,RUN.lon,M.field(V,view),M.ramp,lo,hi,M.unit,vn==='rain');
   let arrows=''; if(vn==='wind') arrows=windArrows(pr,RUN.lat,RUN.lon,V.u_hourly[view],V.v_hourly[view],g.cw,g.ch);
   let outl=''; if(BAI) outl+=`<path d="${polyPathsFC(pr,BAI)}" fill="none" stroke="#4a5763" stroke-width="0.5" opacity="0.5"/>`;
-  if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>`;
-  outl+=`<path d="${polyPathsFC(pr,BAS)}" fill="none" stroke="#12233a" stroke-width="1.1" stroke-linejoin="round" opacity="0.7"/>`;
-  let labs='';(RUN.basins||[]).forEach(b=>{const f=(BAS.features||[]).find(ff=>(ff.properties.basin||ff.properties.Nomes)===b.name);if(!f)return;const c=centroidOf(f);if(!c)return;const [x,y]=P(pr,c[0],c[1]);
-    labs+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9.5" font-weight="700" fill="#12233a" text-anchor="middle" paint-order="stroke" stroke="#fff" stroke-width="2.2">${short(b.name)}</text>`;});
+  // each basin outlined in ITS bar colour (below) — the coloured bars are the legend, so no on-map text labels
+  (BAS.features||[]).forEach(f=>{const nm=f.properties.basin||f.properties.Nomes;const col=BCOL[nm]||'#12233a';
+    outl+=`<path d="${polyPathF(pr,f)}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round" opacity="0.95"><title>${nm}</title></path>`;});
+  if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2" stroke-linejoin="round" opacity="0.85"/>`;
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+18,10,H-20);
-  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${g.s}${arrows}${outl}${labs}${cb}</svg>`;
+  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${g.s}${arrows}${outl}${cb}</svg>`;
   const when=(vn==='rain'&&view==='accum')?'acumulado da rodada':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
   document.getElementById('mapsub').textContent=M.label+' · '+when;
-  document.getElementById('mapcapt').textContent=(vn==='rain'&&view==='accum'
-    ? 'Chuva total acumulada prevista na rodada (mm) por célula da grade WRF de 7 km. '
-    : M.label+' prevista válida para '+RUN.valid_times[view]+'. ')
-    +(vn==='wind'?'Velocidade (cor) e direção (setas). ':'')+'Contornos: limite municipal (grosso), bacias e bairros. Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z).';
+  document.getElementById('mapcapt').innerHTML=(vn==='rain'&&view==='accum'
+    ? '<b>Acumulado</b> = chuva total prevista na rodada (mm), somando todas as horas, por célula da grade WRF de 7 km. Escolha uma hora em “Instante” para ver a taxa horária (mm/h) — em chuva fraca cada hora fica perto de 0, mas o acumulado soma esses pinguinhos. '
+    : M.label+' prevista para '+RUN.valid_times[view]+' (taxa da hora). ')
+    +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z).';
 }
 // ---- 2. basin bars ----
 function drawBars(){const vn=CURVAR, M=VARS[vn];
@@ -222,7 +232,8 @@ function drawBars(){const vn=CURVAR, M=VARS[vn];
   const vals=bs.map(M.bval), mx=Math.max(...vals,0.001), mn=Math.min(...vals,0), base=vn==='temp'?mn-1:0, span=(mx-base)||1;
   document.getElementById('bars').innerHTML=bs.map((b,i)=>{const val=M.bval(b), w=Math.max(3,(val-base)/span*100);
     const dir=(vn==='wind'&&b.wind)?` <span style="color:var(--mut)">${b.wind.dir_deg}°</span>`:'';
-    return `<div class="brow"><span class="nm" title="${b.name}">${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${vn==='rain'?STCOL[i%STCOL.length]:M.color}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${M.bunit}${dir}</i></span></div>`;}).join('');
+    const col=BCOL[b.name]||M.color;
+    return `<div class="brow"><span class="nm" title="${b.name}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${col};margin-right:6px;vertical-align:middle"></span>${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${col}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${M.bunit}${dir}</i></span></div>`;}).join('');
   document.getElementById('totsub').textContent=M.label+' · '+M.blabel;
   const cap={rain:'Total previsto por bacia = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, CRS de área igual).',
     temp:'Temperatura média prevista por bacia (média no tempo da média espacial ponderada por área).',
@@ -267,7 +278,7 @@ function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=
   document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+')';
 }
 // ---- controls / downloads ----
-function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado (rodada inteira)</option>':'';
+function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado — soma de todas as horas</option>':'';
   RUN.lead_h.forEach((h,i)=>o+=`<option value="${i}">+${h} h · ${RUN.valid_times[i]}</option>`);return o;}
 function redrawMaps(){drawMap();}
 function redrawAll(){drawMap();drawBars();drawBairros();drawSeries();}
@@ -321,6 +332,7 @@ async function init(){
   PROJ=mkproj(bbox(BAS)||[Math.min(...RUN.lon),Math.min(...RUN.lat),Math.max(...RUN.lon),Math.max(...RUN.lat)],760);
   if(LIM){const lb=bbox(LIM);if(lb){const b=[Math.min(PROJ.lonmin+0.02,lb[0]),Math.min(PROJ.latmin+0.02,lb[1]),Math.max(PROJ.lonmax-0.02,lb[2]),Math.max(PROJ.latmax-0.02,lb[3])];PROJ=mkproj(b,760);}}
   PROJB=mkproj(bbox(BAI)||bbox(LIM)||[Math.min(...RUN.lon),Math.min(...RUN.lat),Math.max(...RUN.lon),Math.max(...RUN.lat)],520,0.05);
+  (RUN.basins||[]).forEach((b,i)=>{BCOL[b.name]=STCOL[i%STCOL.length];});   // fixed colour per basin (map ↔ bars)
   const isDemo=/synth|demo|test/i.test(RUN.source||'')||!RUN.run_time;
   if(isDemo)document.getElementById('demo').innerHTML='<div class="demo">⚠️ Campo de <b>demonstração</b> (sintético) — os números serão substituídos pela rodada real do WRF assim que o NetCDF for processado.</div>';
   document.getElementById('ribbon').innerHTML='CPTEC/INPE WRF AMS 7 km · rodada '+(RUN.run_time||'—')+' UTC · horários válidos em hora local (UTC−3) · gerado '+(RUN.generated_at||'');

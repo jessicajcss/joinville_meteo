@@ -15,11 +15,11 @@
   <div class="main">
     <div class="tb">
       <div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
-      <div class="search">🔍 Buscar estação, bairro, variável…</div>
-      <div class="tbtn">🔔</div><div class="tbtn">☰</div>
+      
+      
     </div>
     <div class="head">
-      <div class="htitle">Monitoramento Meteorológico<small>Rede SEPROT · Prefeitura de Joinville · quase em tempo real</small></div>
+      <div class="htitle">Monitoramento Meteorológico<small>Rede SEPROT · Prefeitura de Joinville</small></div>
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
     </div>
     <div class="grid">
@@ -171,16 +171,32 @@ async function init(){
       <div class="st"><span class="k">${PRECIP} Precip. por hora</span><span class="v">${prec} mm</span></div>
       <div class="st"><span class="k">${SUNUP} Nascer do sol</span><span class="v">${sr}</span></div>
       <div class="st"><span class="k">${SUNDN} Pôr do sol</span><span class="v">${ss}</span></div></div>`;
-  // KMA alert
+  // Severe-weather alert — 3 states, judged against the viewer's real clock:
+  //   live + calm  → "Em tempo real · sem alertas"   (green)
+  //   live + severe→ "Alerta ativo"                   (red)
+  //   stale/no data→ "Offline · última leitura há X"  (grey) — we can't judge current weather
   const al=SNAP.alert||{};
-  const rlvl=al.rain?(al.rain.active?'alert':(al.rain.value_mmph>=2.5?'warn':'ok')):'ok';
-  const tlvl=(al.temp&&(al.temp.heat_active||al.temp.cold_active))?'alert':'ok';
-  const active=al.active;
+  const LIVE_MAX_H=24;                 // além disso = sem dados do dia → Offline (ajustável)
+  let ageH=Infinity, lastTxt='';
+  if(SNAP.reference_now){const t=new Date(SNAP.reference_now);
+    if(!isNaN(t)){ageH=(Date.now()-t)/36e5;
+      lastTxt=ageH<1.5?'agora há pouco':(ageH<48?`há ${Math.round(ageH)} h`:`há ${Math.round(ageH/24)} dias`);}}
+  const offline=ageH>LIVE_MAX_H, active=al.active;
+  const rlvl=offline?'off':(al.rain?(al.rain.active?'alert':(al.rain.value_mmph>=2.5?'warn':'ok')):'ok');
+  const tlvl=offline?'off':((al.temp&&(al.temp.heat_active||al.temp.cold_active))?'alert':'ok');
+  const wlvl=offline?'off':'ok';
+  const OFFPILL='background:#eef1f5;color:#8a8f98', OFFCHIP='background:#eef1f5;color:#9aa0aa;border-color:#e6e9ee';
+  const chip=(lvl,icon,label)=> lvl==='off'
+    ? `<span class="chip" style="${OFFCHIP}">${icon} ${label}</span>`
+    : `<span class="chip ${lvl}">${icon} ${label}</span>`;
+  const stat=offline?{c:'off',t:`Offline · última leitura ${lastTxt}`,s:OFFPILL}
+            :active ?{c:'alert',t:'alerta ativo',s:''}
+            :        {c:'ok',t:'em tempo real · sem alertas',s:''};
   document.getElementById('kma').innerHTML=`
     <div class="kh"><span><span class="warn">&#9888;</span> Alertas de tempo severo <small>· limiares OMM</small></span>
-      <span class="kstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alertas ativos'}</span></div>
-    <div class="kb"><span class="chip ${rlvl}">${HZ.rain} Chuva</span><span class="chip ${tlvl}">${HZ.temp} Temperatura</span><span class="chip ok">${HZ.wind} Vento</span></div>
-    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">níveis de aviso (estilo KMA)</span></div>`;
+      <span class="kstat ${stat.c}" style="${stat.s}">${stat.t}</span></div>
+    <div class="kb">${chip(rlvl,HZ.rain,'Chuva')}${chip(tlvl,HZ.temp,'Temperatura')}${chip(wlvl,HZ.wind,'Vento')}</div>
+    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">${offline?'sem dados recentes das estações — alerta indisponível':'níveis de aviso (estilo KMA)'}</span></div>`;
   // estado
   document.getElementById('estado').innerHTML=`<div class="ct">Estado da rede</div>
     <div class="txt">${N.n_online} de ${N.n_total} estações online agora. As demais estão defasadas — última leitura há mais de ${SNAP.fresh_days} dias.</div>

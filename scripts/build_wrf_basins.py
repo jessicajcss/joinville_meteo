@@ -51,6 +51,11 @@ def r1(x):
     return 0.0 if v == 0 else v
 
 
+def r2(x):
+    v = round(float(x), 2)     # rain kept to 2 decimals so light drizzle isn't shown as a flat 0.0
+    return 0.0 if v == 0 else v
+
+
 def wdir_from_uv(u, v):
     return float((270.0 - np.degrees(np.arctan2(v, u))) % 360.0)
 
@@ -251,9 +256,9 @@ def grid_block(lat, lon, fields, T):
     block = {"lat": [round(float(x), 4) for x in lat], "lon": [round(float(x), 4) for x in lon], "vars": {}}
     rain = fields["rain"]
     block["vars"]["rain"] = {"unit": "mm",
-        "grid_accum": [[r1(x) for x in row] for row in rain.sum(axis=0)],
-        "grid_hourly": [[[r1(x) for x in row] for row in rain[t]] for t in range(T)],
-        "accum_max": r1(float(rain.sum(axis=0).max())), "hourly_max": r1(float(rain.max()))}
+        "grid_accum": [[r2(x) for x in row] for row in rain.sum(axis=0)],
+        "grid_hourly": [[[r2(x) for x in row] for row in rain[t]] for t in range(T)],
+        "accum_max": r2(float(rain.sum(axis=0).max())), "hourly_max": r2(float(rain.max()))}
     if fields["temp"] is not None:
         temp = fields["temp"]
         block["vars"]["temp"] = {"unit": "°C",

@@ -95,7 +95,7 @@ def open_joinville(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="site/data/wrf_joinville_latest.nc")
-    ap.add_argument("--leads", default="6,15", help="first,last forecast hour")
+    ap.add_argument("--leads", default="0,24", help="first,last forecast hour (default: next 24 h)")
     ap.add_argument("--tmp", default="/tmp/cptec_wrf")
     a = ap.parse_args()
     import requests, xarray as xr

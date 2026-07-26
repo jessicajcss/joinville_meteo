@@ -10,14 +10,28 @@ You don't need the feature branches. For a solo repo of already-tested work, one
 
 ## Step 1 — clean the rain masters once (do this BEFORE committing)
 
-So the station masters, the audit report, and the regenerated page outputs are all consistent in the
-same commit:
+> **This bundle does NOT contain the heavy station masters** — those are your own data. They live in
+> your project at **`…/projeto_resposta_eventos/datasets/hourly`** and **`datasets/daily`**. The
+> dashboard pipeline, however, reads masters from **`data/hourly`** (see `build_site_data.py`). So:
 
-```bash
-python scripts/rain_qc.py        # flags inch-code/ceiling/gap-dump in data/hourly + data/daily (in place)
+**a) Put your masters where the pipeline expects them** — copy `datasets/hourly` → the repo's
+`data/hourly` and `datasets/daily` → `data/daily` (Windows):
+```bat
+xcopy /E /I /Y "..\..\datasets\hourly" "data\hourly"
+xcopy /E /I /Y "..\..\datasets\daily"  "data\daily"
 ```
 
-This also writes `data/processed/rain_qc_flags.csv`. (It's idempotent — safe to run again.)
+**b) Clean them (in place):**
+```bash
+python scripts/rain_qc.py                 # cleans data/hourly + data/daily; writes data/processed/rain_qc_flags.csv
+```
+It's idempotent (safe to re-run). To clean masters that live somewhere else, point at them directly:
+`python scripts/rain_qc.py --dir "C:\...\projeto_resposta_eventos\datasets"`.
+
+> **You don't strictly need this for going live** — the `site/data/*` I regenerated are already clean,
+> and `rain_qc` is wired into `build_hourly_daily.py` + `update_datasets.py`, so the masters get cleaned
+> automatically the next time the pipeline/Action runs. Step 1 just makes them clean *in your first
+> commit* and lets the weekly rebuild find them.
 
 ## Step 2 — stage everything and commit to main
 

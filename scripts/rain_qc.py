@@ -122,7 +122,8 @@ def clean_dir(data_dir: Path, report_dir: Path | None = None) -> pd.DataFrame:
     if fpath.exists():
         try:
             prev = pd.read_csv(fpath)
-            rep = pd.concat([prev, rep], ignore_index=True)
+            frames = [f for f in (prev, rep) if len(f)]          # skip empty frames (avoids a pandas concat warning)
+            rep = pd.concat(frames, ignore_index=True) if frames else rep
         except Exception:
             pass
     rep = rep.drop_duplicates(subset=["station", "kind", "date", "reason"]).sort_values(
@@ -139,13 +140,25 @@ def clean_all(root: Path) -> pd.DataFrame:
 
 if __name__ == "__main__":
     import argparse
-    ap = argparse.ArgumentParser(description="Flag inch-code / non-physical / catch-up rain in the station masters.")
-    ap.add_argument("--root", default=str(Path(__file__).resolve().parents[1]))
+    ap = argparse.ArgumentParser(
+        description="Flag inch-code / non-physical / catch-up rain in the station masters (in place).")
+    ap.add_argument("--root", default=str(Path(__file__).resolve().parents[1]),
+                    help="repo root; the masters are read from <root>/data/{hourly,daily}. Default: the repo.")
+    ap.add_argument("--dir", default=None,
+                    help="point straight at the folder that CONTAINS hourly/ and daily/ "
+                         "(e.g. --dir path/to/datasets). Overrides --root. Use this if your masters "
+                         "live somewhere other than <repo>/data.")
     a = ap.parse_args()
-    s = clean_dir(Path(a.root) / "data")
+    target = Path(a.dir) if a.dir else (Path(a.root) / "data")
+    if not (target / "hourly").is_dir() and not (target / "daily").is_dir():
+        print(f"[rain_qc] no hourly/ or daily/ under {target} — nothing to clean.")
+        print("          (the update bundle does NOT include the heavy station masters; point --dir "
+              "at your real masters folder, e.g. your project's datasets/ .)")
+        raise SystemExit(0)
+    s = clean_dir(target)
     tot = int(s["n_flagged"].sum()) if len(s) else 0
-    print(f"[rain_qc] flagged {tot} points across {len(s)} masters")
+    print(f"[rain_qc] flagged {tot} points across {len(s)} masters (in {target})")
     for _, r in s.iterrows():
         if r.get("n_flagged"):
             print(f"    {r['station']:13} {r['kind']:6} {r['n_flagged']:5d}  {r.get('by_reason',{})}")
-    print("[rain_qc] audit -> data/processed/rain_qc_flags.csv")
+    print(f"[rain_qc] audit -> {target / 'processed' / 'rain_qc_flags.csv'}")
