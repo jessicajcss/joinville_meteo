@@ -1,0 +1,70 @@
+name: WRF forecast (daily)
+
+# Pulls the latest available CPTEC/INPE WRF (AMS 7 km) run once a day, aggregates it onto
+# the Joinville basins + neighbourhoods, and commits the dashboard's Previsão data. Same
+# "fetch external data at build time" pattern as fetch_airport.py / build_enso.py.
+# Needs internet + cfgrib/eccodes (installed below); does NOT run in the Cowork sandbox.
+
+on:
+  schedule:
+    - cron: "0 9 * * *"          # daily 09:00 UTC (~06:00 in Joinville) — the 00Z run is posted by then
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: forecast-wrf
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install cfgrib eccodes ecmwflibs xarray netcdf4 geopandas shapely requests
+
+      - name: Fetch the latest CPTEC-WRF run (rain + temperature + wind)
+        run: python scripts/fetch_wrf.py --out /tmp/wrf_joinville_latest.nc || echo "WRF fetch failed (non-fatal) — keeping previous forecast"
+
+      - name: Aggregate onto basins + neighbourhoods
+        run: |
+          if [ -f /tmp/wrf_joinville_latest.nc ]; then
+            python scripts/build_wrf_basins.py /tmp/wrf_joinville_latest.nc
+          else
+            echo "no new .nc — skipping aggregation"
+          fi
+
+      - name: Accumulate the run into the cumulative grid archive
+        run: |
+          # append THIS run's native-resolution per-cell hourly values to one growing CSV
+          # (idempotent: a run already archived adds nothing). Persists the model history that
+          # the overwritten wrf_forecast.json / wrf_grid.geojson do not keep.
+          if [ -f site/data/wrf_forecast.json ]; then
+            python scripts/archive_wrf_grid.py
+          else
+            echo "no forecast json — skipping archive"
+          fi
+
+      - name: Commit updated forecast data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/wrf_forecast.json site/data/wrf_basins.csv site/data/wrf_basins.geojson \
+                  site/data/wrf_basins_hourly.csv site/data/wrf_bairros.csv site/data/wrf_bairros.geojson \
+                  site/data/wrf_grid.geojson site/data/wrf_regional.png site/data/wrf_grid_archive.csv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no forecast changes to commit"
+          else
+            git commit -m "WRF forecast update $(date -u +%F) [skip ci]"
+            git push
+          fi

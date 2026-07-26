@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Histórico da cidade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.intro{font-size:15px;color:#4a5158;line-height:1.65;max-width:900px;margin:2px 0 6px}
+.vsec{margin-top:26px}
+.vhead{display:flex;align-items:flex-start;gap:14px}
+.vhead .ic{flex:none;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.vhead .ic.temp{background:#fbe9e0}.vhead .ic.rain{background:#e4eefb}.vhead .ic.umid{background:#e3f6f7}.vhead .ic.solar{background:#fdeede}.vhead .ic.wind{background:#e8f5ee}
+.vhead .tt{font-size:23px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.vhead .tt .num{color:var(--mut)}
+.vhead .tt .u{font-size:14px;color:var(--mut);font-weight:600}
+.vhead .ds{font-size:13.5px;color:#6b7178;line-height:1.55;margin-top:4px;max-width:760px}
+.striplab{font-size:12px;font-weight:800;color:var(--ink);margin:16px 0 6px;overflow:hidden}
+.striplab span{color:var(--mut);font-weight:600;font-size:11px;margin-left:4px}
+.cbmini{float:right;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:10.5px;color:var(--mut)}
+.cbmini .g{width:96px;height:9px;border-radius:5px;margin:0 1px}
+.cbmini i{font-style:normal;font-weight:600;color:#b0b3b8;margin-left:1px}
+.tolink{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:6px}
+.tolink:hover{filter:brightness(.96)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb">
+      <div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div>
+      <div class="tbtn">🔔</div><div class="tbtn">☰</div>
+    </div>
+    <div class="head">
+      <div class="htitle">Histórico · cidade<small>O clima de Joinville em cinco parâmetros</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+    <div class="card">
+      <div class="intro" id="intro"></div>
+      <a class="tolink" href="cidade_tempchuva.html">Ver análise detalhada · Temperatura × Chuva →</a>
+    </div>
+    <div id="sections"></div>
+    <div class="card vsec"><div class="hnote" id="note"></div></div>
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ 
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='cidade'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+function ramp(stops){return t=>{t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
+  const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;};}
+const STOPS={temp:['#4078f2','#8aa0e0','#e0e0a0','#d55e00'],rain:['#f7fbff','#c6dbef','#6baed6','#2171b5','#08306b'],
+ humid:['#f1faf6','#a1dab4','#41b6c4','#2171b5'],sun:['#fff5eb','#fdd0a2','#fd8d3c','#d94801'],wind:['#edf8fb','#b2e2e2','#66c2a4','#238b45']};
+const RAMPS={temp:ramp(STOPS.temp),rain:ramp(STOPS.rain),humid:ramp(STOPS.humid),sun:ramp(STOPS.sun),wind:ramp(STOPS.wind)};
+function cbar(key,lo,hi,fmt,unit){return `<span class="cbmini">${fmt(lo)}<span class="g" style="background:linear-gradient(90deg,${STOPS[key].join(',')})"></span>${fmt(hi)}<i>${unit}</i></span>`;}
+const textOn=c=>{const m=c.match(/\d+/g).map(Number);return (0.2126*m[0]+0.7152*m[1]+0.0722*m[2])>155?'#2b2b2b':'#fff';};
+const MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+const IC={
+ temp:'<svg width="30" height="30" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z" fill="none" stroke="#d55e00" stroke-width="1.7"/><circle cx="12" cy="17.6" r="2.3" fill="#d55e00"/></svg>',
+ rain:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2171b5" stroke-width="1.7" stroke-linecap="round"><path d="M8 5c-2 3-3 4.6-3 6.2A3 3 0 0 0 11 11c0-1.6-1-3.2-3-6z"/><path d="M16 10c-1.5 2.3-2.3 3.5-2.3 4.7A2.3 2.3 0 0 0 18 14.7c0-1.2-.8-2.4-2-4.7z"/></svg>',
+ umid:'<svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 1 1-12 0c0-4 6-11 6-11z" fill="none" stroke="#0184bc" stroke-width="1.7"/><text x="12" y="17" font-size="11" font-weight="800" fill="#0184bc" text-anchor="middle">%</text></svg>',
+ solar:'<svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#f08c00"/><g stroke="#f08c00" stroke-width="1.9" stroke-linecap="round"><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22.5" y2="12"/><line x1="4.2" y1="4.2" x2="6" y2="6"/><line x1="18" y1="18" x2="19.8" y2="19.8"/><line x1="19.8" y1="4.2" x2="18" y2="6"/><line x1="6" y1="18" x2="4.2" y2="19.8"/></g></svg>',
+ wind:'<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#238b45" stroke-width="1.8" stroke-linecap="round"><path d="M3 8h10a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 12h14a2.5 2.5 0 1 1-2.5 2.5"/><path d="M3 16h8"/></svg>'};
+
+function monthlyStrip(clim,rmp,fmt){
+  const W=1000,H=68,top=18,ch=44,cw=W/12,gap=2;
+  const good=clim.filter(v=>v!=null);const lo=Math.min(...good),hi=Math.max(...good),span=(hi-lo)||1;
+  const iMax=clim.indexOf(hi),iMin=clim.indexOf(lo);let s='';
+  clim.forEach((v,i)=>{const x=i*cw;
+    s+=`<text x="${x+cw/2}" y="12" font-size="11" fill="#a0a1a7" text-anchor="middle">${MN[i]}</text>`;
+    if(v==null){s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="#f1f2f4"/>`;}
+    else{const c=rmp((v-lo)/span);s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="${c}"/>`;
+      if(i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${top+ch/2+4.5}" font-size="12" font-weight="800" fill="${textOn(c)}" text-anchor="middle">${fmt(v)}</text>`;}});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
+}
+function yearStrip(annual,rmp,fmt){
+  const W=1000,H=62,ch=44,n=annual.length,cw=W/n,gap=1.5;
+  const vals=annual.map(a=>a.value);const lo=Math.min(...vals),hi=Math.max(...vals),span=(hi-lo)||1;
+  const iMax=vals.indexOf(hi),iMin=vals.indexOf(lo);let s='';
+  annual.forEach((a,i)=>{const x=i*cw,c=rmp((a.value-lo)/span);
+    s+=`<rect x="${x+gap/2}" y="0" width="${cw-gap}" height="${ch}" rx="2.5" fill="${c}"/>`;
+    if(i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${ch/2+4.5}" font-size="11" font-weight="800" fill="${textOn(c)}" text-anchor="middle">${fmt(a.value)}</text>`;});
+  s+=`<text x="2" y="${ch+15}" font-size="11" fill="#a0a1a7">${annual[0].year}</text>`;
+  s+=`<text x="${W-2}" y="${ch+15}" font-size="11" fill="#a0a1a7" text-anchor="end">${annual[annual.length-1].year}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
+}
+
+const DESC={
+ temp:'Clima subtropical úmido: verões quentes, invernos amenos. A variação mensal é moderada e a temperatura anual é bastante estável.',
+ rain:'Chuva combinando a rede de pluviômetros da Defesa Civil e as estações meteorológicas. Verão chuvoso, inverno mais seco. Referência: ~2.130 mm/ano.',
+ umid:'Umidade relativa alta o ano inteiro (~80–84%), típica de uma cidade litorânea e chuvosa; dificulta a evaporação do suor no verão.',
+ solar:'A radiação solar é maior no verão e menor no inverno, acompanhando a duração do dia e a nebulosidade.',
+ wind:'Ventos em geral fracos a moderados, com alta proporção de calmarias; a rosa dos ventos (página Agora) mostra predomínio do quadrante leste (brisa marítima do Atlântico). Estações com cata-vento travado (direção fixa em 0°) são excluídas da rosa.'};
+const FMT={temp:v=>v.toFixed(1),rain:v=>Math.round(v),umid:v=>Math.round(v),solar:v=>Math.round(v),wind:v=>v.toFixed(1)};
+const ORDER=['temp','rain','umid','solar','wind'];
+
+async function init(){
+  const C=await fetch('data/city_history.json').then(r=>r.json());
+  const V=C.variables, yr=`${C.years[0]}–${C.years[C.years.length-1]}`;
+  document.getElementById('intro').innerHTML=`Olhamos o clima de Joinville (SC) por cinco parâmetros — <b>temperatura</b>, <b>chuva</b>, <b>umidade</b>, <b>radiação solar</b> e <b>vento</b> — ao longo de ${yr}. O sistema meteorológico é complexo e de difícil previsão, mas a análise do histórico ajuda a entender as condições de longo prazo e a resposta a eventos extremos — cada vez mais relevante com as mudanças climáticas.`;
+  let html='';
+  ORDER.forEach((k,idx)=>{
+    const v=V[k]; if(!v) return; const rmp=RAMPS[v.ramp], fmt=FMT[k];
+    const cln=v.clim.filter(x=>x!=null), cmn=Math.min(...cln), cmx=Math.max(...cln);
+    const av=v.annual.map(a=>a.value), amn=Math.min(...av), amx=Math.max(...av);
+    html+=`<div class="card vsec">
+      <div class="vhead"><div class="ic ${k}">${IC[k]}</div>
+        <div><div class="tt"><span class="num">${idx+1}.</span> ${v.label} <span class="u">(${v.unit})</span></div>
+        <div class="ds">${DESC[k]||''}</div></div></div>
+      <div class="striplab">Média mensal <span>climatologia ${yr}</span>${cbar(v.ramp,cmn,cmx,fmt,v.unit)}</div>
+      ${monthlyStrip(v.clim,rmp,fmt)}
+      <div class="striplab">Tendência anual <span>${v.annual[0].year}–${v.annual[v.annual.length-1].year}</span>${cbar(v.ramp,amn,amx,fmt,v.unit)}</div>
+      ${yearStrip(v.annual,rmp,fmt)}
+    </div>`;
+  });
+  document.getElementById('sections').innerHTML=html;
+  document.getElementById('note').textContent=C.notes;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+C.generated_at.slice(0,16).replace('T',' ')+' UTC';
+}
+init();
+</script>
+</body>
+</html>

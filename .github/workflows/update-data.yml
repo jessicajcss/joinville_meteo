@@ -1,0 +1,75 @@
+name: Update datasets
+
+# Appends any new files dropped in data/incoming/ into the per-station masters,
+# refreshes the airport series (IEM) and the coverage figures, and commits the
+# result. Runs when you push new data, every Monday as a safety net, and on demand.
+on:
+  push:
+    branches: [main]
+    paths: ["data/incoming/**"]
+  schedule:
+    - cron: "0 9 * * 1"          # Mondays 09:00 UTC (~06:00 in Joinville)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-datasets
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true                # datasets/*.parquet are stored with Git LFS
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Append new data + refresh coverage figures
+        run: python scripts/update_datasets.py --incoming data/incoming --datasets data --figs data/figs
+
+      - name: Update airport (SBJV) from the IEM archive
+        run: python scripts/fetch_airport.py || echo "airport fetch failed (non-fatal)"
+
+      - name: Regenerate dashboard snapshot from the masters
+        run: python scripts/build_site_data.py
+
+      - name: Rebuild city climatology (Cidade page)
+        run: |
+          python scripts/build_gauges_city.py
+          python scripts/build_city_history.py
+
+      - name: Rebuild disaster records (Risco page)
+        run: python scripts/build_disasters.py
+
+      - name: Rebuild per-station history + download CSVs (Estação page)
+        run: python scripts/build_station_history.py
+
+      - name: Rebuild quality-controlled river data (Chuva & Rio page)
+        run: python scripts/build_river.py
+
+      - name: Refresh ENSO (El Niño / La Niña) from NOAA ONI
+        run: python scripts/build_enso.py || python scripts/build_enso.py --offline
+
+      - name: Commit updated datasets + dashboard data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data site/data
+          # the raw drops are now merged into the masters — remove them to keep the repo lean
+          git rm -r --ignore-unmatch --quiet data/incoming/*.dat data/incoming/*.csv data/incoming/*.CSV 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "data update $(date -u +%F) [skip ci]"
+            git push
+          fi

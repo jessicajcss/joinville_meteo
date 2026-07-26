@@ -1,0 +1,101 @@
+[
+  {
+    "gauge": "aventureiro",
+    "name": "Aventureiro",
+    "lon": -48.797,
+    "lat": -26.249,
+    "rain_90d": 553.1,
+    "rain_24h": 2.0,
+    "rain_annual": 1080.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "centro",
+    "name": "Centro",
+    "lon": -48.841,
+    "lat": -26.301,
+    "rain_90d": 584.7,
+    "rain_24h": 0.0,
+    "rain_annual": 1835.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "costaesilva",
+    "name": "Costa e Silva",
+    "lon": -48.865,
+    "lat": -26.279,
+    "rain_90d": 203.8,
+    "rain_24h": 0.8,
+    "rain_annual": 1346.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "estacaocidadania",
+    "name": "Estação de Cidadania Abilio Bello",
+    "lon": -48.875,
+    "lat": -26.3309,
+    "rain_90d": 664.8,
+    "rain_24h": 0.2,
+    "rain_annual": 1946.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "estradageral",
+    "name": "Estrada Geral Salto I",
+    "lon": -48.988,
+    "lat": -26.296,
+    "rain_90d": 408.8,
+    "rain_24h": 2.8,
+    "rain_annual": 1629.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "iririu",
+    "name": "Iririú",
+    "lon": -48.828,
+    "lat": -26.273,
+    "rain_90d": 162.4,
+    "rain_24h": 0.0,
+    "rain_annual": 1315.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "itinga",
+    "name": "Itinga",
+    "lon": -48.82,
+    "lat": -26.383,
+    "rain_90d": 309.1,
+    "rain_24h": 0.2,
+    "rain_annual": 1571.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "novabrasilia",
+    "name": "Nova Brasilia",
+    "lon": -48.875,
+    "lat": -26.3309,
+    "rain_90d": 0.0,
+    "rain_24h": 0.0,
+    "rain_annual": 0.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  },
+  {
+    "gauge": "paranaguamirim",
+    "name": "Paranaguamirim",
+    "lon": -48.781,
+    "lat": -26.347,
+    "rain_90d": 392.9,
+    "rain_24h": 0.2,
+    "rain_annual": 1250.0,
+    "alert": "good",
+    "last_time": "2020-12-30T21:00:00-03:00"
+  }
+]

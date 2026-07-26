@@ -1,0 +1,80 @@
+name: Sync Google Drive → incoming
+
+# Lets authorized colleagues upload new station data WITHOUT a GitHub account:
+# they drop files into a shared Google Drive folder, and this job moves those
+# files into data/incoming/ once a week. Committing them there triggers the
+# "Update datasets" workflow, which merges them into the masters.
+#
+# One-time setup (see SETUP_GUIDE.md):
+#   1. Create a Google Cloud service account, enable the Drive API, download its
+#      JSON key.
+#   2. Share the Drive drop-folder with the service account's e-mail (Editor).
+#   3. Add two repository secrets:
+#         GDRIVE_SA_JSON    = the full contents of the service-account JSON key
+#         GDRIVE_FOLDER_ID  = the id in the Drive folder URL (…/folders/<THIS>)
+#
+# Files are MOVED (not copied), so the Drive folder empties after each sync and
+# nothing is processed twice. The raw files live on in the repo's git history and
+# are merged into the masters by the update job.
+
+on:
+  schedule:
+    - cron: "30 8 * * 1"        # Mondays 08:30 UTC — 30 min before the update job
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-drive
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    # skip cleanly if the secrets were never configured
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.DRIVE_SYNC_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rclone
+        run: curl -fsSL https://rclone.org/install.sh | sudo bash
+
+      - name: Configure rclone for the shared Drive folder
+        env:
+          SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          if [ -z "$SA_JSON" ] || [ -z "$FOLDER_ID" ]; then
+            echo "Drive secrets not set — nothing to sync."; exit 0
+          fi
+          echo "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+          mkdir -p ~/.config/rclone
+          cat > ~/.config/rclone/rclone.conf <<EOF
+          [gdrive]
+          type = drive
+          scope = drive
+          service_account_file = $RUNNER_TEMP/sa.json
+          root_folder_id = $FOLDER_ID
+          EOF
+          echo "configured=yes" >> "$GITHUB_ENV"
+
+      - name: Move new files from Drive into data/incoming
+        if: env.configured == 'yes'
+        run: |
+          mkdir -p data/incoming
+          rclone move gdrive: data/incoming -v --drive-acknowledge-abuse || true
+          ls -la data/incoming || true
+
+      - name: Commit new drops (triggers the update job)
+        if: env.configured == 'yes'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/incoming
+          if git diff --cached --quiet; then
+            echo "no new files from Drive this run"
+          else
+            git commit -m "sync: new data from Google Drive $(date -u +%F)"
+            git push
+          fi

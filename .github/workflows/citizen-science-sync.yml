@@ -1,0 +1,54 @@
+name: Citizen-science sync
+
+# Pulls the Google Form responses (a Google Sheet published as CSV) into the repo as
+# site/data/ciencia_cidada.csv, so the Ciência Cidadã page can show the count and the data
+# lives in your repository. Set the repo VARIABLE `CITIZEN_SHEET_CSV_URL` to the Sheet's
+# "Publish to web → CSV" link (see CIENCIA_CIDADA_SETUP.md). If it's unset, this job no-ops.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"        # every 6 hours (offset minute so it doesn't pile on the hour)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: citizen-science-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull the responses sheet as CSV
+        env:
+          URL: ${{ vars.CITIZEN_SHEET_CSV_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "CITIZEN_SHEET_CSV_URL not set — skipping (configure it in Settings → Variables)."
+            exit 0
+          fi
+          mkdir -p site/data
+          # download to a temp file; only replace if it's a non-empty CSV (guards against a transient error page)
+          curl -fsSL "$URL" -o /tmp/cc.csv || { echo "download failed (non-fatal)"; exit 0; }
+          if [ -s /tmp/cc.csv ] && head -1 /tmp/cc.csv | grep -qi ','; then
+            mv /tmp/cc.csv site/data/ciencia_cidada.csv
+            echo "rows (incl. header): $(wc -l < site/data/ciencia_cidada.csv)"
+          else
+            echo "downloaded file didn't look like a CSV — keeping previous"
+          fi
+
+      - name: Commit updated responses
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/ciencia_cidada.csv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no new responses to commit"
+          else
+            git commit -m "Citizen-science responses sync $(date -u +%F) [skip ci]"
+            git push
+          fi

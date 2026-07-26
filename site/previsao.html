@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Previsão WRF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.pick{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.pick .fg{display:flex;flex-direction:column;gap:5px}
+.pick label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.pick select{font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 13px;cursor:pointer;min-width:200px}
+.seg{display:inline-flex;background:#eef1f5;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--mut);background:transparent;border:none;padding:9px 15px;cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.capt{font-size:12.5px;color:var(--mut);margin-top:12px;line-height:1.55}
+.demo{background:#fff7ea;border:1px solid #f2dfb0;border-left:4px solid #e0a11a;border-radius:12px;padding:10px 14px;margin:2px 0 4px;font-size:12.5px;color:#8a6d1f;font-weight:600}
+.dlrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.dl{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:11px;padding:8px 14px;font-size:12.5px;font-weight:700;text-decoration:none}
+.dl.alt{background:#eef3fd;color:var(--blue);border:1px solid #dbe6fb}
+.dl:hover{filter:brightness(.97)}
+.bwrap{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.brow{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.brow .nm{width:200px;flex:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .bar{flex:1;height:20px;border-radius:5px;background:#f0f4f8;overflow:hidden}
+.brow .bar span{display:block;height:100%;border-radius:5px}
+.brow .v{width:104px;text-align:right;font-weight:800;flex:none}
+.brow .v i{font-style:normal;font-weight:600;font-size:11px;color:var(--mut)}
+.hleg{display:flex;flex-wrap:wrap;gap:5px 13px;margin-top:9px}
+.hleg .li{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.hleg .sw{width:16px;height:3px;border-radius:2px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:900px){.twocol{grid-template-columns:1fr}}
+#bairromap{margin-bottom:8px}
+.regfig{width:100%;height:auto;border-radius:10px;display:block;margin-top:8px}
+.bsearch{width:100%;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-bottom:8px}
+.blist{max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.brow2{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #f3f4f6;font-size:12.5px}
+.brow2:last-child{border-bottom:none}
+.brow2 .nm{font-weight:600;color:var(--ink)}
+.brow2 .v{font-weight:800}
+.doc p{font-size:13.5px;color:#414852;line-height:1.62;margin:9px 0}
+.doc p b{color:var(--ink)}
+.doc h4{font-size:13px;font-weight:800;color:var(--ink);margin:14px 0 2px}
+.testtag{display:inline-block;background:#fff3cd;color:#8a6d1f;border:1px solid #f0e0bd;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:800;letter-spacing:.03em;margin-left:8px;vertical-align:middle;text-transform:uppercase}
+#fcalert .kma{box-shadow:none;padding:0;margin-top:8px;border:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+    <div class="head">
+      <div class="htitle">Previsão · WRF<small>Chuva, temperatura e vento previstos (CPTEC/INPE WRF 7 km) — por bacia e por bairro</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <div id="demo"></div>
+
+    <!-- 0 · alerta de risco de chuva (previsão) — fase de teste -->
+    <div class="card" id="fcalert" style="margin-bottom:16px;display:none"></div>
+
+    <!-- 1 · mapa local -->
+    <div class="card">
+      <div class="ct">Mapa de previsão <span class="mut" id="mapsub"></span></div>
+      <div class="pick">
+        <div class="fg"><label>Variável</label><div class="seg" id="segVar"></div></div>
+        <div class="fg"><label>Instante</label><select id="selStep"></select></div>
+        <div class="fg" style="flex:1;min-width:200px"><label>&nbsp;</label><input type="range" id="slStep" min="0" max="0" value="0" style="width:100%"></div>
+      </div>
+      <div id="wmap"></div>
+      <div class="capt" id="mapcapt"></div>
+    </div>
+
+    <!-- 2+3 · por bacia | por bairro (lado a lado) -->
+    <div class="twocol">
+      <div class="card">
+        <div class="ct">Previsão por bacia hidrográfica <span class="mut" id="totsub"></span></div>
+        <div class="bwrap" id="bars"></div>
+        <div class="capt" id="barcapt"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Previsão por bairro <span class="mut" id="bairrosub"></span></div>
+        <div id="bairromap"></div>
+        <input class="bsearch" id="bairroSearch" placeholder="🔍 buscar bairro…">
+        <div class="blist" id="bairrolist"></div>
+        <div class="capt" id="bairrocapt"></div>
+      </div>
+    </div>
+
+    <!-- downloads -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Baixar dados da previsão</div>
+      <div class="dlrow" id="dlrow"></div>
+    </div>
+
+    <!-- 4 · evolução horária -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Evolução horária por bacia <span class="mut" id="hsub"></span></div>
+      <div id="hourly"></div>
+      <div class="hleg" id="hleg"></div>
+      <div class="capt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
+    </div>
+
+    <!-- 5 · figura regional (6 painéis, estilo científico) -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Mapa regional — domínio do modelo <span class="mut">6 painéis · CPTEC-WRF 7 km</span></div>
+      <img class="regfig" id="regfig" src="data/wrf_regional.png" alt="WRF Joinville — 6 painéis: chuva, temperatura e vento (séries + mapas)">
+      <div class="capt">Painel científico de 6 quadros sobre <b>todo o domínio do modelo</b>, gerado automaticamente a cada rodada do WRF (GitHub Action): <b>(a,b)</b> chuva — série e mapa; <b>(c,d)</b> temperatura a 2 m; <b>(e,f)</b> vento a 10 m (mapa com setas). Observe a chuva realçada sobre a Serra do Mar (oeste) e o contraste térmico costa–interior — interpretados no texto abaixo. Contornos cinza tênues: divisa de <b>Santa Catarina</b> e limite de <b>Joinville</b> (IBGE). Horários dos mapas em <b>hora local (UTC−3)</b>; a rodada no título é rotulada em UTC.</div>
+    </div>
+
+    <!-- 6 · texto explicativo -->
+    <div class="card doc" style="margin-top:16px">
+      <div class="ct">Como ler os mapas — o clima de Joinville em três forçantes</div>
+      <p><b>Relevo e chuva (controle orográfico).</b> Joinville fica no sopé da <b>Serra do Mar</b>. Ventos úmidos de leste/nordeste vindos do Atlântico são forçados a subir a escarpa, resfriam e condensam — realçando a chuva sobre as encostas a oeste/noroeste da cidade (Mello, 2020; Rodrigues, 2015). Por isso, no mapa regional, as células de chuva mais intensas com frequência se concentram <b>sobre a Serra, a oeste</b>, e não sobre a planície onde está a cidade: um evento pode “chover na serra” e deixar as bacias urbanas quase secas — exatamente o que a agregação por bacia mostra quando os totais locais são baixos.</p>
+      <p><b>Contraste térmico mar–continente–relevo.</b> A temperatura a 2 m exibe um gradiente característico: o oceano e a orla, de maior inércia térmica, permanecem amenos; o interior elevado da Serra é mais frio; e a superfície continental aquece e resfria mais no ciclo diário. No mapa, isso aparece como faixas mais <b>quentes a leste</b> (costa/oceano) e mais <b>frias a oeste</b> (altitude), com aquecimento ao longo da manhã.</p>
+      <p><b>Vento.</b> O vento a 10 m responde ao gradiente de pressão de grande escala e é <b>canalizado e desviado pelo relevo</b>; brisas marítima e terrestre modulam o ciclo diário junto à costa. As setas indicam a direção <i>para onde</i> o vento sopra; a cor, a velocidade.</p>
+      <p><b>Escala e leitura.</b> O WRF do CPTEC tem resolução de <b>~7 km</b>: cada “retalho” do mapa é a média do modelo naquela célula. Isso resolve bem os padrões regionais (serra × costa), mas é mais grosseiro que um bairro — por isso vários bairros dentro de uma mesma célula recebem o mesmo valor previsto. É a <b>saída direta do modelo</b>, sem correção de viés; use-a como orientação de padrão e tendência, confirmada pelas estações observadas nas demais páginas.</p>
+    </div>
+
+    <div class="foot">Modelo: <b>CPTEC/INPE WRF AMS 7 km</b> · agregação por bacia/bairro: LaCiA · metodologia na página <a href="sobre.html">Sobre</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',
+ estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='previsao'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+function ramp(stops){return t=>{t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
+  const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;};}
+const RAINR=ramp(['#f7fbff','#d0e1f2','#94c4df','#4a97c9','#2166ac','#6a51a3','#3f007d']);
+const TEMPR=ramp(['#3b4cc0','#7b9ff9','#c0d4f5','#f3f3f3','#f6c1a6','#e6744d','#b40426']);
+const WINDR=ramp(['#ffffd9','#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8','#0c2c84']);
+const STCOL=['#0072B2','#009E73','#D55E00','#CC79A7','#E69F00','#56B4E9','#8E63B5','#117733','#B8860B','#4C6E9C'];
+
+const VARS={
+  rain:{label:'Chuva', color:'#2166ac', ramp:RAINR, accum:true, unit:'mm', sUnit:'mm/h', bunit:'mm',
+        bval:b=>b.rain.total_mm, blabel:'total', series:b=>b.rain.series,
+        vlims:(V,view)=>[0, view==='accum'?V.accum_max:V.hourly_max], field:(V,view)=>view==='accum'?V.grid_accum:V.grid_hourly[view]},
+  temp:{label:'Temperatura', color:'#d6604d', ramp:TEMPR, accum:false, unit:'°C', sUnit:'°C', bunit:'°C',
+        bval:b=>b.temp.mean, blabel:'média', series:b=>b.temp.series, vlims:(V)=>[V.min, V.max], field:(V,view)=>V.grid_hourly[view]},
+  wind:{label:'Vento', color:'#225ea8', ramp:WINDR, accum:false, unit:'m/s', sUnit:'m/s', bunit:'m/s',
+        bval:b=>b.wind.mean_ms, blabel:'média', series:b=>b.wind.series, vlims:(V)=>[0, V.spd_max], field:(V,view)=>V.spd_hourly[view]}};
+
+let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', PROJ, PROJB;
+
+function mkproj(bb,W,padFrac){padFrac=padFrac==null?0.06:padFrac;
+  const px=(bb[2]-bb[0])*padFrac+0.01, py=(bb[3]-bb[1])*padFrac+0.01;
+  const lonmin=bb[0]-px,lonmax=bb[2]+px,latmin=bb[1]-py,latmax=bb[3]+py;
+  const midlat=(latmin+latmax)/2, coslat=Math.cos(midlat*Math.PI/180);
+  const H=Math.round(W*((latmax-latmin)/((lonmax-lonmin)*coslat)));
+  return {W,H,lonmin,lonmax,latmin,latmax,px:l=>(l-lonmin)/(lonmax-lonmin)*W,py:l=>(latmax-l)/(latmax-latmin)*H};}
+function P(pr,lon,lat){return [pr.px(lon),pr.py(lat)];}
+function bbox(fc){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;(fc.features||[]).forEach(f=>{const g=f.geometry;const ps=g.type==='MultiPolygon'?g.coordinates:[g.coordinates];
+  ps.forEach(p=>p.forEach(r=>r.forEach(c=>{x0=Math.min(x0,c[0]);x1=Math.max(x1,c[0]);y0=Math.min(y0,c[1]);y1=Math.max(y1,c[1]);})));});return (x1>x0)?[x0,y0,x1,y1]:null;}
+function ringPath(pr,ring){return ring.map((c,i)=>{const [x,y]=P(pr,c[0],c[1]);return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ')+'Z';}
+function polyPathsFC(pr,fc){let d='';(fc.features||[]).forEach(f=>{const g=f.geometry;const ps=g.type==='MultiPolygon'?g.coordinates:[g.coordinates];ps.forEach(p=>p.forEach(r=>{d+=ringPath(pr,r);}));});return d;}
+function polyPathF(pr,f){const g=f.geometry;const ps=g.type==='MultiPolygon'?g.coordinates:[g.coordinates];let d='';ps.forEach(p=>p.forEach(r=>{d+=ringPath(pr,r);}));return d;}
+const CENT={};
+function centroidOf(f){const k=f.properties.basin||f.properties.Nomes||f.properties.NM_MUN||'x';if(CENT[k])return CENT[k];
+  let sx=0,sy=0,n=0;const g=f.geometry;const ps=g.type==='MultiPolygon'?g.coordinates:[g.coordinates];
+  ps.forEach(p=>p[0].forEach(c=>{sx+=c[0];sy+=c[1];n++;}));const c=n?[sx/n,sy/n]:null;CENT[k]=c;return c;}
+function short(n){return n.replace('Bacia Hidrográfica d','B. d').replace('Bacias independentes da ','B. ').replace(' (sub-bacia)','');}
+function fmt(v,vn){const d=(vn==='rain'&&Math.abs(v)<1)?2:1;return v.toFixed(d);}
+
+function colorbar(rmp,lo,hi,unit,x,top,h){let cb=`<defs><linearGradient id="cb_${x}" x1="0" x2="0" y1="0" y2="1">`;
+  [0,.2,.4,.6,.8,1].forEach(s=>cb+=`<stop offset="${s}" stop-color="${rmp(1-s)}"/>`);cb+='</linearGradient>';cb+='</defs>';
+  cb+=`<rect x="${x}" y="${top}" width="14" height="${h}" fill="url(#cb_${x})" rx="3"/>`;
+  cb+=`<text x="${x+20}" y="${top+8}" font-size="11" fill="#8a8f98">${hi.toFixed(hi<10?1:0)}</text>`;
+  cb+=`<text x="${x+20}" y="${(top+h/2).toFixed(0)}" font-size="11" fill="#8a8f98">${((lo+hi)/2).toFixed(1)}</text>`;
+  cb+=`<text x="${x+20}" y="${(top+h).toFixed(0)}" font-size="11" fill="#8a8f98">${lo.toFixed(lo<10?1:0)}</text>`;
+  cb+=`<text x="${x+20}" y="${(top+h+14).toFixed(0)}" font-size="10" fill="#a0a1a7">${unit}</text>`;return cb;}
+function drawGrid(pr,lat,lon,field,rmp,lo,hi,unit,zeroWhite){const rng=(hi-lo)||1,nlat=lat.length,nlon=lon.length;
+  const cw=Math.abs(P(pr,lon[1],lat[0])[0]-P(pr,lon[0],lat[0])[0])||pr.W/nlon, ch=Math.abs(P(pr,lon[0],lat[0])[1]-P(pr,lon[0],lat[1])[1])||pr.H/nlat;
+  let s='';for(let i=0;i<nlat;i++)for(let j=0;j<nlon;j++){const v=field[i][j];const [cx,cy]=P(pr,lon[j],lat[i]);
+    const t=(v-lo)/rng, show=zeroWhite?v>0.05:true, fill=show?rmp(t):'#fbfdff';
+    s+=`<rect x="${(cx-cw/2).toFixed(1)}" y="${(cy-ch/2).toFixed(1)}" width="${(cw+0.6).toFixed(1)}" height="${(ch+0.6).toFixed(1)}" fill="${fill}"><title>${lat[i].toFixed(2)}, ${lon[j].toFixed(2)}: ${v.toFixed(1)} ${unit}</title></rect>`;}
+  return {s,cw,ch};}
+function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/16));let a='';
+  for(let i=0;i<nlat;i+=s)for(let j=0;j<nlon;j+=s){const uu=U[i][j],vv=V[i][j],sp=Math.hypot(uu,vv);if(sp<0.3)continue;
+    const [cx,cy]=P(pr,lon[j],lat[i]);const L=Math.min(cw,ch)*0.7,ex=cx+uu/sp*L,ey=cy-vv/sp*L;
+    a+=`<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#12233a" stroke-width="1.1" opacity="0.7"/><circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="1.2" fill="#12233a" opacity="0.75"/>`;}
+  return a;}
+
+// ---- 1. local map ----
+function drawMap(){
+  const vn=CURVAR, view=CURVIEW, M=VARS[vn], V=RUN.vars[vn], pr=PROJ, {W,H}=pr;
+  const [lo,hi]=M.vlims(V,view), g=drawGrid(pr,RUN.lat,RUN.lon,M.field(V,view),M.ramp,lo,hi,M.unit,vn==='rain');
+  let arrows=''; if(vn==='wind') arrows=windArrows(pr,RUN.lat,RUN.lon,V.u_hourly[view],V.v_hourly[view],g.cw,g.ch);
+  let outl=''; if(BAI) outl+=`<path d="${polyPathsFC(pr,BAI)}" fill="none" stroke="#4a5763" stroke-width="0.5" opacity="0.5"/>`;
+  if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>`;
+  outl+=`<path d="${polyPathsFC(pr,BAS)}" fill="none" stroke="#12233a" stroke-width="1.1" stroke-linejoin="round" opacity="0.7"/>`;
+  let labs='';(RUN.basins||[]).forEach(b=>{const f=(BAS.features||[]).find(ff=>(ff.properties.basin||ff.properties.Nomes)===b.name);if(!f)return;const c=centroidOf(f);if(!c)return;const [x,y]=P(pr,c[0],c[1]);
+    labs+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9.5" font-weight="700" fill="#12233a" text-anchor="middle" paint-order="stroke" stroke="#fff" stroke-width="2.2">${short(b.name)}</text>`;});
+  const cb=colorbar(M.ramp,lo,hi,M.unit,W+18,10,H-20);
+  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${g.s}${arrows}${outl}${labs}${cb}</svg>`;
+  const when=(vn==='rain'&&view==='accum')?'acumulado da rodada':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
+  document.getElementById('mapsub').textContent=M.label+' · '+when;
+  document.getElementById('mapcapt').textContent=(vn==='rain'&&view==='accum'
+    ? 'Chuva total acumulada prevista na rodada (mm) por célula da grade WRF de 7 km. '
+    : M.label+' prevista válida para '+RUN.valid_times[view]+'. ')
+    +(vn==='wind'?'Velocidade (cor) e direção (setas). ':'')+'Contornos: limite municipal (grosso), bacias e bairros. Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z).';
+}
+// ---- 2. basin bars ----
+function drawBars(){const vn=CURVAR, M=VARS[vn];
+  const bs=(RUN.basins||[]).slice().filter(b=>b[vn]).sort((a,b)=>M.bval(b)-M.bval(a));
+  const vals=bs.map(M.bval), mx=Math.max(...vals,0.001), mn=Math.min(...vals,0), base=vn==='temp'?mn-1:0, span=(mx-base)||1;
+  document.getElementById('bars').innerHTML=bs.map((b,i)=>{const val=M.bval(b), w=Math.max(3,(val-base)/span*100);
+    const dir=(vn==='wind'&&b.wind)?` <span style="color:var(--mut)">${b.wind.dir_deg}°</span>`:'';
+    return `<div class="brow"><span class="nm" title="${b.name}">${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${vn==='rain'?STCOL[i%STCOL.length]:M.color}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${M.bunit}${dir}</i></span></div>`;}).join('');
+  document.getElementById('totsub').textContent=M.label+' · '+M.blabel;
+  const cap={rain:'Total previsto por bacia = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, CRS de área igual).',
+    temp:'Temperatura média prevista por bacia (média no tempo da média espacial ponderada por área).',
+    wind:'Vento médio previsto por bacia: velocidade média (m/s) e direção predominante, do vetor médio u,v ponderado por área.'};
+  document.getElementById('barcapt').textContent=cap[vn];
+}
+// ---- 3. bairro choropleth + list ----
+// meaningful color span per variable, so a near-uniform field (e.g. temp at 7 km) doesn't
+// get stretched into false red-vs-blue drama
+function bairroRange(vn,vals){let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(vn==='rain'){lo=0;hi=Math.max(hi,0.2);}
+  else if(vn==='wind'){lo=0;hi=Math.max(hi,2);}
+  else{const mid=(lo+hi)/2,span=Math.max(hi-lo,5);lo=mid-span/2;hi=mid+span/2;}
+  return [lo,hi];}
+function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn], pr=PROJB, {W,H}=pr;
+  const byName={}; RUN.bairros.forEach(b=>byName[b.name.toUpperCase()]=b);
+  const vals=RUN.bairros.map(M.bval), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
+  let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?M.bval(b):null;
+    const fill=v==null?'#eef1f5':M.ramp((v-lo)/rng);
+    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#fff" stroke-width="0.6"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
+  const outl=LIM?`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="1.6" opacity="0.9"/>`:'';
+  const cb=colorbar(M.ramp,lo,hi,M.unit,W+16,10,H-20);
+  document.getElementById('bairromap').innerHTML=`<svg viewBox="0 0 ${W+66} ${H+8}" width="100%" style="max-height:520px">${fills}${outl}${cb}</svg>`;
+  const sorted=RUN.bairros.slice().sort((a,b)=>M.bval(b)-M.bval(a));
+  document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(M.bval(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${M.bunit}</i></span></div>`).join('');
+  const q=document.getElementById('bairroSearch').value.toLowerCase();
+  if(q)filterBairros(q);
+  document.getElementById('bairrosub').textContent=M.label+' · '+M.blabel+' por bairro';
+  document.getElementById('bairrocapt').textContent='Previsão média por bairro (43 bairros). Como o WRF tem células de ~7 km — maiores que um bairro — bairros dentro da mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal.';
+}
+function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEach(r=>{r.style.display=r.dataset.nm.includes(q)?'':'none';});}
+// ---- 4. basin hourly ----
+function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=>b[vn]); if(!bs.length)return;
+  const n=RUN.lead_h.length,W=1000,H=250,PL=48,PR=12,PT=12,PB=30,plotW=W-PL-PR,plotH=H-PT-PB;
+  const all=bs.flatMap(M.series); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
+  const x=i=>PL+(n>1?i/(n-1):0.5)*plotW, y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH, adec=hi<1?2:(hi<10?1:0);
+  let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4}" font-size="12" fill="#8a8f98" text-anchor="end">${t.toFixed(adec)}</text>`;});
+  RUN.lead_h.forEach((h,i)=>{if(i%Math.ceil(n/8)===0)ax+=`<text x="${x(i).toFixed(1)}" y="${H-10}" font-size="11" fill="#8a8f98" text-anchor="middle">+${h}h</text>`;});
+  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
+  document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
+  document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
+  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+')';
+}
+// ---- controls / downloads ----
+function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado (rodada inteira)</option>':'';
+  RUN.lead_h.forEach((h,i)=>o+=`<option value="${i}">+${h} h · ${RUN.valid_times[i]}</option>`);return o;}
+function redrawMaps(){drawMap();}
+function redrawAll(){drawMap();drawBars();drawBairros();drawSeries();}
+function setVar(vn){CURVAR=vn;document.querySelectorAll('#segVar button').forEach(b=>b.classList.toggle('on',b.dataset.v===vn));
+  const sel=document.getElementById('selStep');sel.innerHTML=stepOptions();CURVIEW=VARS[vn].accum?'accum':0;sel.value=String(CURVIEW);
+  document.getElementById('slStep').value='0';redrawAll();}
+function setView(v){CURVIEW=(v==='accum')?'accum':+v;const sl=document.getElementById('slStep');if(v!=='accum')sl.value=String(+v);redrawMaps();}
+function downloads(){document.getElementById('dlrow').innerHTML=
+   '<a class="dl" href="data/wrf_basins.csv" download>⬇ Bacias (CSV)</a>'
+  +'<a class="dl" href="data/wrf_bairros.csv" download>⬇ Bairros (CSV)</a>'
+  +'<a class="dl alt" href="data/wrf_basins_hourly.csv" download>⬇ Série horária (CSV)</a>'
+  +'<a class="dl alt" href="data/wrf_grid.geojson" download>⬇ Grade WRF (GeoJSON)</a>'
+  +'<a class="dl alt" href="data/wrf_grid_archive.csv" download>⬇ Arquivo histórico da grade (CSV, acumulado)</a>'
+  +'<a class="dl alt" href="data/wrf_basins.geojson" download>⬇ Bacias (GeoJSON)</a>'
+  +'<a class="dl alt" href="data/wrf_bairros.geojson" download>⬇ Bairros (GeoJSON)</a>';}
+
+// ---- 0. forecast rain-risk alert (same OMM logic as the 'Agora' page, on the forecast) ----
+function renderForecastAlert(){
+  const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has||!RUN.has.rain) return;
+  // worst predicted hourly rain rate anywhere in the city over the run window (peak, area-weighted per bairro)
+  const src=(RUN.bairros&&RUN.bairros.length)?RUN.bairros:(RUN.basins||[]);
+  let pk={v:0,name:'',time:''};
+  src.forEach(b=>{const p=b.rain&&b.rain.peak_mm_h; if(p!=null&&p>pk.v)pk={v:p,name:b.name,time:b.rain.peak_time};});
+  const v=pk.v;
+  const cls = v<2.5?'leve':(v<10?'moderada':(v<50?'forte':'violenta'));
+  const active = v>=10;                                   // "forte"+ => alerta ativo — igual à página Agora
+  const lvl = active?'alert':(v>=2.5?'warn':'ok');
+  const label = v<2.5?'Sem chuva significativa prevista'
+              : v<10?'Atenção — chuva moderada prevista'
+              : v<50?'Alerta — chuva forte prevista'
+              :      'Alerta — chuva muito forte prevista';
+  const when = pk.time?('por volta das '+pk.time.slice(11,16)+(pk.name?(', em '+short(pk.name)):'')):'';
+  el.style.display='';
+  el.innerHTML=`<div class="ct">Risco de chuva — próximas horas <span class="mut">previsão WRF · limiares OMM</span><span class="testtag">Fase de teste</span></div>
+    <div class="kma">
+      <div class="kh"><span><span class="warn">&#9888;</span> ${label}</span>
+        <span class="kstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alerta'}</span></div>
+      <div class="kb"><span class="chip ${lvl}">🌧️ Chuva prevista: ${cls} · pico ${v.toFixed(1)} mm/h</span></div>
+      <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">mesma lógica da página Agora, aplicada à previsão</span></div>
+    </div>
+    <div class="capt">Maior taxa de chuva horária que o modelo prevê em algum bairro na janela da rodada${when?(' ('+when+')'):''}. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h), igual à página Agora. <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>`;
+}
+
+async function init(){
+  const gj=async u=>{try{const r=await fetch(u);return r.ok?r.json():null;}catch(e){return null;}};
+  RUN=await gj('data/wrf_forecast.json');
+  BAS=await gj('data/wrf_basins.geojson')||await gj('data/bacias.geojson')||{features:[]};
+  LIM=await gj('data/limite.geojson'); BAI=await gj('data/bairros.geojson');
+  if(!RUN){document.getElementById('demo').innerHTML='<div class="demo">Ainda não há uma rodada WRF processada. Rode o notebook, envie o <code>.nc</code> e a página será preenchida.</div>';
+    document.getElementById('ribbon').textContent='Previsão WRF — aguardando dados';return;}
+  PROJ=mkproj(bbox(BAS)||[Math.min(...RUN.lon),Math.min(...RUN.lat),Math.max(...RUN.lon),Math.max(...RUN.lat)],760);
+  if(LIM){const lb=bbox(LIM);if(lb){const b=[Math.min(PROJ.lonmin+0.02,lb[0]),Math.min(PROJ.latmin+0.02,lb[1]),Math.max(PROJ.lonmax-0.02,lb[2]),Math.max(PROJ.latmax-0.02,lb[3])];PROJ=mkproj(b,760);}}
+  PROJB=mkproj(bbox(BAI)||bbox(LIM)||[Math.min(...RUN.lon),Math.min(...RUN.lat),Math.max(...RUN.lon),Math.max(...RUN.lat)],520,0.05);
+  const isDemo=/synth|demo|test/i.test(RUN.source||'')||!RUN.run_time;
+  if(isDemo)document.getElementById('demo').innerHTML='<div class="demo">⚠️ Campo de <b>demonstração</b> (sintético) — os números serão substituídos pela rodada real do WRF assim que o NetCDF for processado.</div>';
+  document.getElementById('ribbon').innerHTML='CPTEC/INPE WRF AMS 7 km · rodada '+(RUN.run_time||'—')+' UTC · horários válidos em hora local (UTC−3) · gerado '+(RUN.generated_at||'');
+  const order=[['rain','Chuva'],['temp','Temperatura'],['wind','Vento']].filter(([k])=>RUN.has&&RUN.has[k]);
+  document.getElementById('segVar').innerHTML=order.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('');
+  document.querySelectorAll('#segVar button').forEach(btn=>btn.onclick=()=>setVar(btn.dataset.v));
+  document.getElementById('selStep').onchange=function(){setView(this.value);};
+  const sl=document.getElementById('slStep');sl.min='0';sl.max=String(RUN.lead_h.length-1);
+  sl.oninput=()=>{document.getElementById('selStep').value=String(+sl.value);CURVIEW=+sl.value;redrawMaps();};
+  document.getElementById('bairroSearch').oninput=function(){filterBairros(this.value.toLowerCase());};
+  downloads();
+  renderForecastAlert();
+  setVar((RUN.has&&RUN.has.rain)?'rain':order[0][0]);
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+[
+  {
+    "code": "aeroporto",
+    "station": "Aeroporto SBJV",
+    "lon": -48.7974,
+    "lat": -26.2245,
+    "elevation": 6.0,
+    "last_time": "2020-12-30T21:00:00-03:00",
+    "n_obs": 51616,
+    "start": "2011-12-31T22:00:00-02:00",
+    "temp": 26.0,
+    "umid": 88.75,
+    "ws": 1.03,
+    "wd": 120.0,
+    "rain_24h": null,
+    "alert": "good"
+  },
+  {
+    "code": "rodovia",
+    "station": "Rodovia",
+    "lon": -48.95242888888889,
+    "lat": -26.373819444444443,
+    "elevation": 11.0,
+    "last_time": "2014-07-02T03:30:00-03:00",
+    "n_obs": 146851,
+    "start": "2012-04-18T14:15:00-03:00",
+    "temp": 17.04,
+    "umid": 100.0,
+    "ws": 0.72,
+    "wd": 281.2,
+    "prec": 45.01,
+    "rain_24h": 45.0,
+    "alert": "warning"
+  }
+]

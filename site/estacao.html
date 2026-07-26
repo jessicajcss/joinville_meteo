@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Histórico por estação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.pick{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.pick .fg{display:flex;flex-direction:column;gap:5px}
+.pick label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.pick select{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 13px;cursor:pointer}
+.pick select#selSt{min-width:260px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.emap{width:100%;height:420px;border-radius:12px;background:#fff;z-index:1}
+.leaflet-tooltip.st{background:#fff;border:1px solid var(--line);border-radius:7px;box-shadow:0 2px 7px rgba(0,0,0,.12);font-family:inherit;font-size:10.5px;font-weight:700;padding:2px 6px;color:var(--ink)}
+.leaflet-tooltip.st:before{display:none}
+.tleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--mut);margin:2px 0 8px}
+.tleg i{display:inline-block;width:16px;height:4px;border-radius:2px;margin-right:5px;vertical-align:2px}
+.wleg{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mut);margin-top:8px}
+.wleg .g{height:10px;flex:1;max-width:220px;border-radius:5px;background:linear-gradient(90deg,#1a9850,#91cf60,#fee08b,#fc8d59,#d73027)}
+.minfo{font-size:13.5px;color:var(--mut);margin-top:12px}
+.minfo b{color:var(--ink);font-weight:700}
+.bigstats{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:36px;margin:12px 8px 0}
+.bigstats .s{text-align:right}
+.bigstats .s .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.bigstats .s .v{font-size:31px;font-weight:800;color:var(--ink);line-height:1;margin-top:4px;letter-spacing:-.01em}
+.bigstats .s .v.sm{font-size:19px}
+.bigstats .s .v i{font-style:normal;font-size:14px;color:var(--mut);font-weight:600}
+.dlpanel{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.dlpanel .fg{display:flex;flex-direction:column;gap:5px}
+.dlpanel label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase}
+.dlpanel select,.dlpanel input{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:11px;padding:9px 13px}
+.dlbtn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.dlnote{font-size:12px;color:var(--mut);margin-top:8px}
+@media(max-width:1000px){.g2{grid-template-columns:1fr}.itiles{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+    <div class="head">
+      <div class="htitle">Histórico · estação<small>Rede de estações, condições e download por estação</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <div class="card">
+      <div class="pick">
+        <div class="fg"><label>Estação (gráficos à direita)</label><select id="selSt"></select></div>
+        <div class="fg"><label>Ano</label><select id="selYear"></select></div>
+        <div class="fg"><label>Mês (mapa de vento)</label><select id="selMonth"></select></div>
+      </div>
+      <div class="minfo" id="minfo"></div>
+    </div>
+    <div class="bigstats" id="bigstats"></div>
+
+    <div class="g2" style="margin-top:16px">
+      <div>
+        <div class="card"><div class="ct">Estações — localização e operação <span class="mut" id="stsub"></span></div>
+          <div id="mapSt" class="emap"></div></div>
+        <div class="card" style="margin-top:16px"><div class="ct">Velocidade média do vento <span class="mut" id="wsub"></span></div>
+          <div id="mapWind" class="emap"></div>
+          <div class="wleg">mais fraco<span class="g"></span>mais forte · <span id="wmax"></span></div></div>
+      </div>
+      <div>
+        <div class="card"><div class="ct">Condições de temperatura <span class="mut" id="tsub"></span></div>
+          <div class="tleg"><span><i style="background:#d7301f"></i>Máx. registrada</span><span><i style="background:#0184bc"></i>Mín. registrada</span><span><i style="background:#e0a020"></i>Máx. diária (média)</span><span><i style="background:#50a14f"></i>Mín. diária (média)</span></div>
+          <div id="tempchart"></div></div>
+        <div class="card" style="margin-top:16px"><div class="ct">Chuva histórica <span class="mut" id="rsub"></span></div>
+          <div class="hm-wrap" id="rainhm"></div>
+          <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#ffffd9,#c7e9b4,#7fcdbb,#41b6c4,#1d91c0,#225ea8)"></span><span id="rmaxlab"></span></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px"><div class="ct">Cobertura de dados <span class="mut">% de dias com registro, por ano — estação selecionada</span></div>
+      <div id="cover"></div>
+      <div class="hcbar"><span>0%</span><span class="g" style="background:linear-gradient(90deg,#f0f7f4,#a8ddb5,#43a2ca,#0868ac)"></span><span>100%</span></div></div>
+
+    <div class="card" style="margin-top:16px" id="download"><div class="ct">Baixar dados <span class="mut">por estação e período</span></div>
+      <div class="dlpanel">
+        <div class="fg"><label>Resolução</label><select id="dlRes"><option value="daily">Diária</option></select></div>
+        <div class="fg"><label>De</label><input type="date" id="dlFrom"></div>
+        <div class="fg"><label>Até</label><input type="date" id="dlTo"></div>
+        <button class="dlbtn" id="dlBtn">⭳ Baixar CSV</button>
+      </div>
+      <div class="dlnote" id="dlnote"></div></div>
+
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='estacao'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+function ramp(stops){return t=>{t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
+  const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;};}
+const WINDR=ramp(['#1a9850','#91cf60','#fee08b','#fc8d59','#d73027']);
+const RAINR=ramp(['#ffffd9','#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8']);
+const COVR=ramp(['#f0f7f4','#a8ddb5','#43a2ca','#0868ac']);
+const textOn=c=>{const m=c.match(/\d+/g).map(Number);return (0.2126*m[0]+0.7152*m[1]+0.0722*m[2])>150?'#2b2b2b':'#fff';};
+const M3=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MFULL=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const TYPE_LABEL={meteorologica:'Meteorológica',hidrometeorologica:'Hidrometeorológica',hidrologica:'Hidrológica',aeroporto:'Aeroporto'};
+
+// ---- temperature 2-line panel ----
+function linePanel(lines,W,H){
+  const PL=32,PR=8,PT=16,PB=20,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
+  const all=lines.flatMap(l=>l.data.filter(v=>v!=null)); if(!all.length)return '';
+  let lo=Math.min(...all),hi=Math.max(...all);const pad=Math.max(2,(hi-lo)*0.18);lo=Math.floor((lo-pad)/5)*5;hi=Math.ceil((hi+pad)/5)*5;
+  const y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH,x=i=>PL+i*bw+bw/2;
+  let g='';const stp=Math.max(5,Math.round((hi-lo)/4/5)*5);
+  for(let t=lo;t<=hi;t+=stp){const yy=y(t);g+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#eef0f2"/><text x="${PL-5}" y="${yy+3}" font-size="11" fill="#a0a1a7" text-anchor="end">${t}</text>`;}
+  let p='';lines.forEach(l=>{
+    const pts=l.data.map((v,i)=>v!=null?`${x(i).toFixed(1)},${y(v).toFixed(1)}`:null).filter(Boolean);
+    p+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${l.color}" stroke-width="2.3"/>`;
+    l.data.forEach((v,i)=>{if(v!=null){p+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.4" fill="${l.color}"/>`;
+      p+=`<text x="${x(i).toFixed(1)}" y="${(y(v)+(l.below?12:-6)).toFixed(1)}" font-size="11" fill="${l.color}" text-anchor="middle" font-weight="700">${v.toFixed(1)}</text>`;}});});
+  let labs='';M3.forEach((m,i)=>labs+=`<text x="${x(i).toFixed(1)}" y="${H-6}" font-size="11" fill="#a0a1a7" text-anchor="middle">${m}</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${g}${p}${labs}</svg>`;
+}
+function tempChart(s,year){
+  const t=s.temp[year]; if(!t)return '<div style="padding:30px 0;color:#a0a1a7;font-size:13px">Sem dados de temperatura para esta estação/ano.</div>';
+  const rec=linePanel([{color:'#d7301f',data:t.maxrec},{color:'#0184bc',data:t.minrec,below:true}],560,150);
+  const mean=linePanel([{color:'#e0a020',data:t.maxmean},{color:'#50a14f',data:t.minmean,below:true}],560,150);
+  return `<div style="font-size:11px;font-weight:700;color:var(--mut);margin:2px 0">Temperaturas registradas (°C)</div>${rec}
+    <div style="font-size:11px;font-weight:700;color:var(--mut);margin:6px 0 2px">Temperaturas diárias médias (°C)</div>${mean}`;
+}
+
+// ---- rainfall year×month heatmap ----
+function rainHM(rain){
+  const years=Object.keys(rain).map(Number).sort((a,b)=>a-b); if(!years.length)return '<div style="padding:30px 0;color:#a0a1a7">Sem dados de chuva.</div>';
+  const all=years.flatMap(y=>rain[y].filter(v=>v!=null)); const mx=Math.max(...all,1);
+  const cw=Math.max(30,Math.min(52,760/years.length)),ch=20,PL=30,PT=20,rowsH=12*ch,W=PL+years.length*cw,H=PT+rowsH+26;
+  let s='';
+  years.forEach((y,j)=>s+=`<text x="${PL+j*cw+cw/2}" y="14" font-size="11.5" fill="#6b7178" text-anchor="middle" font-weight="700">${y}</text>`);
+  for(let m=0;m<12;m++){s+=`<text x="${PL-4}" y="${PT+m*ch+ch/2+3.5}" font-size="11.5" fill="#a0a1a7" text-anchor="end">${M3[m]}</text>`;
+    years.forEach((y,j)=>{const v=rain[y][m];const x=PL+j*cw,yy=PT+m*ch;
+      if(v==null){s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${ch-2}" rx="2" fill="#f1f2f4"/>`;}
+      else{const c=RAINR(v/mx);s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${ch-2}" rx="2" fill="${c}"/><text x="${x+cw/2}" y="${yy+ch/2+3.5}" font-size="11" fill="${textOn(c)}" text-anchor="middle">${Math.round(v)}</text>`;}});}
+  // totals row
+  const ty=PT+rowsH+16;s+=`<text x="${PL-4}" y="${ty}" font-size="11.5" fill="#383a42" text-anchor="end" font-weight="800">Total</text>`;
+  years.forEach((y,j)=>{const tot=rain[y].reduce((a,b)=>a+(b||0),0);s+=`<text x="${PL+j*cw+cw/2}" y="${ty}" font-size="11.5" fill="#383a42" text-anchor="middle" font-weight="800">${Math.round(tot)}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W}px">${s}</svg>`;
+}
+function coverStrip(cov){
+  const years=Object.keys(cov).map(Number).sort((a,b)=>a-b); if(!years.length)return '';
+  const W=1000,ch=34,H=ch+22,cw=W/years.length,fs=9,step=Math.max(1,Math.ceil(fs*2.8/cw));let s='';
+  years.forEach((y,i)=>{const c=Math.min(1,cov[y]),col=COVR(c);
+    s+=`<rect x="${i*cw+1}" y="0" width="${cw-2}" height="${ch}" rx="3" fill="${col}"/><text x="${i*cw+cw/2}" y="${ch/2+4}" font-size="11.5" fill="${c>0.5?'#fff':'#7a8690'}" text-anchor="middle">${Math.round(c*100)}</text>`;
+    if(i%step===0||i===years.length-1)s+=`<text x="${i*cw+cw/2}" y="${ch+16}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${y}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
+}
+
+let DATA, cur, curYear, curMonth=5, mapSt, mapWind, layerSt, layerWind, LIMITE;
+async function init(){
+  DATA=await fetch('data/station_history.json').then(r=>r.json());
+  LIMITE=await fetch('data/limite.geojson').then(r=>r.json()).catch(()=>null);
+  const sel=document.getElementById('selSt');
+  sel.innerHTML=DATA.stations.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+  const yr=document.getElementById('selYear'); yr.innerHTML=DATA.all_years.slice().reverse().map(y=>`<option>${y}</option>`).join('');
+  curYear=DATA.all_years[DATA.all_years.length-1]; yr.value=curYear;
+  const mo=document.getElementById('selMonth'); mo.innerHTML=MFULL.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''); mo.value=6; curMonth=6;
+  sel.onchange=()=>{cur=DATA.stations[+sel.value];renderStation();};
+  yr.onchange=()=>{curYear=+yr.value;renderYear();};
+  mo.onchange=()=>{curMonth=+mo.value;renderWind();};
+  document.getElementById('dlBtn').onclick=doDownload;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · dados por estação (registro próprio) · gerado '+DATA.generated_at;
+  cur=DATA.stations[0];
+  buildMaps();
+  renderStation();
+}
+function buildMaps(){
+  const opts={zoomControl:true,scrollWheelZoom:false,attributionControl:false};
+  mapSt=L.map('mapSt',opts); mapWind=L.map('mapWind',opts);
+  const stb=L.latLngBounds(DATA.stations.map(s=>[s.lat,s.lon]));   // center/zoom on the stations
+  [mapSt,mapWind].forEach(m=>{
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(m);
+    if(LIMITE) L.geoJSON(LIMITE,{style:{color:'#fff',weight:1.4,fill:false,opacity:0.65}}).addTo(m);
+    m.fitBounds(stb,{padding:[34,34]});
+  });
+  layerSt=L.layerGroup().addTo(mapSt); layerWind=L.layerGroup().addTo(mapWind);
+  renderStationsMap(); renderWind();
+}
+function renderStationsMap(){
+  layerSt.clearLayers();
+  DATA.stations.forEach(s=>{const active=s.years.includes(curYear);
+    L.circleMarker([s.lat,s.lon],{radius:6,color:'#fff',weight:1.5,fillColor:active?'#e45649':'#c3c9d0',fillOpacity:1})
+      .addTo(layerSt).bindTooltip(s.name,{className:'st',permanent:true,direction:'right',offset:[6,0]});});
+}
+function renderWind(){
+  layerWind.clearLayers();
+  const vals=DATA.stations.map(s=>s.wind[curMonth-1]).filter(v=>v!=null);
+  const lo=Math.min(...vals),hi=Math.max(...vals),span=(hi-lo)||1;
+  document.getElementById('wmax').textContent=`${hi.toFixed(1)} m/s (${MFULL[curMonth-1]})`;
+  document.getElementById('wsub').textContent=MFULL[curMonth-1];
+  DATA.stations.forEach(s=>{const v=s.wind[curMonth-1]; if(v==null)return;const col=WINDR((v-lo)/span);
+    L.circleMarker([s.lat,s.lon],{radius:10,color:'#fff',weight:1.5,fillColor:col,fillOpacity:0.95})
+      .addTo(layerWind).bindTooltip(`${v.toFixed(1)}`,{className:'st',permanent:true,direction:'center'});});
+}
+function renderYear(){
+  document.getElementById('stsub').textContent=`em operação em ${curYear}`;
+  renderStationsMap(); renderTempAndInfo();
+}
+function renderTempAndInfo(){
+  document.getElementById('tsub').textContent=`${cur.name} · ${curYear}`;
+  document.getElementById('tempchart').innerHTML=tempChart(cur,curYear);
+}
+function fmtBR(iso){const[y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}
+function renderStation(){
+  const s=cur, days=Math.round((new Date(s.period[1])-new Date(s.period[0]))/864e5)+1, compl=Math.round(s.n_days/days*100);
+  document.getElementById('minfo').innerHTML=`<b>Tipo:</b> ${TYPE_LABEL[s.type]||s.type} &nbsp;·&nbsp; <b>Altitude (a.n.m., acima do nível do mar):</b> ${s.elevation!=null?s.elevation+' m':'—'}`;
+  document.getElementById('bigstats').innerHTML=`
+    <div class="s"><div class="k">Período</div><div class="v sm">${fmtBR(s.period[0])} – ${fmtBR(s.period[1])}</div></div>
+    <div class="s"><div class="k">Dias com dados</div><div class="v">${s.n_days.toLocaleString('pt-BR')}</div></div>
+    <div class="s"><div class="k">Completude</div><div class="v">${compl}<i> %</i></div></div>`;
+  // if selected year has no data for this station, jump to its latest year with temp/rain
+  if(!s.years.includes(curYear)) curYear=s.years[s.years.length-1]||curYear;
+  document.getElementById('selYear').value=curYear;
+  renderTempAndInfo();
+  document.getElementById('rsub').textContent=cur.name;
+  document.getElementById('rainhm').innerHTML=rainHM(s.rain);
+  const rall=Object.values(s.rain).flat().filter(v=>v!=null); document.getElementById('rmaxlab').textContent=(rall.length?Math.round(Math.max(...rall)):0)+' mm';
+  document.getElementById('cover').innerHTML=coverStrip(s.coverage);
+  document.getElementById('dlFrom').value=s.period[0]; document.getElementById('dlTo').value=s.period[1];
+  document.getElementById('dlFrom').min=document.getElementById('dlTo').min=s.period[0];
+  document.getElementById('dlFrom').max=document.getElementById('dlTo').max=s.period[1];
+  document.getElementById('dlnote').innerHTML=`Variáveis: ${s.vars.map(v=>DATA.var_labels[v]).join(', ')}. O arquivo diário traz máxima, mínima, média e acumulados. Resoluções horária e de 5 min podem ser adicionadas.`;
+  document.getElementById('stsub').textContent=`em operação em ${curYear}`;
+}
+async function doDownload(){
+  const from=document.getElementById('dlFrom').value,to=document.getElementById('dlTo').value,btn=document.getElementById('dlBtn');
+  btn.textContent='… preparando';
+  try{const txt=await fetch(`data/stations/daily/${cur.code}.csv`).then(r=>r.text());
+    const lines=txt.split(/\r?\n/),di=lines[0].split(',').indexOf('date'),out=[lines[0]];
+    for(let i=1;i<lines.length;i++){const ln=lines[i];if(!ln)continue;const dt=ln.split(',')[di];if(dt>=from&&dt<=to)out.push(ln);}
+    const blob=new Blob([out.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=`${cur.code}_diaria_${from}_${to}.csv`;document.body.appendChild(a);a.click();a.remove();
+    btn.textContent=`⭳ Baixado (${out.length-1} dias)`;}
+  catch(e){btn.textContent='⭳ Baixar CSV';alert('Falha: '+e);}
+  setTimeout(()=>btn.textContent='⭳ Baixar CSV',2500);
+}
+init();
+</script>
+</body>
+</html>

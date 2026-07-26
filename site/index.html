@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Monitoramento Meteorológico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb">
+      <div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div>
+      <div class="tbtn">🔔</div><div class="tbtn">☰</div>
+    </div>
+    <div class="head">
+      <div class="htitle">Monitoramento Meteorológico<small>Rede SEPROT · Prefeitura de Joinville · quase em tempo real</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+    <div class="grid">
+      <div>
+        <div class="now2" id="now2"></div>
+        <div class="card mapcard">
+          <div class="ct">Rede de estações — Joinville <span class="mut">base orográfica (OpenTopoMap) · balões estilo KMA</span></div>
+          <div id="map"></div>
+          <div class="tog" id="tog"><span data-m="temp">Temperatura</span><span data-m="rain">Chuva</span><span data-m="wind" class="on">Vento</span></div>
+          <div class="mapleg" id="mapleg"></div>
+          <div class="leg"><i style="background:#fff;border:1px solid #ccc"></i>online (leitura recente)<i style="background:#e6e6e6;border:1px solid #d5d5d5"></i>última leitura (defasada)</div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="ct">Temperatura diária — média da rede (últimos 20 dias)</div>
+          <div class="capt">cada barra vai da mínima à máxima do dia — leia os valores no eixo °C à esquerda; a cor acompanha a mesma escala de temperatura</div>
+          <div class="dailyrow"><div class="chart" id="daily"></div><div class="vbar" id="vbar"></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="card kma" id="kma"></div>
+        <div class="card state" style="margin-top:16px" id="estado"></div>
+        <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div></div>
+        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut">agora</span></div><div class="rowlist" id="rows"></div></div>
+      </div>
+    </div>
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · Programa de Pós-Graduação em Engenharia Civil (PPGEC) · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script>
+// ---------- small icon library ----------
+const rad=x=>x*Math.PI/180, deg=x=>x*180/Math.PI;
+const GLYPH={
+ sun:'<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="5" fill="#c18401"/><g stroke="#c18401" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22.5" y2="12"/><line x1="4.2" y1="4.2" x2="6" y2="6"/><line x1="18" y1="18" x2="19.8" y2="19.8"/><line x1="19.8" y1="4.2" x2="18" y2="6"/><line x1="6" y1="18" x2="4.2" y2="19.8"/></g></svg>',
+ part:'<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="8" cy="8" r="4" fill="#c18401"/><path d="M7 17h9a3.2 3.2 0 0 0 .3-6.4A4.3 4.3 0 0 0 8 10.6 3.3 3.3 0 0 0 7 17z" fill="#cdd0d6"/></svg>',
+ cloud:'<svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 18h10a3.4 3.4 0 0 0 .3-6.8A4.6 4.6 0 0 0 8 11 3.5 3.5 0 0 0 7 18z" fill="#b4b8c0"/></svg>',
+ rain:'<svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 15h10a3.3 3.3 0 0 0 .3-6.6A4.5 4.5 0 0 0 8 8.4 3.4 3.4 0 0 0 7 15z" fill="#9aa0ab"/><g stroke="#0184bc" stroke-width="1.8" stroke-linecap="round"><line x1="9" y1="17" x2="8" y2="20"/><line x1="13" y1="17" x2="12" y2="20"/><line x1="17" y1="17" x2="16" y2="20"/></g></svg>'};
+const THERMO='<svg viewBox="0 0 24 24" width="34" height="34"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z" fill="none" stroke="#d55e00" stroke-width="1.7"/><circle cx="12" cy="17.6" r="2.3" fill="#d55e00"/></svg>';
+const THERMO_SM='<svg viewBox="0 0 24 24" width="17" height="17" style="vertical-align:-3px"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z" fill="none" stroke="#d55e00" stroke-width="1.7"/><circle cx="12" cy="17.6" r="2.3" fill="#d55e00"/></svg>';
+const DROP='<svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px"><path d="M12 3s6 7 6 11a6 6 0 1 1-12 0c0-4 6-11 6-11z" fill="none" stroke="#0184bc" stroke-width="1.7"/></svg>';
+const PRECIP='<svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px"><path d="M6 13h12a3.4 3.4 0 0 0 .3-6.8A4.6 4.6 0 0 0 9 6 3.5 3.5 0 0 0 6 13z" fill="none" stroke="#4078f2" stroke-width="1.6"/><g stroke="#4078f2" stroke-width="1.8" stroke-linecap="round"><line x1="9" y1="16" x2="8" y2="19"/><line x1="15" y1="16" x2="14" y2="19"/></g></svg>';
+const SUNUP='<svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px"><g stroke="#c18401" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 18h18"/><path d="M8 18a4 4 0 0 1 8 0"/><path d="M12 4v3M6 8l1.5 1.5M18 8l-1.5 1.5"/></g></svg>';
+const SUNDN='<svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px"><g stroke="#a06030" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 18h18"/><path d="M8 18a4 4 0 0 1 8 0"/><path d="M12 10V4M9 7l3 3 3-3"/></g></svg>';
+const HZ={rain:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M6 12h11a3 3 0 0 0 0-6 4 4 0 0 0-7.7-1A3 3 0 0 0 6 12z"/><path d="M9 16l-1 2.5M15 16l-1 2.5"/></svg>',
+ temp:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M14 14V5a2 2 0 0 0-4 0v9a4 4 0 1 0 4 0z"/></svg>',
+ wind:'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path d="M3 8h9a2.5 2.5 0 1 0-2.5-2.5M3 12h14a2.5 2.5 0 1 1-2.5 2.5M3 16h8"/></svg>'};
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ 
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+function arrowSVG(color){return '<svg viewBox="0 0 24 24" width="15" height="15"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+
+// ---------- helpers ----------
+function fmtDate(iso){const d=iso.slice(8,10),m=iso.slice(5,7),y=iso.slice(2,4);return d+'/'+m+'/'+y;}
+function iconFor(s){ if(s.rain_rate && s.rain_rate.v>0) return 'rain'; if(s.fresh) return 'part'; return 'cloud'; }
+function sunTimes(lat,lng,y,mo,d,tz){
+  const n=Math.floor((Date.UTC(y,mo-1,d)-Date.UTC(2000,0,1))/86400000)+1;
+  const Jstar=n-lng/360, M=(357.5291+0.98560028*Jstar)%360;
+  const C=1.9148*Math.sin(rad(M))+0.02*Math.sin(rad(2*M))+0.0003*Math.sin(rad(3*M));
+  const lam=(M+C+180+102.9372)%360;
+  const Jtr=2451545.0+Jstar+0.0053*Math.sin(rad(M))-0.0069*Math.sin(rad(2*lam));
+  const decl=deg(Math.asin(Math.sin(rad(lam))*Math.sin(rad(23.44))));
+  const la=rad(lat);
+  let cw=(Math.sin(rad(-0.833))-Math.sin(la)*Math.sin(rad(decl)))/(Math.cos(la)*Math.cos(rad(decl)));
+  cw=Math.max(-1,Math.min(1,cw)); const w=deg(Math.acos(cw));
+  const loc=jd=>{let h=(((jd-2451545.0+0.5)%1)*24+tz+24)%24;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');};
+  return [loc(Jtr-w/360),loc(Jtr+w/360)];
+}
+
+// ---------- chart renderers ----------
+function windRoseSVG(rose){
+  const cx=112,cy=116,hole=9,R=88,hw=9.6;
+  const RAMP=["#deebf7","#9ecae1","#4292c6","#2171b5","#084594"],SCLASS=["0–2","2–4","4–6","6–8","≥8"];
+  const freq=rose.freq, tot=freq.map(f=>f.reduce((a,b)=>a+b,0)), maxtot=Math.max(...tot)||1, k=(R-hole)/maxtot;
+  const P=(ang,r)=>{const a=rad(ang-90);return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  const sector=(a0,a1,ri,ro,fill)=>{const[x0,y0]=P(a0,ri),[x1,y1]=P(a0,ro),[x2,y2]=P(a1,ro),[x3,y3]=P(a1,ri);
+    return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} L${x1.toFixed(1)} ${y1.toFixed(1)} A${ro} ${ro} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)} L${x3.toFixed(1)} ${y3.toFixed(1)} A${ri} ${ri} 0 0 0 ${x0.toFixed(1)} ${y0.toFixed(1)} Z" fill="${fill}"/>`;};
+  let g='';[2,4,6].forEach(p=>{const rr=hole+p*k;g+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#e2e4e8"/><text x="${cx+3}" y="${(cy-rr+3).toFixed(1)}" font-size="11" fill="#b7bcc4">${p}%</text>`;});
+  let seg='';freq.forEach((cls,d)=>{const a=d*22.5;let r0=hole;cls.forEach((v,ci)=>{const r1=r0+v*k;if(v>0)seg+=sector(a-hw,a+hw,r0,r1,RAMP[ci]);r0=r1;});});
+  let dl='';[["N",0],["L",90],["S",180],["O",270]].forEach(([lab,ang])=>{const[x,y]=P(ang,R+13);dl+=`<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="11" fill="#8a9099" text-anchor="middle" font-weight="700">${lab}</text>`;});
+  const leg=SCLASS.map((s,i)=>`<span class="wl"><i style="background:${RAMP[i]}"></i>${s}</span>`).join('')+'<span class="wl mut2">m/s</span>';
+  return `<svg viewBox="0 0 224 244" width="100%" height="252" style="max-width:270px">${g}${seg}<circle cx="${cx}" cy="${cy}" r="${hole}" fill="#fff" stroke="#dfe2e6"/>${dl}</svg><div class="wleg">${leg}</div>`;
+}
+function dailyChart(td){
+  const tmn=Math.min(...td.map(x=>x.mn)),tmx=Math.max(...td.map(x=>x.mx));
+  const step=(tmx-tmn)>15?5:((tmx-tmn)>6?2:1);
+  const axlo=Math.floor(tmn/step)*step,axhi=Math.ceil(tmx/step)*step;
+  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/td.length;
+  const sy=t=>PT+(axhi-t)/(axhi-axlo)*PLOTH;
+  let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}°</text>`;}
+  let bars='';td.forEach((r,i)=>{const cx=PL+i*bw+bw/2,yt=sy(r.mx),yb=sy(r.mn);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(yb-yt,3).toFixed(1)}" rx="5" fill="url(#tg)"/>`;});
+  let labs=td.map((r,i)=>i%2===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><defs><linearGradient id="tg" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${PT}" y2="${PT+PLOTH}"><stop offset="0" stop-color="#d55e00"/><stop offset="0.4" stop-color="#e0e0a0"/><stop offset="0.7" stop-color="#8aa0e0"/><stop offset="1" stop-color="#4078f2"/></linearGradient></defs><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">°C</text>${grid}${bars}${labs}</svg>`;
+  return {svg,axlo,axhi};
+}
+function sparkSVG(w24){
+  const vals=w24.map(x=>x.ws),good=vals.map((v,i)=>[i,v]).filter(p=>p[1]!=null);
+  if(good.length<2)return '<div style="height:58px"></div>';
+  const ys=good.map(p=>p[1]),wmin=Math.min(...ys),wmax=Math.max(...ys),span=(wmax-wmin)||1,n=vals.length;
+  const pts=good.map(([i,v])=>`${(i/(n-1)*260).toFixed(1)},${(46-(v-wmin)/span*38).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 260 52" width="100%" height="58" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="#4078f2" stroke-width="2.4"/><polyline points="0,52 ${pts} 260,52" fill="#4078f2" opacity="0.09" stroke="none"/></svg>`;
+}
+
+// ---------- balloon HTML per mode ----------
+function balloonHTML(s,mode){
+  // freshness is PER VARIABLE: a station can be online via wind yet have a stale temperature
+  const v = mode==='wind'?s.wind:(mode==='rain'?s.rain:s.temp);
+  if(!v) return null;
+  const fresh=!!v.fresh, cls=fresh?'fresh':'stale';
+  const dt=fresh?'':`<span class="bl-dt">${fmtDate(v.t)}</span>`;
+  let inner;
+  if(mode==='wind'){ const dir=(v.wd==null?0:v.wd);
+    inner=`<span class="warr" style="transform:rotate(${(dir+180)%360}deg)">${arrowSVG(fresh?'#4078f2':'#9a9a9a')}</span><span class="bl-vl">${v.ws.toFixed(1)}<i>m/s</i></span>`; }
+  else if(mode==='rain'){ inner=`${GLYPH.rain}<span class="bl-vl">${v.v}<i>mm</i></span>`; }
+  else { inner=`${GLYPH[iconFor(s)]}<span class="bl-vl">${Math.round(v.v)}<i>°C</i></span>`; }
+  return `<div class="bl-inner ${cls}"><div class="bl-c"><span class="bl-nm">${s.name.split(' ')[0]}</span>${inner}${dt}</div><span class="pt"></span></div>`;
+}
+const MAPLEG={temp:'Temperatura · °C',rain:'Chuva 24 h · mm',wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s`};
+
+// ---------- main ----------
+let MAP, MARKERS, MODE='wind', SNAP;
+async function init(){
+  SNAP=await fetch('data/snapshot.json').then(r=>r.json());
+  const N=SNAP.network, ref=SNAP.reference_now;
+  // rail
+  document.getElementById('rail').innerHTML=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']]
+    .map(([k,l,href],i)=>`<a class="ri${i===0?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+  // conditions
+  const y=+ref.slice(0,4),mo=+ref.slice(5,7),d=+ref.slice(8,10);
+  const [sr,ss]=sunTimes(-26.30,-48.85,y,mo,d,-3);
+  const upd=`${ref.slice(8,10)}/${ref.slice(5,7)}/${ref.slice(0,4)} · ${ref.slice(11,16)}`;
+  const feels=N.feels!=null?`Sensação ${THERMO_SM} ${N.feels}°C`:'';
+  const prec=N.precip_now?`${N.precip_now}`:'—';
+  document.getElementById('now2').innerHTML=`
+    <div class="now2-top"><span class="lbl">Condições agora <span class="mut">· média da rede</span></span>
+      <div class="upd-stack"><span class="upd">↻ Atualizado ${upd}</span>
+        <div class="datep2"><div class="d">${d}</div><small>${['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'][new Date(y,mo-1,d).getDay()]}<br>${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][mo-1]} ${y}</small></div></div></div>
+    <div class="now2-main">${THERMO}<span class="tnum">${N.temp_mean!=null?Math.round(N.temp_mean):'—'}<span class="u">°C</span></span><span class="feels">${feels}</span></div>
+    <div class="now2-cmp">${N.condition||''}. ${N.n_online} de ${N.n_total} estações reportando.</div>
+    <div class="now2-stats">
+      <div class="st"><span class="k">${DROP} Umidade</span><span class="v">${N.humidity_mean!=null?N.humidity_mean+' %':'—'}</span></div>
+      <div class="st"><span class="k">${PRECIP} Precip. por hora</span><span class="v">${prec} mm</span></div>
+      <div class="st"><span class="k">${SUNUP} Nascer do sol</span><span class="v">${sr}</span></div>
+      <div class="st"><span class="k">${SUNDN} Pôr do sol</span><span class="v">${ss}</span></div></div>`;
+  // KMA alert
+  const al=SNAP.alert||{};
+  const rlvl=al.rain?(al.rain.active?'alert':(al.rain.value_mmph>=2.5?'warn':'ok')):'ok';
+  const tlvl=(al.temp&&(al.temp.heat_active||al.temp.cold_active))?'alert':'ok';
+  const active=al.active;
+  document.getElementById('kma').innerHTML=`
+    <div class="kh"><span><span class="warn">&#9888;</span> Alertas de tempo severo <small>· limiares OMM</small></span>
+      <span class="kstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alertas ativos'}</span></div>
+    <div class="kb"><span class="chip ${rlvl}">${HZ.rain} Chuva</span><span class="chip ${tlvl}">${HZ.temp} Temperatura</span><span class="chip ok">${HZ.wind} Vento</span></div>
+    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">níveis de aviso (estilo KMA)</span></div>`;
+  // estado
+  document.getElementById('estado').innerHTML=`<div class="ct">Estado da rede</div>
+    <div class="txt">${N.n_online} de ${N.n_total} estações online agora. As demais estão defasadas — última leitura há mais de ${SNAP.fresh_days} dias.</div>
+    <div style="display:flex;gap:8px">${GLYPH.part}${GLYPH.sun}${GLYPH.cloud}${GLYPH.rain}</div>`;
+  // rose
+  if(SNAP.windrose){const R=SNAP.windrose;document.getElementById('rose').innerHTML=windRoseSVG(R);
+    const nd=(R.stations_dropped||[]).length, calm=(R.calm_pct!=null)?` · calmaria ${R.calm_pct}%`:'';
+    const drop=nd?` · ${nd} anemômetro(s) com cata-vento inválido excluído(s)`:'';
+    document.getElementById('rosesub').textContent=`frequência (ventos ≥ ${R.calm_ms??0.5} m/s)${calm} · ${R.n.toLocaleString('pt-BR')} obs · ${(R.stations_used||[]).length} estações com direção válida${drop}`;}
+  // daily
+  const dc=dailyChart(SNAP.daily_temp);
+  document.getElementById('daily').innerHTML=dc.svg;
+  document.getElementById('vbar').innerHTML=`<b>${dc.axhi}°</b><span class="vg"></span><b>${dc.axlo}°</b>`;
+  // station rows
+  document.getElementById('rows').innerHTML=SNAP.stations.map(s=>{
+    const cls=s.fresh?'fresh':'stale', sub=s.fresh?'online':'última: '+fmtDate(s.last_time);
+    // show a CURRENT reading when the station is online (prefer fresh temp, then rain, then wind);
+    // for offline stations show the last known temp/rain (the row is greyed to signal it's old)
+    let val='—';
+    if(s.temp&&s.temp.fresh) val=`${Math.round(s.temp.v)}<i>°C</i>`;
+    else if(s.rain&&s.rain.fresh) val=`${s.rain.v}<i>mm</i>`;
+    else if(s.wind&&s.wind.fresh) val=`${s.wind.ws.toFixed(1)}<i>m/s</i>`;
+    else if(s.temp) val=`${Math.round(s.temp.v)}<i>°C</i>`;
+    else if(s.rain) val=`${s.rain.v}<i>mm</i>`;
+    return `<div class="row ${cls}">${GLYPH[iconFor(s)]}<div class="rn"><b>${s.name}</b><span>${sub}</span></div><div class="rv">${val}</div></div>`;
+  }).join('');
+  // ribbon
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo (Okabe-Ito #D55E00) · base orográfica OpenTopoMap · gerado '+SNAP.generated_at.slice(0,16).replace('T',' ')+' UTC';
+  // map
+  buildMap();
+  // toggles
+  document.getElementById('tog').addEventListener('click',e=>{const m=e.target.getAttribute('data-m');if(!m)return;
+    MODE=m;[...document.querySelectorAll('#tog span')].forEach(x=>x.classList.toggle('on',x.getAttribute('data-m')===m));
+    drawMarkers();});
+}
+function buildMap(){
+  MAP=L.map('map',{zoomControl:true,scrollWheelZoom:false,attributionControl:true}).setView([-26.30,-48.85],11);
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,opacity:0.9,
+    attribution:'© <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · © OpenStreetMap'}).addTo(MAP);
+  MARKERS=L.layerGroup().addTo(MAP);
+  fetch('data/limite.geojson').then(r=>r.json()).then(gj=>{
+    const layer=L.geoJSON(gj,{style:{color:'#3b4a57',weight:1.6,fill:false,opacity:.7}}).addTo(MAP);
+    MAP.fitBounds(layer.getBounds(),{padding:[16,16]});
+  }).catch(()=>{});
+  drawMarkers();
+  document.getElementById('mapleg').innerHTML=MAPLEG[MODE];
+}
+function drawMarkers(){
+  if(!MARKERS)return; MARKERS.clearLayers();
+  document.getElementById('mapleg').innerHTML=MAPLEG[MODE];
+  SNAP.stations.forEach(s=>{
+    const html=balloonHTML(s,MODE); if(!html)return;
+    const icon=L.divIcon({className:'bl',html,iconSize:[0,0],iconAnchor:[0,0]});
+    L.marker([s.lat,s.lon],{icon,zIndexOffset:s.fresh?1000:0,riseOnHover:true}).addTo(MARKERS);
+  });
+}
+init();
+</script>
+</body>
+</html>

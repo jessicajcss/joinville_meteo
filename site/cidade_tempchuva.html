@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Cidade — Temperatura × Chuva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.lead-wrap{max-width:820px}
+.sec{margin-top:20px}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.sec-n{font-size:14px;font-weight:800;color:#fff;border-radius:9px;padding:3px 12px;flex:none}
+.sec-n.t{background:var(--red)}.sec-n.r{background:var(--blue)}.sec-n.y{background:var(--purple)}
+.sec-t{font-size:23px;font-weight:800;letter-spacing:-.01em}
+.sec-lead{font-size:17px;color:var(--ink);line-height:1.55;margin:8px 0 6px}
+.sec-lead b{font-weight:800}.sec-lead .t{color:var(--red)}.sec-lead .r{color:var(--blue)}
+.sec-narr{font-size:13.5px;color:#6b7178;line-height:1.6;margin-bottom:16px}
+.krow{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+.kt{flex:1;min-width:140px;background:#f7f8fa;border:1px solid var(--line);border-radius:13px;padding:12px 15px}
+.kt .kl{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.kt .kv{font-size:23px;font-weight:800;margin-top:5px;color:var(--ink)}
+.kt .kv i{font-style:normal;font-size:13px;color:var(--mut);font-weight:600;margin-left:2px}
+.kt.t .kv{color:var(--red)}.kt.r .kv{color:var(--blue)}
+.twocol{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start}
+.rank{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.rank .r2{display:flex;align-items:center;gap:10px;font-size:13px}
+.rank .n{width:21px;height:21px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.rank .dt{color:var(--mut);width:88px;flex:none}
+.rank .bar{flex:1;height:9px;border-radius:5px;background:#eef2f7;overflow:hidden}
+.rank .bar span{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#6baed6,#08519c)}
+.rank .mm{font-weight:800;color:var(--blue);width:56px;text-align:right;flex:none}.rank .mm i{font-style:normal;font-weight:600;font-size:11px;color:var(--mut)}
+.subt{font-size:12.5px;font-weight:800;color:var(--ink);margin:2px 0 8px}
+@media(max-width:1000px){.twocol{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb">
+      <div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div>
+      <div class="tbtn">🔔</div><div class="tbtn">☰</div>
+    </div>
+    <div class="head">
+      <div class="htitle" id="htitle">Temperatura × Chuva<small id="hsub">Histórico · cidade — clima detalhado de Joinville</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <!-- overview climograph -->
+    <div class="card">
+      <div class="ct">O ano climatológico de Joinville <span class="mut" id="clyears"></span></div>
+      <div class="sec-narr lead-wrap" id="overtext"></div>
+      <div class="capt">barras = chuva mensal (mm, eixo esquerdo, pluviômetros da Defesa Civil + estações meteorológicas) · linha = temperatura média (°C, eixo direito)</div>
+      <div id="climo"></div>
+    </div>
+
+    <!-- Section 1: Temperature -->
+    <div class="card sec">
+      <div class="sec-h"><span class="sec-n t">1</span><span class="sec-t">Temperatura</span></div>
+      <div class="sec-lead lead-wrap" id="tlead"></div>
+      <div class="sec-narr lead-wrap" id="tnarr"></div>
+      <div class="hm-wrap" id="hmTemp"></div>
+      <div class="hcbar"><span id="tlo"></span><span class="g" style="background:linear-gradient(90deg,#4078f2,#8aa0e0,#e0e0a0,#d55e00)"></span><span id="thi"></span></div>
+      <div class="krow" id="tkeys"></div>
+    </div>
+
+    <!-- Section 2: Rainfall -->
+    <div class="card sec">
+      <div class="sec-h"><span class="sec-n r">2</span><span class="sec-t">Chuva</span></div>
+      <div class="sec-lead lead-wrap" id="rlead"></div>
+      <div class="sec-narr lead-wrap" id="rnarr"></div>
+      <div class="twocol">
+        <div>
+          <div class="subt">Climatologia mensal — mm médios por mês</div>
+          <div id="rainClimo"></div>
+        </div>
+        <div>
+          <div class="subt">Dias mais chuvosos já registrados</div>
+          <div class="rank" id="rank"></div>
+        </div>
+      </div>
+      <div class="subt" style="margin-top:18px">Chuva acumulada mensal — mm por ano (média espacial: pluviômetros da Defesa Civil + estações meteorológicas)</div>
+      <div class="hm-wrap" id="hmRain"></div>
+      <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#f7fbff,#c6dbef,#6baed6,#2171b5,#08306b)"></span><span id="rhi"></span></div>
+      <div class="krow" id="rkeys"></div>
+    </div>
+
+    <!-- Section 3: Annual trend -->
+    <div class="card sec">
+      <div class="sec-h"><span class="sec-n y">3</span><span class="sec-t">Ano a ano</span></div>
+      <div class="sec-lead lead-wrap" id="alead"></div>
+      <div class="capt">barras = chuva anual (mm) · linha = temperatura média anual (°C)</div>
+      <div id="annual"></div>
+      <div class="legrow"><span><i style="background:#4078f2"></i>chuva anual</span><span><i class="dot" style="background:#d55e00"></i>temperatura média</span></div>
+    </div>
+
+    <div class="card sec"><div class="hnote" id="note"></div></div>
+
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ 
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='cidade'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+function ramp(stops,t){t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
+  const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;}
+const TEMPRAMP=['#4078f2','#8aa0e0','#e0e0a0','#d55e00'], RAINRAMP=['#f7fbff','#c6dbef','#6baed6','#2171b5','#08306b'];
+const textOn=rgb=>{const m=rgb.match(/\d+/g).map(Number);return (0.2126*m[0]+0.7152*m[1]+0.0722*m[2])>155?'#2b2b2b':'#fff';};
+const MN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function heatmap(mat,years,months,colorFn,fmt){
+  const cw=42,ch=22,PL=46,PT=22,W=PL+12*cw,H=PT+years.length*ch;let s='';
+  months.forEach((m,j)=>s+=`<text x="${PL+j*cw+cw/2}" y="15" font-size="12" fill="#a0a1a7" text-anchor="middle">${m}</text>`);
+  years.forEach((y,i)=>{s+=`<text x="${PL-8}" y="${PT+i*ch+ch/2+3.5}" font-size="12" fill="#a0a1a7" text-anchor="end">${y}</text>`;
+    for(let j=0;j<12;j++){const v=mat[i][j],x=PL+j*cw,yy=PT+i*ch;
+      if(v==null){s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${ch-2}" rx="3" fill="#f1f2f4"/>`;}
+      else{const c=colorFn(v);s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${ch-2}" rx="3" fill="${c}"/><text x="${x+cw/2}" y="${yy+ch/2+3.5}" font-size="11.5" fill="${textOn(c)}" text-anchor="middle">${fmt(v)}</text>`;}}});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W}px">${s}</svg>`;
+}
+function climograph(clim){
+  const R=clim.rain,T=clim.temp,W=560,H=220,PL=40,PR=42,PB=26,PT=12,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
+  const rmax=Math.max(50,Math.ceil(Math.max(...R.filter(x=>x!=null))/50)*50);
+  const tv=T.filter(x=>x!=null),tmn=Math.floor(Math.min(...tv)/5)*5,tmx=Math.ceil(Math.max(...tv)/5)*5;
+  const ry=v=>PT+plotH-(v/rmax)*plotH,ty=v=>PT+plotH-((v-tmn)/(tmx-tmn))*plotH;let g='',bars='',tpts=[];
+  for(let r=0;r<=rmax;r+=50){const y=ry(r);g+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11.5" fill="#8fb0d6" text-anchor="end">${r}</text>`;}
+  for(let t=tmn;t<=tmx;t+=5){const y=ty(t);g+=`<text x="${W-PR+6}" y="${y+3}" font-size="11.5" fill="#c98a5c" text-anchor="start">${t}°</text>`;}
+  R.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw*0.2,y=ry(v);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#4078f2" opacity="0.75"/>`;}});
+  T.forEach((v,i)=>{if(v!=null)tpts.push(`${(PL+i*bw+bw/2).toFixed(1)},${ty(v).toFixed(1)}`);});
+  const dots=T.map((v,i)=>v!=null?`<circle cx="${(PL+i*bw+bw/2).toFixed(1)}" cy="${ty(v).toFixed(1)}" r="3" fill="#d55e00"/>`:'').join('');
+  const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-8}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="230">${g}${bars}<polyline points="${tpts.join(' ')}" fill="none" stroke="#d55e00" stroke-width="2.4"/>${dots}${labs}</svg>`;
+}
+function rainClimo(R){
+  const W=560,H=190,PL=34,PR=10,PT=10,PB=22,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
+  const rmax=Math.max(50,Math.ceil(Math.max(...R.filter(x=>x!=null))/50)*50);const ry=v=>PT+plotH-(v/rmax)*plotH;let g='',bars='';
+  for(let r=0;r<=rmax;r+=50){const y=ry(r);g+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11.5" fill="#a0a1a7" text-anchor="end">${r}</text>`;}
+  R.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw*0.18,y=ry(v);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.64).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#3987e5"/><text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="11" fill="#6b7178" text-anchor="middle">${Math.round(v)}</text>`;}});
+  const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-7}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="200">${g}${bars}${labs}</svg>`;
+}
+function annualTrend(annual){
+  const A=annual.filter(a=>a.temp_mean!=null||a.rain_total!=null);
+  const W=980,H=210,PL=40,PR=42,PB=26,PT=12,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/A.length;
+  const rmax=Math.max(500,Math.ceil(Math.max(...A.map(a=>a.rain_total||0))/500)*500);
+  const tv=A.map(a=>a.temp_mean).filter(x=>x!=null),tmn=Math.floor(Math.min(...tv)-1),tmx=Math.ceil(Math.max(...tv)+1);
+  const ry=v=>PT+plotH-(v/rmax)*plotH,ty=v=>PT+plotH-((v-tmn)/(tmx-tmn))*plotH;let g='',bars='',tpts=[],dots='',labs='';
+  for(let r=0;r<=rmax;r+=500){const y=ry(r);g+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11.5" fill="#8fb0d6" text-anchor="end">${r}</text>`;}
+  for(let t=tmn;t<=tmx;t+=2){const y=ty(t);g+=`<text x="${W-PR+6}" y="${y+3}" font-size="11.5" fill="#c98a5c" text-anchor="start">${t}°</text>`;}
+  A.forEach((a,i)=>{
+    if(a.rain_total!=null){const x=PL+i*bw+bw*0.2,y=ry(a.rain_total);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#4078f2" opacity="0.7"/>`;}
+    if(a.temp_mean!=null){tpts.push(`${(PL+i*bw+bw/2).toFixed(1)},${ty(a.temp_mean).toFixed(1)}`);dots+=`<circle cx="${(PL+i*bw+bw/2).toFixed(1)}" cy="${ty(a.temp_mean).toFixed(1)}" r="3" fill="#d55e00"/>`;}
+    labs+=`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-8}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${a.year}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="215">${g}${bars}<polyline points="${tpts.join(' ')}" fill="none" stroke="#d55e00" stroke-width="2.4"/>${dots}${labs}</svg>`;
+}
+function fmtBR(iso){const[y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}
+
+async function init(){
+  const C=await fetch('data/city_history.json').then(r=>r.json());
+  const cl=C.climatology, st=C.story, mn=C.months, yr=`${C.years[0]}–${C.years[C.years.length-1]}`;
+  document.getElementById('clyears').textContent=yr;
+  const argmax=a=>a.indexOf(Math.max(...a.filter(x=>x!=null))), argmin=a=>a.indexOf(Math.min(...a.filter(x=>x!=null)));
+  const hotM=argmax(cl.temp),coldM=argmin(cl.temp),wetM=argmax(cl.rain),dryM=argmin(cl.rain);
+  const at=C.annual.map(a=>a.temp_mean).filter(x=>x!=null), mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+  const tmean=mean(at).toFixed(1);
+  const wettestYr=C.annual.filter(a=>a.rain_total!=null).sort((a,b)=>b.rain_total-a.rain_total)[0];
+  // overview
+  document.getElementById('overtext').innerHTML=`Joinville tem clima subtropical úmido: verões quentes e chuvosos, invernos amenos e mais secos. Este resumo combina ${C.years[C.years.length-1]-C.years[0]+1} anos de dados — a temperatura vem da rede de estações meteorológicas e a chuva, da média espacial combinada da rede de pluviômetros da Defesa Civil e das estações meteorológicas.`;
+  document.getElementById('climo').innerHTML=climograph(cl);
+  // temp scale
+  const tall=C.temp.flat().filter(x=>x!=null),tlo=Math.floor(Math.min(...tall)),thi=Math.ceil(Math.max(...tall));
+  document.getElementById('tlo').textContent=tlo+'°';document.getElementById('thi').textContent=thi+'°';
+  // Section 1
+  document.getElementById('tlead').innerHTML=`A temperatura média de Joinville vai de <b class="t">${cl.temp[coldM]} °C</b> em ${mn[coldM].toLowerCase()} a <b class="t">${cl.temp[hotM]} °C</b> em ${mn[hotM].toLowerCase()}, com média anual de <b class="t">${tmean} °C</b>.`;
+  document.getElementById('tnarr').textContent='Cada célula do mapa é a temperatura média de um mês em um ano — laranja para os meses quentes, azul para os frios. Lê-se de cima (mais antigo) para baixo (mais recente).';
+  document.getElementById('hmTemp').innerHTML=heatmap(C.temp,C.years,C.months,v=>ramp(TEMPRAMP,(v-tlo)/(thi-tlo)),v=>Math.round(v));
+  const TK=[['Mês mais quente',`${mn[hotM]} · ${cl.temp[hotM]}`,'°C'],['Mês mais frio',`${mn[coldM]} · ${cl.temp[coldM]}`,'°C'],['Temperatura média anual',tmean,'°C']];
+  document.getElementById('tkeys').innerHTML=TK.map(([l,v,u])=>`<div class="kt t"><div class="kl">${l}</div><div class="kv">${v}<i>${u}</i></div></div>`).join('');
+  // Section 2
+  const rd=st.rainy_days_mean, wdd=st.wettest_day;
+  document.getElementById('rlead').innerHTML=`Joinville tem cerca de <b class="r">${rd} dias de chuva</b> por ano. O dia mais chuvoso já medido pela rede rendeu <b class="r">${wdd.mm} mm</b> em ${fmtBR(wdd.date)}.`;
+  document.getElementById('rnarr').innerHTML=`Chuva = média espacial combinada da rede de pluviômetros da Defesa Civil e das estações meteorológicas (${fmtBR(st.gauge_period[0])}–${fmtBR(st.gauge_period[1])}). O verão concentra as chuvas; o inverno é mais seco. "Dia de chuva" = média da cidade ≥ 1 mm.`;
+  document.getElementById('rainClimo').innerHTML=rainClimo(cl.rain);
+  document.getElementById('rank').innerHTML=st.top_days.map((d,i)=>{const w=(d.mm/st.top_days[0].mm*100).toFixed(0);
+    return `<div class="r2"><span class="n">${i+1}</span><span class="dt">${fmtBR(d.date)}</span><span class="bar"><span style="width:${w}%"></span></span><span class="mm">${d.mm}<i> mm</i></span></div>`;}).join('');
+  const rall=C.rain.flat().filter(x=>x!=null),rhi=Math.ceil(Math.max(...rall)/50)*50;
+  document.getElementById('rhi').textContent=rhi+' mm';
+  document.getElementById('hmRain').innerHTML=heatmap(C.rain,C.years,C.months,v=>ramp(RAINRAMP,v/rhi),v=>Math.round(v));
+  const RK=[['Mês mais chuvoso',`${mn[wetM]} · ${Math.round(cl.rain[wetM])}`,'mm'],['Mês mais seco',`${mn[dryM]} · ${Math.round(cl.rain[dryM])}`,'mm'],['Dias de chuva/ano',rd,'dias'],['Dia mais chuvoso',`${wdd.mm}`,'mm']];
+  document.getElementById('rkeys').innerHTML=RK.map(([l,v,u])=>`<div class="kt r"><div class="kl">${l}</div><div class="kv">${v}<i>${u}</i></div></div>`).join('');
+  // Section 3
+  document.getElementById('alead').innerHTML=`Ano a ano, a temperatura média oscila pouco em torno de ${tmean} °C, enquanto a chuva varia bastante — o ano mais chuvoso da série foi <b class="r">${wettestYr.year}</b>, com <b class="r">${Math.round(wettestYr.rain_total)} mm</b>.`;
+  document.getElementById('annual').innerHTML=annualTrend(C.annual);
+  document.getElementById('note').textContent=C.notes;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+C.generated_at.slice(0,16).replace('T',' ')+' UTC';
+}
+init();
+</script>
+</body>
+</html>

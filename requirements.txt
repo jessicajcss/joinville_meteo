@@ -1,0 +1,19 @@
+# Python dependencies for the data pipeline + coverage figures + Quarto rendering
+pandas>=2.2
+numpy>=1.26
+python-calamine>=0.2      # fast reader for the year-sheet *_HR/_DIARIA spreadsheets
+openpyxl>=3.1             # fallback spreadsheet engine
+pyarrow>=15              # Parquet masters
+matplotlib>=3.8          # coverage heatmaps / variable inventory
+# Dashboard (maps + charts) — used by the Quarto dashboard step:
+geopandas>=1.0
+shapely>=2.0
+pyogrio>=0.7
+plotly>=5.22
+folium>=0.16
+mapclassify>=2.6
+# Quarto renders the .qmd through a Jupyter kernel:
+jupyter>=1.0
+nbclient>=0.10
+nbformat>=5.10
+ipykernel>=6.29

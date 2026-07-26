@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-24T04:28:31.415223+00:00",
+  "city": "Joinville - SC",
+  "n_stations": 8,
+  "n_reporting": 2,
+  "n_gauges": 9,
+  "temp_mean": 21.5,
+  "temp_min": 17.0,
+  "temp_max": 26.0,
+  "humidity_mean": 94.0,
+  "wind_max": 1.0,
+  "rain_24h_max": 45.0,
+  "rain_24h_where": "Rodovia",
+  "n_events": 20,
+  "worst_alert": "warning"
+}

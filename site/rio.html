@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Chuva & Rio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<style>
+.pick{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.pick .fg{display:flex;flex-direction:column;gap:5px}
+.pick label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.pick select{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 13px;cursor:pointer;min-width:250px}
+.panlab{font-size:11px;font-weight:800;color:var(--mut);margin:10px 0 2px}
+.rainbars{display:flex;flex-direction:column;gap:6px}
+.rrow{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.rrow .m{width:78px;flex:none;font-weight:600;text-transform:capitalize}
+.rrow .bar{flex:1;height:18px;border-radius:5px;background:#f0f4f8;overflow:hidden}
+.rrow .bar span{display:block;height:100%;border-radius:5px}
+.rrow .v{width:60px;text-align:right;font-weight:800;color:#1d69b5;flex:none}.rrow .v i{font-style:normal;font-weight:600;font-size:11px;color:var(--mut)}
+.qcnote{font-size:11px;color:var(--mut);line-height:1.5;margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.smgrid{display:flex;flex-wrap:wrap;gap:14px 0;margin-top:6px}
+.smcell{flex:1 1 168px;min-width:150px;max-width:230px;padding:0 6px 2px 12px;border-left:1px dashed #dbe4ee}
+.smcell:first-child{border-left:none}
+.smcell h4{font-size:11.5px;font-weight:700;color:var(--ink);margin:0 0 4px;text-align:center;line-height:1.25;min-height:29px;display:flex;align-items:flex-end;justify-content:center}
+.smfoot{display:flex;flex-direction:column;align-items:center;gap:1px;margin-top:2px}
+.smfoot .mm{font-size:13px;font-weight:800;color:var(--ink)}.smfoot .mm i{font-style:normal;font-weight:600;font-size:10px;color:var(--mut)}
+.mgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:0 1px;margin-top:10px}
+.mcell{min-width:0;padding:0 2px 2px 5px;border-left:1px dashed #dbe4ee}
+.mcell:first-child{border-left:none}
+.mcell h4{font-size:10px;font-weight:700;color:var(--ink);margin:0 0 3px;text-align:center;white-space:nowrap}
+.mcell .smfoot .mm{font-size:11px}.mcell .smfoot .mm i{font-size:8.5px}
+@media(max-width:720px){.mgrid{grid-template-columns:repeat(6,1fr)}}
+.rainwrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 2px;grid-auto-flow:row dense;align-items:start;margin-top:8px}
+#rainmap{grid-column:2/4;grid-row:2/4;align-self:stretch;display:flex;flex-direction:column;min-height:250px}
+#pluvmap{flex:1;min-height:230px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#eef2f6;z-index:0}
+.maplab{font-size:10.5px;font-weight:700;color:var(--mut);text-align:center;margin-top:6px}
+.leaflet-tooltip.pv{background:#fff;border:1px solid var(--line);border-radius:7px;box-shadow:0 2px 7px rgba(0,0,0,.12);font-family:inherit;font-size:10.5px;font-weight:700;padding:2px 7px;color:var(--ink)}
+.leaflet-tooltip.pv:before{display:none}
+.rlegend{display:flex;flex-wrap:wrap;gap:6px 15px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.rlegend .li{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.rlegend .sw{width:22px;height:0;border-top:3px solid;border-radius:2px}
+.hleg{display:flex;flex-wrap:wrap;gap:5px 13px;margin-top:9px}
+.hleg .li{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.hleg .sw{width:17px;height:3px;border-radius:2px}
+.lvgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 22px;margin-top:6px}
+.lvcell h4{font-size:12.5px;font-weight:700;color:var(--ink);margin:0 0 1px;text-align:center}
+.hmini-rng{font-size:10.5px;color:var(--mut);text-align:center;margin-top:2px}
+@media(max-width:760px){.lvgrid{grid-template-columns:1fr}}
+.capt{font-size:12.5px;margin-top:16px;line-height:1.55}
+#dumbbell,#hourly,#dailyBody{margin-top:12px}
+.card .pick+.pick{margin-top:8px}
+@media(max-width:820px){.rainwrap{grid-template-columns:repeat(2,1fr)}.rainwrap .smcell{grid-column:auto!important;grid-row:auto!important}#rainmap{grid-column:1/3!important;grid-row:auto!important;order:-1}#pluvmap{min-height:260px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+    <div class="head">
+      <div class="htitle">Chuva &amp; Rio<small>Precipitação e nível dos rios — estações hidrometeorológicas</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <!-- 1 · Gradiente de chuvas por estação meteorológica -->
+    <div class="card">
+      <div class="ct">Gradiente de chuvas por estação meteorológica <span class="mut">climatologia mensal</span></div>
+      <div class="rainwrap" id="rainwrap">
+        <div class="rainmap" id="rainmap"><div id="pluvmap"></div><div class="maplab">Localização das estações — cor por estação</div></div>
+      </div>
+      <div class="capt">Climatologia da precipitação mensal por estação (rede de estações meteorológicas e hidrometeorológicas). Cada gota ≈ 40 mm; painéis ordenados por acúmulo anual crescente — estação mais seca no canto inferior direito. Cursor sobre as colunas: total mensal e cobertura de registro (%).</div>
+    </div>
+
+    <!-- 2 · precipitação mensal (estação/cidade + ano) -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Precipitação mensal <span class="mut" id="rbsub"></span></div>
+      <div class="pick"><div class="fg"><label>Estação</label><select id="selStB"></select></div><div class="fg"><label>Ano</label><select id="selYearB"></select></div></div>
+      <div class="rainbars" id="rainbars" style="margin-top:12px"></div>
+      <div class="capt">Acumulado mensal de precipitação (mm mês⁻¹). Máximos no verão austral (jan–mar); mínimos no inverno (jul–ago).</div>
+    </div>
+
+    <!-- 3 · precipitação mensal por estação (seletor de Ano próprio) -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Precipitação mensal por estação — todas as estações <span class="mut" id="ryearlab"></span></div>
+      <div class="pick"><div class="fg"><label>Ano</label><select id="selYearM"></select></div></div>
+      <div class="mgrid" id="monthgrid"></div>
+      <div class="capt">Precipitação por estação em cada mês (uma coluna por estação; cores dos painéis acima). Cada gota ≈ 40 mm; guarda-chuva sombreado pela média mensal entre estações. Cursor: total e cobertura de registro (%).</div>
+    </div>
+
+    <!-- 4 · nível do rio — perfil mensal -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Nível do rio — perfil mensal <span class="mut" id="lsub"></span></div>
+      <div class="pick"><div class="fg"><label>Estação</label><select id="selStL"></select></div><div class="fg"><label>Ano</label><select id="selYearL"></select></div></div>
+      <div id="dumbbell"></div>
+      <div id="levelline"></div>
+      <div id="lenso"></div>
+      <div class="hleg" id="lleg"></div>
+      <div class="capt" id="lcapt">Nível da água por mês: amplitude (mín–máx do nível diário) e mediana mensal. O nível é a cota relativa à referência (zero) da régua — não é a profundidade da lâmina d’água.</div>
+      <div class="qcnote" id="qcLevel"></div>
+    </div>
+
+    <!-- 5 · nível do rio — perfil horário (heatmap hora × mês) -->
+    <div class="card" style="margin-top:16px" id="hourCard">
+      <div class="ct">Nível do rio — perfil horário (hora × mês) <span class="mut" id="hsub"></span></div>
+      <div class="pick"><div class="fg"><label>Estação</label><select id="selStH"></select></div><div class="fg"><label>Ano</label><select id="selYearH"></select></div></div>
+      <div id="hourly"></div>
+      <div class="capt" id="hcapt">Nível médio da água por hora do dia (linhas) e mês (colunas). A estrutura horária revela a influência da maré nas estações do baixo curso.</div>
+      <div class="qcnote" id="qcHour"></div>
+    </div>
+
+    <!-- 6 · análise diária -->
+    <div class="card" style="margin-top:16px" id="dailyCard">
+      <div class="ct">Análise diária <span class="mut" id="dsub"></span></div>
+      <div class="pick"><div class="fg"><label>Estação</label><select id="selStD"></select></div><div class="fg"><label>Ano</label><select id="selYearD"></select></div></div>
+      <div id="dailyBody">
+        <div id="tempWrap">
+          <div class="panlab">Temperatura média (°C)</div><div id="pTavg"></div>
+          <div class="panlab">Temperatura mín / máx (°C)</div><div id="pTmm"></div>
+        </div>
+        <div class="panlab">Chuva (mm dia⁻¹)</div><div id="pRain"></div>
+        <div class="panlab">Nível da água — cota da régua (m)</div><div id="pLevel"></div>
+        <div id="xaxis"></div>
+        <div class="hleg" id="ensoLeg" style="margin-top:8px"></div>
+      </div>
+      <div class="capt">Séries diárias de temperatura, precipitação e nível para a estação e o ano selecionados. O fundo sombreado marca as fases do ENSO — El Niño (quente) e La Niña (frio) — pelo Índice Oceânico do Niño (ONI, NOAA/CPC).</div>
+      <div class="qcnote" id="qcDaily"></div>
+    </div>
+
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='rio'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
+function ramp(stops){return t=>{t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
+  const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;};}
+const RAINR=ramp(['#c6dbef','#6baed6','#3182bd','#08519c']);
+const MFULL=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const M3=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+// ---- top: monthly rainfall bars ----
+function rainBars(clim){
+  const mx=Math.max(...clim.filter(v=>v!=null),1);const wet=clim.indexOf(Math.max(...clim.filter(v=>v!=null)));
+  return clim.map((v,i)=>{const w=v!=null?v/mx*100:0;
+    return `<div class="rrow"><span class="m">${MFULL[i]}</span><span class="bar"><span style="width:${w}%;background:${RAINR(v/mx)}"></span></span><span class="v">${v!=null?Math.round(v):'—'}<i> mm</i></span></div>`;}).join('');
+}
+
+// ---- small-multiples: monthly rainfall raindrops, one panel per station ----
+// categorical, colorblind-safe station palette (Okabe-Ito extended)
+const STCOL=['#0072B2','#009E73','#D55E00','#CC79A7','#E69F00','#56B4E9','#8E63B5','#117733','#B8860B','#4C6E9C'];
+function rgbTriple(hex,tw){let [r,g,b]=hex2rgb(hex);
+  if(tw>=0){r+=(255-r)*tw;g+=(255-g)*tw;b+=(255-b)*tw;}       // toward white
+  else{const f=-tw;r=r*(1-f)+20*f;g=g*(1-f)+38*f;b=b*(1-f)+58*f;} // toward deep navy
+  return [r,g,b];}
+function stationRamp(hex){const lo=rgbTriple(hex,0.76),hi=rgbTriple(hex,-0.14);
+  return t=>{t=Math.max(0,Math.min(1,t));const L=(a,b)=>Math.round(a+(b-a)*t);
+    return `rgb(${L(lo[0],hi[0])},${L(lo[1],hi[1])},${L(lo[2],hi[2])})`;};}
+function umbrella(color){return `<svg viewBox="0 0 24 27" width="25" height="28" aria-hidden="true">`
+  +`<path d="M12 2.4V4" stroke="${color}" stroke-width="1.3" stroke-linecap="round"/>`
+  +`<path d="M2.4 11.6a9.6 6.4 0 0 1 19.2 0q-2.4-2.1-4.8 0q-2.4-2.1-4.8 0q-2.4-2.1-4.8 0Z" fill="${color}"/>`
+  +`<path d="M12 11.6V20.4a2.5 2.5 0 0 1-4.2 0" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/></svg>`;}
+const DOT_MM=40;                      // cada "gota" ≈ 40 mm de chuva (fixo em todos os gráficos)
+function dropGeom(gmax){
+  const maxN=Math.max(1,Math.ceil(gmax/DOT_MM));
+  const dy=Math.max(3.2,Math.min(5.2,44/maxN));
+  const R=Math.max(1.8,Math.min(2.4,dy*0.46));
+  const base=5+maxN*dy;
+  return {maxN,dy,R,base,H:base+3};
+}
+function dropCol(v,gmax,cx,geom,ramp,colW){
+  // transparent hit-area so the whole column shows the <title> tooltip (not just the dots)
+  let g=`<rect x="${(cx-colW/2).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${geom.H}" fill="transparent"/>`;
+  if(v==null)return g+`<circle cx="${cx.toFixed(1)}" cy="${(geom.base-3).toFixed(1)}" r="1" fill="#dfe4ea"/>`;
+  const t=Math.max(0,Math.min(1,v/gmax)),n=v>0?Math.max(1,Math.round(v/DOT_MM)):0;
+  for(let k=0;k<n;k++){const cy=geom.base-3-k*geom.dy,sh=ramp(t*(0.5+0.5*(k+1)/n));
+    g+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${geom.R}" fill="${sh}"/>`;}
+  return g;
+}
+// around-map cells (ascending total: driest bottom-right → wettest top-right)
+const AROUND_CELLS=[[4,4],[4,3],[4,2],[4,1],[3,1],[2,1],[1,1],[1,2],[1,3],[1,4]];
+function smallMultiples(panels){
+  if(!panels||!panels.length)return '<div style="color:#a0a1a7;padding:10px">Sem climatologia de chuva por estação.</div>';
+  const gmax=Math.max(...panels.flatMap(p=>p.clim.filter(v=>v!=null)),1),geom=dropGeom(gmax),W=12*13;
+  const asc=panels.slice().sort((a,b)=>a.annual-b.annual);
+  return asc.map((p,idx)=>{const c=STCOL[p.ci%STCOL.length],ramp=stationRamp(c);
+    let g='';p.clim.forEach((v,m)=>{const cx=13*m+6.5,cov=(p.clim_cov&&p.clim_cov[m]!=null)?p.clim_cov[m]:null;
+      const tip=`${MFULL[m]}: ${v!=null?Math.round(v)+' mm':'sem dado'}${cov!=null?' · cobertura '+cov+'%':''}`;
+      g+=`<g><title>${tip}</title>${dropCol(v,gmax,cx,geom,ramp,13)}</g>`;});
+    const svg=`<svg viewBox="0 0 ${W} ${geom.H}" width="100%" height="${geom.H}" preserveAspectRatio="xMidYMax meet">${g}</svg>`;
+    const [rr,cc]=AROUND_CELLS[idx]||[1,1];
+    return `<div class="smcell" style="grid-row:${rr};grid-column:${cc}"><h4>${p.name}</h4>${svg}`
+      +`<div class="smfoot">${umbrella(c)}<div class="mm">${p.annual.toLocaleString('pt-BR')}<i> mm/ano</i></div></div></div>`;
+  }).join('');
+}
+
+// ---- pluviômetro location map ----
+let PMAP;
+function pluvMap(panels){
+  if(!panels||!panels.length||typeof L==='undefined')return;
+  PMAP=L.map('pluvmap',{zoomControl:true,attributionControl:false,scrollWheelZoom:false});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(PMAP);
+  const pts=[];
+  panels.forEach((p,i)=>{const c=STCOL[(p.ci!=null?p.ci:i)%STCOL.length];if(p.lat==null||p.lon==null)return;pts.push([p.lat,p.lon]);
+    L.circleMarker([p.lat,p.lon],{radius:7,color:'#fff',weight:2,fillColor:c,fillOpacity:1})
+      .bindTooltip(`${p.name} · ${p.annual.toLocaleString('pt-BR')} mm/ano`,{className:'pv',direction:'top'}).addTo(PMAP);});
+  if(pts.length)PMAP.fitBounds(L.latLngBounds(pts).pad(0.28));
+  setTimeout(()=>{try{PMAP.invalidateSize();if(pts.length)PMAP.fitBounds(L.latLngBounds(pts).pad(0.28));}catch(e){}},250);
+}
+
+// ---- combined: 12 month panels (one umbrella each), station dot-columns inside ----
+function rainMonthUmbrellas(panels,year){
+  const sts=panels.map(p=>({name:p.name,color:STCOL[p.ci%STCOL.length],
+      v:year==='all'?p.clim:((p.by_year&&p.by_year[year])?p.by_year[year]:null),
+      cov:year==='all'?p.clim_cov:((p.by_year_cov&&p.by_year_cov[year])?p.by_year_cov[year]:null)}))
+    .filter(s=>s.v&&s.v.some(x=>x!=null));
+  if(!sts.length)return {html:`<div style="color:#a0a1a7;padding:20px">Sem dados de chuva para ${year}.</div>`};
+  let gmax=1;const monthMean=[];
+  for(let m=0;m<12;m++){let vals=[];sts.forEach(s=>{const v=s.v[m];if(v!=null){vals.push(v);if(v>gmax)gmax=v;}});
+    monthMean[m]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
+  const mmax=Math.max(...monthMean.filter(v=>v!=null),1);
+  const MAB=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const geom=dropGeom(gmax),N=sts.length,colW=10.5,W=N*colW;
+  const html=MFULL.map((mname,m)=>{
+    let g='';
+    sts.forEach((s,i)=>{const v=s.v[m],cx=colW*i+colW/2,ramp=stationRamp(s.color);
+      const cov=(s.cov&&s.cov[m]!=null)?s.cov[m]:null;
+      const tip=`${s.name} — ${mname}: ${v!=null?Math.round(v)+' mm':'sem dado'}${cov!=null?' · cobertura '+cov+'%':''}`;
+      g+=`<g><title>${tip}</title>${dropCol(v,gmax,cx,geom,ramp,colW)}</g>`;});
+    const svg=`<svg viewBox="0 0 ${W} ${geom.H}" width="100%" height="${geom.H}" preserveAspectRatio="xMidYMax meet">${g}</svg>`;
+    const mm=monthMean[m],uc=mm!=null?RAINR(Math.min(1,mm/mmax)):'#c6dbef';
+    return `<div class="mcell" title="${mname}"><h4>${MAB[m]}</h4>${svg}<div class="smfoot">${umbrella(uc)}<div class="mm">${mm!=null?Math.round(mm).toLocaleString('pt-BR'):'—'}<i> mm</i></div></div></div>`;
+  }).join('');
+  return {html};
+}
+
+// ---- generic multi-line chart (bigger axis fonts) ----
+function multiLine(series,cfg){
+  const lines=series.filter(s=>s.v&&s.v.some(v=>v!=null));if(!lines.length)return '';
+  const n=cfg.n,W=1000,H=cfg.H||236,PL=52,PR=14,PT=14,PB=28,plotW=W-PL-PR,plotH=H-PT-PB;
+  let lo,hi;
+  if(cfg.lo!=null&&cfg.hi!=null){lo=cfg.lo;hi=cfg.hi;}
+  else{const all=lines.flatMap(s=>s.v.filter(v=>v!=null));lo=Math.min(...all);hi=Math.max(...all);const pad=(hi-lo)*0.12||0.1;lo-=pad;hi+=pad;}
+  const x=i=>PL+(n>1?i/(n-1):0.5)*plotW,y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH;
+  const dec=cfg.dec!=null?cfg.dec:2;
+  const ticks=(lo<0&&hi>0)?[hi,(hi+0)/2,0,(lo+0)/2,lo]:[hi,(hi+lo)/2,lo];
+  let ax='';ticks.forEach(t=>{const yy=y(t);const z=(Math.abs(t)<1e-9);
+    ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="${z?'#c7ced6':'#f1f2f4'}"/><text x="${PL-8}" y="${yy+4.5}" font-size="13" fill="#8a8f98" text-anchor="end">${t.toFixed(dec)}</text>`;});
+  (cfg.labels||[]).forEach((lab,i)=>{if(lab==null)return;ax+=`<text x="${x(i).toFixed(1)}" y="${H-9}" font-size="13" fill="#8a8f98" text-anchor="middle">${lab}</text>`;});
+  let paths='';lines.forEach(s=>{let d='',st=false;s.v.forEach((v,i)=>{if(v==null){st=false;return;}const vy=Math.max(lo,Math.min(hi,v));d+=(st?'L':'M')+x(i).toFixed(1)+' '+y(vy).toFixed(1)+' ';st=true;});
+    paths+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" opacity="0.92"/>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><text x="3" y="11" font-size="12" fill="#a0a1a7" text-anchor="start">${cfg.unit||''}</text>${ax}${paths}</svg>`;
+}
+// seasonal month colors (SH: summer warm, winter cool) + legend
+const CWR=ramp(['#2166ac','#67a9cf','#d1e5f0','#fddbc7','#ef8a62','#b2182b']);
+function monthColor(m){return CWR((Math.cos(2*Math.PI*m/12)+1)/2);}
+const HRLAB=Array.from({length:24},(_,h)=>h%3===0?h+'h':null);
+function legendHTML(items){return items.map(s=>`<span class="li"><span class="sw" style="background:${s.color}"></span>${s.label}</span>`).join('');}
+// ---- heatmap: level referred to the GAUGE ZERO (datum) over hour × month ----
+// White pinned at 0 (zero da régua): warm = water above the gauge zero, cool = below.
+// Span is per-station (symmetric about zero), stable across year views.
+const HEATR=ramp(['#2166ac','#4393c3','#d1e5f0','#f7f7f7','#fddbc7','#ef8a62','#b2182b']);
+// data range of a single hour×month matrix (the view being drawn)
+function matRange(hm){const vals=[];for(let m=1;m<=12;m++){const a=hm&&hm[String(m)];if(a)a.forEach(v=>{if(v!=null)vals.push(v);});}
+  if(!vals.length)return [0,1];let lo=Math.min(...vals),hi=Math.max(...vals);if(hi-lo<1e-6)hi=lo+1;return [lo,hi];}
+// color spans the station's own min→max (values are cota, m, referred to the gauge zero)
+function heatmap(hm,dmin,dmax){
+  const months=[];for(let m=1;m<=12;m++)months.push((hm&&hm[String(m)])||null);
+  const vals=months.flatMap(a=>a?a.filter(v=>v!=null):[]);
+  if(!vals.length)return '<div style="height:120px;color:#a0a1a7;padding:20px">Sem registro horário para esta seleção.</div>';
+  const lo=dmin,hi=dmax,rng=(hi-lo)||1;
+  const W=1000,H=430,PL=52,PR=92,PT=14,PB=30,plotW=W-PL-PR,plotH=H-PT-PB,cw=plotW/12,ch=plotH/24;
+  let cells='';
+  for(let m=0;m<12;m++){const arr=months[m];if(!arr)continue;
+    for(let h=0;h<24;h++){const v=arr[h];if(v==null)continue;const t=Math.max(0,Math.min(1,(v-lo)/rng));
+      const x=PL+m*cw,y=PT+(23-h)*ch;
+      cells+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(cw+0.6).toFixed(1)}" height="${(ch+0.6).toFixed(1)}" fill="${HEATR(t)}"><title>${MFULL[m]} · ${h}h: ${v.toFixed(2)} m (${v>=0?'acima':'abaixo'} do zero da régua)</title></rect>`;}}
+  let ax='';
+  for(let h=0;h<=23;h+=3){const y=PT+(23-h)*ch+ch/2;ax+=`<text x="${PL-9}" y="${(y+4).toFixed(1)}" font-size="12.5" fill="#8a8f98" text-anchor="end">${h}h</text>`;}
+  MFULL.forEach((mn,m)=>{const x=PL+m*cw+cw/2;ax+=`<text x="${x.toFixed(1)}" y="${H-10}" font-size="12.5" fill="#8a8f98" text-anchor="middle">${M3[m]}</text>`;});
+  const cbx=W-PR+20,cbw=15,cbh=plotH,mid=(lo+hi)/2;
+  let cb='<defs><linearGradient id="cbg" x1="0" x2="0" y1="0" y2="1">';[0,.25,.5,.75,1].forEach(s=>cb+=`<stop offset="${s}" stop-color="${HEATR(1-s)}"/>`);cb+='</linearGradient></defs>';
+  cb+=`<rect x="${cbx}" y="${PT}" width="${cbw}" height="${cbh}" fill="url(#cbg)" rx="3"/>`;
+  cb+=`<text x="${cbx+cbw+6}" y="${PT+9}" font-size="12" fill="#8a8f98">${hi.toFixed(2)}</text>`;
+  cb+=`<text x="${cbx+cbw+6}" y="${(PT+cbh/2+4).toFixed(1)}" font-size="12" fill="#8a8f98">${mid.toFixed(2)}</text>`;
+  cb+=`<text x="${cbx+cbw+6}" y="${(PT+cbh).toFixed(1)}" font-size="12" fill="#8a8f98">${lo.toFixed(2)}</text>`;
+  cb+=`<text x="${cbx+cbw+6}" y="${(PT+cbh+15).toFixed(1)}" font-size="10" fill="#a0a1a7">m · cota</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${cells}${ax}${cb}</svg>`;
+}
+// compact heatmap for the "Todas as estações" grid — each panel on its own min→max
+function heatmapMini(hm){
+  const months=[];for(let m=1;m<=12;m++)months.push((hm&&hm[String(m)])||null);
+  const vals=months.flatMap(a=>a?a.filter(v=>v!=null):[]);
+  if(!vals.length)return '<div style="height:160px;color:#a0a1a7;padding:14px">Sem registro horário.</div>';
+  const [lo,hi]=matRange(hm),rng=(hi-lo)||1;
+  const W=360,H=200,PL=30,PR=8,PT=8,PB=20,plotW=W-PL-PR,plotH=H-PT-PB,cw=plotW/12,ch=plotH/24;
+  let cells='';
+  for(let m=0;m<12;m++){const arr=months[m];if(!arr)continue;
+    for(let h=0;h<24;h++){const v=arr[h];if(v==null)continue;const t=Math.max(0,Math.min(1,(v-lo)/rng));
+      const x=PL+m*cw,y=PT+(23-h)*ch;
+      cells+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(cw+0.5).toFixed(1)}" height="${(ch+0.5).toFixed(1)}" fill="${HEATR(t)}"><title>${MFULL[m]} · ${h}h: ${v.toFixed(2)} m</title></rect>`;}}
+  let ax='';
+  for(let h=0;h<=23;h+=6){const y=PT+(23-h)*ch+ch/2;ax+=`<text x="${PL-5}" y="${(y+3).toFixed(1)}" font-size="9" fill="#a0a1a7" text-anchor="end">${h}h</text>`;}
+  [0,3,6,9,11].forEach(m=>{const x=PL+m*cw+cw/2;ax+=`<text x="${x.toFixed(1)}" y="${H-7}" font-size="9" fill="#a0a1a7" text-anchor="middle">${M3[m]}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${cells}${ax}</svg>`;
+}
+
+// ---- ENSO (El Niño / La Niña) overlay ----
+// Fonte: Oceanic Niño Index (ONI) da NOAA/CPC. Classificação por mês (centro do
+// trimestre) pela regra oficial (|ONI| ≥ 0,5 °C por ≥ 5 trimestres sobrepostos
+// consecutivos). Intensidade por |ONI|: fraco 0,5–0,9 · moderado 1,0–1,4 · forte
+// 1,5–1,9 · muito forte ≥ 2,0. `data/enso.json` é atualizado automaticamente pela
+// GitHub Action (build_enso.py, NOAA ao vivo); ENSO_FALLBACK abaixo é o reserva embutido.
+let ENSO_DATA=null;
+const ENSO_FALLBACK={"2010":{"oni":[1.5,1.2,0.8,0.4,-0.2,-0.7,-1.0,-1.3,-1.6,-1.6,-1.6,-1.5],"phase":[0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1]},"2011":{"oni":[-1.3,-1.0,-0.8,-0.6,-0.5,-0.4,-0.4,-0.6,-0.8,-1.0,-1.0,-0.9],"phase":[-1,-1,-1,-1,-1,0,0,-1,-1,-1,-1,-1]},"2012":{"oni":[-0.7,-0.6,-0.5,-0.4,-0.2,0.1,0.3,0.4,0.4,0.3,0.1,-0.1],"phase":[-1,-1,-1,0,0,0,0,0,0,0,0,0]},"2013":{"oni":[-0.3,-0.3,-0.2,-0.2,-0.3,-0.3,-0.4,-0.3,-0.2,-0.1,-0.1,-0.2],"phase":[0,0,0,0,0,0,0,0,0,0,0,0]},"2014":{"oni":[-0.3,-0.3,-0.1,0.2,0.3,0.2,0.1,0.1,0.3,0.5,0.7,0.8],"phase":[0,0,0,0,0,0,0,0,0,1,1,1]},"2015":{"oni":[0.7,0.6,0.7,0.8,1.0,1.3,1.6,1.9,2.2,2.5,2.6,2.8],"phase":[1,1,1,1,1,1,1,1,1,1,1,1]},"2016":{"oni":[2.6,2.3,1.7,1.0,0.5,0.0,-0.3,-0.5,-0.6,-0.6,-0.6,-0.5],"phase":[1,1,1,1,1,0,0,-1,-1,-1,-1,-1]},"2017":{"oni":[-0.2,0.0,0.2,0.3,0.4,0.4,0.2,-0.1,-0.3,-0.6,-0.8,-0.9],"phase":[0,0,0,0,0,0,0,0,0,-1,-1,-1]},"2018":{"oni":[-0.8,-0.7,-0.6,-0.4,-0.1,0.1,0.1,0.3,0.5,0.8,1.0,0.9],"phase":[-1,-1,-1,0,0,0,0,0,1,1,1,1]},"2019":{"oni":[0.9,0.9,0.8,0.8,0.6,0.5,0.3,0.2,0.2,0.4,0.6,0.7],"phase":[1,1,1,1,1,1,0,0,0,0,1,1]},"2020":{"oni":[0.6,0.6,0.5,0.3,0.0,-0.2,-0.4,-0.5,-0.8,-1.1,-1.2,-1.1],"phase":[1,1,1,0,0,0,0,-1,-1,-1,-1,-1]},"2021":{"oni":[-0.9,-0.8,-0.7,-0.5,-0.4,-0.3,-0.3,-0.4,-0.6,-0.8,-0.9,-0.9],"phase":[-1,-1,-1,-1,0,0,0,0,-1,-1,-1,-1]},"2022":{"oni":[-0.8,-0.8,-0.9,-1.0,-0.9,-0.8,-0.8,-0.9,-1.0,-0.9,-0.8,-0.7],"phase":[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]},"2023":{"oni":[-0.5,-0.3,0.0,0.3,0.6,0.8,1.1,1.4,1.6,1.8,2.0,2.1],"phase":[-1,0,0,0,1,1,1,1,1,1,1,1]},"2024":{"oni":[1.9,1.6,1.3,0.8,0.5,0.2,0.1,-0.1,-0.2,-0.2,-0.3,-0.4],"phase":[1,1,1,1,1,0,0,0,0,0,0,0]},"2025":{"oni":[-0.4,-0.2,-0.1,0.0,0.0,0.0,-0.1,-0.3,-0.4,-0.5,-0.6,-0.5],"phase":[0,0,0,0,0,0,0,0,0,0,0,0]},"2026":{"oni":[-0.4,-0.1,0.1,0.5,null,null,null,null,null,null,null,null],"phase":[0,0,0,0,0,0,0,0,0,0,0,0]}};
+function ensoYear(y){const Y=(ENSO_DATA&&ENSO_DATA.years)||ENSO_FALLBACK;return Y[y]||Y[String(y)]||null;}
+function ensoPhaseOf(d){const e=ensoYear(+d.slice(0,4));return e?(e.phase[+d.slice(5,7)-1]||0):0;}
+function ensoOniOf(d){const e=ensoYear(+d.slice(0,4));const v=e?e.oni[+d.slice(5,7)-1]:null;return v==null?null:v;}
+const INTEN=['','fraco','moderado','forte','muito forte'];
+function ensoCat(oni){if(oni==null)return 0;const a=Math.abs(oni);return a>=2.0?4:a>=1.5?3:a>=1.0?2:a>=0.5?1:0;}
+function ensoFill(ph,cat){const op=[0,0.10,0.18,0.26,0.34][cat]||0.14;return (ph>0?`rgba(214,94,0,${op})`:`rgba(33,102,172,${op})`);}
+function ensoSolid(ph,cat){if(!cat)return '#eef1f5';const b=ph>0?[214,94,0]:[33,102,172],t=[0,0.34,0.55,0.76,0.95][cat];
+  const L=x=>Math.round(255+(x-255)*t);return `rgb(${L(b[0])},${L(b[1])},${L(b[2])})`;}
+function ensoLegSw(ph){return [1,2,3,4].map(c=>`<span class="sw" style="width:11px;height:11px;border-radius:2px;background:${ensoSolid(ph,c)}"></span>`).join('');}
+function ensoBands(dates){                        // faixas de fundo (pixels PW), por corrida de mesma fase+intensidade
+  if(!dates.length)return [];const x=xFor(dates.length),half=dates.length>1?(x(1)-x(0))/2:6,segs=[];let i=0;
+  const catAt=d=>{const ph=ensoPhaseOf(d);return ph?ensoCat(ensoOniOf(d)):0;};
+  while(i<dates.length){const ph=ensoPhaseOf(dates[i]),cat=catAt(dates[i]);
+    let j=i;while(j<dates.length&&ensoPhaseOf(dates[j])===ph&&catAt(dates[j])===cat)j++;
+    if(ph!==0&&cat>0)segs.push({x0:Math.max(26,x(i)-half),x1:Math.min(PW-10,x(j-1)+half),fill:ensoFill(ph,cat)});i=j;}
+  return segs;}
+function bandRects(bands,H){return (bands||[]).map(s=>`<rect x="${s.x0.toFixed(1)}" y="0" width="${Math.max(0,s.x1-s.x0).toFixed(1)}" height="${H}" fill="${s.fill}"/>`).join('');}
+function ensoSummary(dates){                       // texto: fases no período, com intensidade de pico e faixa de meses
+  const runs=[];let i=0;
+  while(i<dates.length){const ph=ensoPhaseOf(dates[i]);let j=i,mx=0;
+    while(j<dates.length&&ensoPhaseOf(dates[j])===ph){if(ph)mx=Math.max(mx,ensoCat(ensoOniOf(dates[j])));j++;}
+    if(ph!==0&&mx>0)runs.push({ph,mx,a:dates[i],b:dates[j-1]});i=j;}
+  if(!runs.length)return 'Fase neutra do ENSO em todo o período (sem El Niño/La Niña).';
+  return runs.map(r=>`${r.ph>0?'El Niño':'La Niña'} ${INTEN[r.mx]} (${M3[+r.a.slice(5,7)-1]}–${M3[+r.b.slice(5,7)-1]})`).join(' · ');}
+// compact 12-month ENSO strip for the perfil mensal (specific year)
+function ensoStripMonthly(year){
+  const e=ensoYear(+year);if(!e)return '';
+  const W=1000,H=42,PL=50,PR=10,PT=4,plotW=W-PL-PR,cw=plotW/12,ch=18;
+  let cells='',labs='',any=false;
+  for(let m=0;m<12;m++){const ph=e.phase[m]||0,oni=(e.oni[m]==null?null:e.oni[m]),cat=ph?ensoCat(oni):0;if(ph&&cat)any=true;
+    const x=PL+m*cw;
+    cells+=`<rect x="${x.toFixed(1)}" y="${PT}" width="${(cw-1.5).toFixed(1)}" height="${ch}" rx="2" fill="${ensoSolid(ph,cat)}"><title>${MFULL[m]} ${year}: ${ph>0?'El Niño':ph<0?'La Niña':'neutro'}${(ph&&cat)?' '+INTEN[cat]:''}${oni!=null?' · ONI '+(oni>=0?'+':'')+oni.toFixed(1):''}</title></rect>`;
+    labs+=`<text x="${(x+cw/2).toFixed(1)}" y="${(PT+ch+12).toFixed(1)}" font-size="10" fill="#8a8f98" text-anchor="middle">${M3[m]}</text>`;}
+  const lab=`<text x="4" y="${(PT+ch-5).toFixed(1)}" font-size="10.5" font-weight="800" fill="#8a8f98">ENSO</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${lab}${cells}${labs}</svg>`;
+}
+
+// ---- generic daily panels ----
+const PW=1000;
+function xFor(n){return i=>26+i/(Math.max(1,n-1))*(PW-36);}
+function lineP(data,H,color,gradient,bands){
+  const good=data.filter(v=>v!=null);if(!good.length)return `<div style="height:${H}px"></div>`;
+  let lo=Math.min(...good),hi=Math.max(...good);const pad=(hi-lo)*0.1||1;lo-=pad;hi+=pad;
+  const x=xFor(data.length),y=v=>10+ (H-24)-((v-lo)/((hi-lo)||1))*(H-24);
+  let ax='';[lo,(lo+hi)/2,hi].forEach(t=>{const yy=y(t);ax+=`<text x="22" y="${yy+3}" font-size="11" fill="#a0a1a7" text-anchor="end">${t.toFixed(t>100?0:1)}</text><line x1="26" y1="${yy}" x2="${PW-10}" y2="${yy}" stroke="#f1f2f4"/>`;});
+  let d='';let started=false;data.forEach((v,i)=>{if(v==null){started=false;return;}d+=(started?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';started=true;});
+  const defs=gradient?`<defs><linearGradient id="${gradient.id}" x1="0" x2="0" y1="10" y2="${H-14}"><stop offset="0" stop-color="${gradient.hi}"/><stop offset="1" stop-color="${gradient.lo}"/></linearGradient></defs>`:'';
+  return `<svg viewBox="0 0 ${PW} ${H}" width="100%" height="${H}">${defs}${bandRects(bands,H)}${ax}<path d="${d}" fill="none" stroke="${gradient?`url(#${gradient.id})`:color}" stroke-width="1.5"/></svg>`;
+}
+function dotsP(tmin,tmax,H,bands){
+  const all=[...tmin,...tmax].filter(v=>v!=null);if(!all.length)return `<div style="height:${H}px"></div>`;
+  let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*0.08||1;lo-=pad;hi+=pad;
+  const x=xFor(tmin.length),y=v=>10+(H-24)-((v-lo)/((hi-lo)||1))*(H-24);
+  let ax='';[lo,(lo+hi)/2,hi].forEach(t=>{const yy=y(t);ax+=`<text x="22" y="${yy+3}" font-size="11" fill="#a0a1a7" text-anchor="end">${Math.round(t)}</text>`;});
+  let dts='';tmax.forEach((v,i)=>{if(v!=null)dts+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="1.3" fill="#e6892e"/>`;});
+  tmin.forEach((v,i)=>{if(v!=null)dts+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="1.3" fill="#3182bd"/>`;});
+  return `<svg viewBox="0 0 ${PW} ${H}" width="100%" height="${H}">${bandRects(bands,H)}${ax}${dts}</svg>`;
+}
+function barsP(prec,H,bands){
+  const mx=Math.max(...prec.filter(v=>v!=null),1),x=xFor(prec.length),bw=Math.max(0.6,(PW-36)/prec.length*0.7);
+  let b='';prec.forEach((v,i)=>{if(v>0){const h=v/mx*(H-16);b+=`<rect x="${(x(i)-bw/2).toFixed(1)}" y="${(H-4-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="#3182bd"/>`;}});
+  return `<svg viewBox="0 0 ${PW} ${H}" width="100%" height="${H}">${bandRects(bands,H)}<text x="22" y="12" font-size="11" fill="#a0a1a7" text-anchor="end">${Math.round(mx)}</text>${b}</svg>`;
+}
+function xAxis(dates){
+  const x=xFor(dates.length);let t='';const step=Math.ceil(dates.length/8);
+  for(let i=0;i<dates.length;i+=step){const d=dates[i];t+=`<text x="${x(i).toFixed(1)}" y="12" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${d.slice(8,10)}/${d.slice(5,7)}/${d.slice(2,4)}</text>`;}
+  return `<svg viewBox="0 0 ${PW} 18" width="100%" height="18">${t}</svg>`;
+}
+
+// ---- bottom: monthly level dumbbell + gradient line (Fahrenheit style) ----
+const LVL=ramp(['#7fb2e5','#c9d6e5','#e58a8a','#d7301f']);
+function dumbbell(mn,mx){
+  const all=[...mn,...mx].filter(v=>v!=null);if(!all.length)return '<div style="height:150px;color:#a0a1a7;padding:20px">Sem dados de nível.</div>';
+  const W=1000,H=170,PL=34,PT=16,PB=22,plotH=H-PT-PB,cw=(W-PL-10)/12;
+  let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*0.1||0.2;lo-=pad;hi+=pad;
+  const y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH,x=i=>PL+i*cw+cw/2;
+  let g='';for(let k=0;k<=3;k++){const val=lo+(hi-lo)*k/3,yy=y(val);g+=`<line x1="${PL}" y1="${yy}" x2="${W-10}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-5}" y="${yy+3}" font-size="11" fill="#a0a1a7" text-anchor="end">${val.toFixed(1)}</text>`;}
+  let s='';mn.forEach((v,i)=>{if(v==null||mx[i]==null)return;const y1=y(mx[i]),y2=y(v);
+    s+=`<line x1="${x(i)}" y1="${y1}" x2="${x(i)}" y2="${y2}" stroke="#b9c4d0" stroke-width="2.4"/>`+
+       `<circle cx="${x(i)}" cy="${y1}" r="5.5" fill="#d7301f"/><circle cx="${x(i)}" cy="${y2}" r="5.5" fill="#3a6ea5"/>`;});
+  let labs='';M3.forEach((m,i)=>labs+=`<text x="${x(i)}" y="${H-7}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${g}${s}${labs}</svg>`;
+}
+function levelLine(median){
+  const good=median.filter(v=>v!=null);if(good.length<2)return '';
+  const W=1000,H=150,PL=50,PT=14,PB=22,plotH=H-PT-PB,cw=(W-PL-10)/12;
+  let lo=Math.min(...good),hi=Math.max(...good);const pad=(hi-lo)*0.2||0.2;lo-=pad;hi+=pad;
+  const y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH,x=i=>PL+i*cw+cw/2;
+  let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-10}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4.5}" font-size="13" fill="#8a8f98" text-anchor="end">${t.toFixed(2)}</text>`;});
+  const pts=median.map((v,i)=>v!=null?[x(i),y(v)]:null).filter(Boolean);
+  let d=`M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)} `;
+  for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i],mx2=(x0+x1)/2;d+=`C${mx2.toFixed(1)} ${y0.toFixed(1)} ${mx2.toFixed(1)} ${y1.toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)} `;}
+  const area=d+`L${pts[pts.length-1][0].toFixed(1)} ${PT+plotH} L${pts[0][0].toFixed(1)} ${PT+plotH} Z`;
+  let labs='';M3.forEach((m,i)=>labs+=`<text x="${x(i)}" y="${H-6}" font-size="12.5" fill="#8a8f98" text-anchor="middle">${m}</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%"><text x="3" y="11" font-size="12" fill="#a0a1a7">m</text><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#3a6ea5"/><stop offset="0.5" stop-color="#c9a0a0"/><stop offset="1" stop-color="#d7301f"/></linearGradient></defs>
+    ${ax}<path d="${area}" fill="#f3dede" opacity="0.5"/><path d="${d}" fill="none" stroke="url(#lg)" stroke-width="3"/>${labs}</svg>`;
+}
+function median(a){const g=a.filter(v=>v!=null).slice().sort((x,y)=>x-y);if(!g.length)return null;const m=g.length>>1;return g.length%2?g[m]:(g[m-1]+g[m])/2;}
+// compact dumbbell (min–max lollipop) + median line, for the "Todas as estações" small-multiples
+function levelPanel(mn,mx,med){
+  const all=[...mn,...mx].filter(v=>v!=null);if(!all.length)return '<div style="height:120px;color:#a0a1a7;padding:14px">Sem dados de nível.</div>';
+  const W=360,H=150,PL=42,PR=8,PT=12,PB=22,plotW=W-PL-PR,plotH=H-PT-PB,cw=plotW/12;
+  let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*0.1||0.2;lo-=pad;hi+=pad;
+  const y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH,x=i=>PL+i*cw+cw/2;
+  let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-6}" y="${yy+4}" font-size="11" fill="#8a8f98" text-anchor="end">${t.toFixed(2)}</text>`;});
+  [0,3,6,9,11].forEach(i=>ax+=`<text x="${x(i).toFixed(1)}" y="${H-6}" font-size="11" fill="#8a8f98" text-anchor="middle">${M3[i]}</text>`);
+  let s='';mn.forEach((v,i)=>{if(v==null||mx[i]==null)return;const y1=y(mx[i]),y2=y(v);
+    s+=`<line x1="${x(i)}" y1="${y1}" x2="${x(i)}" y2="${y2}" stroke="#c3ccd6" stroke-width="2"/><circle cx="${x(i)}" cy="${y1}" r="3.4" fill="#d7301f"/><circle cx="${x(i)}" cy="${y2}" r="3.4" fill="#3a6ea5"/>`;});
+  let d='',st=false;med.forEach((v,i)=>{if(v==null){st=false;return;}d+=(st?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';st=true;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><text x="3" y="11" font-size="10.5" fill="#a0a1a7">m</text>${ax}${s}<path d="${d}" fill="none" stroke="#8a4f9e" stroke-width="1.8"/></svg>`;
+}
+
+let RV;
+const CI={}, COLS={};
+async function getCol(code){ if(!COLS[code]) COLS[code]=await fetch(`data/river/${code}.json`).then(r=>r.json()); return COLS[code]; }
+function stColor(code,i){ const c=(CI[code]!=null?CI[code]:i); return STCOL[c%STCOL.length]; }
+function fmtN(n){return (n==null?'—':n.toLocaleString('pt-BR'));}
+function yopts(){return '<option value="all">Todos os anos</option>'+(RV.rain_years||[]).map(y=>`<option value="${y}">${y}</option>`).join('');}
+// station option: label estuary station explicitly so it isn't read as a river reach
+function stLabel(s){return s.name+(s.estuary?' (estuário)':'');}
+function stopts(withAll){return (withAll?'<option value="all">Todas as estações</option>':'')+RV.stations.map((s,i)=>`<option value="${i}">${stLabel(s)}</option>`).join('');}
+const yl=y=>(y==='all'?'':' · '+y);
+// ---- per-station year availability (drives the Ano dropdowns from real coverage) ----
+function yoptsList(years){return '<option value="all">Todos os anos</option>'+(years||[]).map(y=>`<option value="${y}">${y}</option>`).join('');}
+function stYears(stVal,key){
+  if(stVal==='all'){const set=new Set();RV.stations.forEach(st=>(st[key]||[]).forEach(y=>set.add(String(y))));return [...set].sort();}
+  return (RV.stations[+stVal][key]||[]).map(String);
+}
+// repopulate a year <select> for the chosen station, keeping the current pick if still available
+function syncYear(yrSel,stVal,key){const cur=yrSel.value,years=stYears(stVal,key);
+  yrSel.innerHTML=yoptsList(years);
+  yrSel.value=(cur==='all'||years.includes(cur))?cur:'all';}
+
+async function init(){
+  RV=await fetch('data/river.json').then(r=>r.json());
+  try{ENSO_DATA=await fetch('data/enso.json').then(r=>r.ok?r.json():null);}catch(e){ENSO_DATA=null;}
+  (RV.rain_panels||[]).forEach(p=>{CI[p.code]=p.ci;});
+  document.getElementById('rainwrap').insertAdjacentHTML('beforeend',smallMultiples(RV.rain_panels||[]));
+  pluvMap(RV.rain_panels||[]);
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · '+(RV.qc_method||'')+' · gerado '+RV.generated_at;
+  // 2 · precipitação mensal (cidade/estação + ano)
+  const stB=document.getElementById('selStB'),yrB=document.getElementById('selYearB');
+  stB.innerHTML='<option value="city">Média da cidade</option>'+(RV.rain_panels||[]).map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');
+  yrB.innerHTML=yopts(); stB.value='city'; yrB.value='all';
+  const doB=()=>renderBar(stB.value,yrB.value); stB.onchange=doB; yrB.onchange=doB; doB();
+  // 3 · precipitação por mês (own year)
+  const sym=document.getElementById('selYearM'); sym.innerHTML=yopts(); sym.value='all';
+  sym.onchange=()=>renderAllRain(sym.value); renderAllRain('all');
+  // 4 · nível mensal (own Estação+Ano; Ano list = anos com nível dessa estação)
+  const stL=document.getElementById('selStL'),yrL=document.getElementById('selYearL');
+  stL.innerHTML=stopts(true); stL.value='0'; syncYear(yrL,'0','level_years');
+  const doL=()=>renderLevelMonthly(stL.value,yrL.value);
+  stL.onchange=()=>{syncYear(yrL,stL.value,'level_years');doL();}; yrL.onchange=doL;
+  // 5 · nível horário heatmap (own Estação+Ano; Ano list = anos com registro horário)
+  const stH=document.getElementById('selStH'),yrH=document.getElementById('selYearH');
+  stH.innerHTML=stopts(true); stH.value='0'; syncYear(yrH,'0','hm_years');
+  const doH=()=>renderHeatmap(stH.value,yrH.value);
+  stH.onchange=()=>{syncYear(yrH,stH.value,'hm_years');doH();}; yrH.onchange=doH;
+  // 6 · análise diária (own Estação+Ano; Ano list = anos com qualquer dado)
+  const stD=document.getElementById('selStD'),yrD=document.getElementById('selYearD');
+  stD.innerHTML=stopts(true); stD.value='0'; syncYear(yrD,'0','data_years');
+  const doD=()=>renderDaily(stD.value,yrD.value);
+  stD.onchange=()=>{syncYear(yrD,stD.value,'data_years');doD();}; yrD.onchange=doD;
+  doL(); doH(); doD();
+}
+function renderAllRain(year){
+  const r=rainMonthUmbrellas(RV.rain_panels||[],String(year));
+  document.getElementById('monthgrid').innerHTML=r.html;
+  document.getElementById('ryearlab').textContent=(year==='all'?'climatologia (todos os anos)':year);
+}
+function cityByYear(year){const out=[];for(let m=0;m<12;m++){let v=[];(RV.rain_panels||[]).forEach(p=>{const x=(p.by_year&&p.by_year[year])?p.by_year[year][m]:null;if(x!=null)v.push(x);});out.push(v.length?v.reduce((a,b)=>a+b,0)/v.length:null);}return out;}
+function renderBar(stVal,year){
+  let clim,name;
+  if(stVal==='city'){name='média da cidade';clim=(year==='all')?RV.city_rain_clim:cityByYear(year);}
+  else{const p=(RV.rain_panels||[])[+stVal];name=p?p.name:'';clim=p?((year==='all')?p.clim:((p.by_year&&p.by_year[year])?p.by_year[year]:new Array(12).fill(null))):[];}
+  document.getElementById('rainbars').innerHTML=rainBars(clim||[]);
+  document.getElementById('rbsub').textContent=name+(year==='all'?' · climatologia':' · '+year);
+}
+// tide is an INFLUENCE on the river water level here, not the subject; estuary handled by datum_note
+function tideNote(s){
+  if(s.estuary||!s.tidal) return '';
+  return ' · nível com influência de maré'+(s.intraday_range!=null?' (oscilação diária típica ~'+s.intraday_range.toFixed(2).replace('.',',')+' m)':'');
+}
+async function renderLevelMonthly(stVal,year){
+  const isAll=(stVal==='all');
+  document.getElementById('lsub').textContent=(isAll?'Todas as estações':stLabel(RV.stations[+stVal]))+yl(year);
+  function monthly(col){const bym=Array.from({length:12},()=>[]);
+    for(let i=0;i<col.d.length;i++){const v=col.lv?col.lv[i]:null;if(v!=null&&(year==='all'||col.d[i].slice(0,4)===year))bym[+col.d[i].slice(5,7)-1].push(v);}
+    return {mn:bym.map(a=>a.length?Math.min(...a):null),mx:bym.map(a=>a.length?Math.max(...a):null),me:bym.map(a=>a.length?median(a):null)};}
+  if(isAll){
+    const cols=await Promise.all(RV.stations.map(s=>getCol(s.code)));
+    const cells=RV.stations.map((s,i)=>{const m=monthly(cols[i]);
+      return `<div class="lvcell"><h4>${stLabel(s)}</h4>${levelPanel(m.mn,m.mx,m.me)}</div>`;}).join('');
+    document.getElementById('dumbbell').innerHTML=`<div class="lvgrid">${cells}</div>`;
+    document.getElementById('levelline').innerHTML='';
+    document.getElementById('lenso').innerHTML=(year!=='all')?ensoStripMonthly(year):'';
+    document.getElementById('lleg').innerHTML=(year!=='all')?('<span class="li">El Niño&nbsp;'+ensoLegSw(1)+'</span><span class="li">La Niña&nbsp;'+ensoLegSw(-1)+'</span><span class="li" style="color:#8a8f98">fraco → muito forte · ONI (NOAA/CPC)</span>'):'';
+    document.getElementById('lcapt').textContent='Um painel por estação: amplitude mensal (mín–máx do nível diário da água) e mediana mensal (linha). O nível é a cota relativa à referência (zero) da régua de cada estação — valores negativos indicam água abaixo do zero da régua, não profundidade. Cada painel na sua própria escala.'+(year!=='all'?' A faixa ENSO abaixo marca a fase de El Niño/La Niña de '+year+'.':'');
+    document.getElementById('qcLevel').textContent='Nível (cota) referido à referência da régua de cada estação'+(year!=='all'?' · '+year:'')+'.';
+    return;
+  }
+  const s=RV.stations[+stVal], col=await getCol(s.code), m=monthly(col);
+  document.getElementById('dumbbell').innerHTML=dumbbell(m.mn,m.mx);
+  document.getElementById('levelline').innerHTML=levelLine(m.me);
+  document.getElementById('lenso').innerHTML=(year!=='all')?ensoStripMonthly(year):'';
+  document.getElementById('lleg').innerHTML=(year!=='all')?('<span class="li">El Niño&nbsp;'+ensoLegSw(1)+'</span><span class="li">La Niña&nbsp;'+ensoLegSw(-1)+'</span><span class="li" style="color:#8a8f98">fraco → muito forte · ONI (NOAA/CPC)</span>'):'';
+  document.getElementById('lcapt').textContent='Nível da água por mês: amplitude (mín–máx do nível diário) e mediana mensal (linha). O nível é a cota relativa à referência (zero) da régua desta estação — não é a profundidade da lâmina d’água; valores negativos indicam água abaixo do zero da régua.'+(s.estuary?' Estação no estuário: o nível é dominado pela maré, não pela vazão do rio.':(s.tidal?' No baixo curso, a maré da Baía Babitonga influencia o nível.':''))+(year!=='all'?' A faixa ENSO abaixo marca a fase de El Niño/La Niña de '+year+'.':'');
+  const q=s.qc||{}, pct=q.frac!=null?Math.round(q.frac*100):null;
+  document.getElementById('qcLevel').textContent='Nível (cota) referido à referência da régua · '+fmtN(q.n_kept)+' de '+fmtN(q.n_raw)+' dias'+(pct!=null?` (${pct}% aprovados no controle)`:'')+tideNote(s)+(s.datum_note?' · '+s.datum_note:'');
+}
+async function renderHeatmap(stVal,year){
+  if(stVal==='all'){
+    document.getElementById('hsub').textContent='Todas as estações'+yl(year);
+    const cols=await Promise.all(RV.stations.map(s=>getCol(s.code)));
+    const cells=RV.stations.map((s,i)=>{const hmAll=cols[i].diurnal_hm||{};const hm=(year==='all')?hmAll['all']:hmAll[year];
+      const rng=hm?matRange(hm):null;
+      const body=hm?heatmapMini(hm):'<div style="height:160px;color:#a0a1a7;padding:14px">Sem registro horário para '+year+'.</div>';
+      const foot=rng?`<div class="hmini-rng">${rng[0].toFixed(2)} … ${rng[1].toFixed(2)} m · cota</div>`:'';
+      return `<div class="lvcell"><h4>${stLabel(s)}</h4>${body}${foot}</div>`;}).join('');
+    document.getElementById('hourly').innerHTML=`<div class="lvgrid">${cells}</div>`;
+    document.getElementById('hcapt').textContent='Um mapa de calor por estação (hora × mês). Cada painel usa a escala de cor da sua própria mínima à máxima (cota, m) — comparam-se padrões (a estrutura horária revela a maré), não valores absolutos entre estações.';
+    document.getElementById('qcHour').textContent='Escala de cor própria de cada estação (mínima → máxima).';
+    return;
+  }
+  const s=RV.stations[+stVal], col=await getCol(s.code);
+  document.getElementById('hsub').textContent=stLabel(s)+yl(year);
+  const hmAll=col.diurnal_hm||{}, hm=(year==='all')?hmAll['all']:hmAll[year];
+  const [lo,hi]=matRange(hm||{});                       // escala de cor: mínima → máxima da própria estação
+  document.getElementById('hourly').innerHTML=heatmap(hm||{},lo,hi);
+  const drv=s.estuary?'A estrutura vertical (por hora) reflete a maré do estuário, que domina o nível nesta estação.'
+    :(s.tidal?'A estrutura vertical (por hora) revela a influência da maré no nível da água (baixo curso da cidade de baía).'
+             :'Variação horária (vertical) fraca; o padrão por coluna reflete a sazonalidade das chuvas.');
+  document.getElementById('hcapt').textContent='Nível da água (cota) por hora do dia (linhas) × mês (colunas). A cor vai da mínima ('+lo.toFixed(2)+' m) à máxima ('+hi.toFixed(2)+' m) da própria estação; os valores são cota em relação ao zero da régua'+(year==='all'?' (climatologia horária).':' ('+year+').')+' '+drv;
+  document.getElementById('qcHour').textContent='Escala de cor da mínima à máxima desta estação (valores = cota em relação ao zero da régua)'+(!hm?' · sem registro horário para esta seleção':'')+(s.datum_note?' · '+s.datum_note:'');
+}
+async function renderDaily(stVal,year){
+  const isAll=(stVal==='all');
+  document.getElementById('dsub').textContent=(isAll?'Todas as estações':stLabel(RV.stations[+stVal]))+yl(year);
+  const body=document.getElementById('dailyBody');
+  if(isAll){ body.style.display='none'; document.getElementById('qcDaily').textContent='Selecione uma estação para ver as séries diárias.'; return; }
+  body.style.display='';
+  const s=RV.stations[+stVal], col=await getCol(s.code);
+  let rows=[];for(let i=0;i<col.d.length;i++) rows.push({d:col.d[i],
+    ta:col.ta?col.ta[i]:null, tx:col.tx?col.tx[i]:null, tn:col.tn?col.tn[i]:null, p:col.p?col.p[i]:null, lv:col.lv?col.lv[i]:null});
+  if(year!=='all') rows=rows.filter(r=>r.d.slice(0,4)===year);
+  const dates=rows.map(r=>r.d);
+  const bands=ensoBands(dates);
+  document.getElementById('tempWrap').style.display=s.has_temp?'':'none';
+  if(s.has_temp){
+    document.getElementById('pTavg').innerHTML=lineP(rows.map(r=>r.ta),90,null,{id:'tg',hi:'#d7301f',lo:'#3a6ea5'},bands);
+    document.getElementById('pTmm').innerHTML=dotsP(rows.map(r=>r.tn),rows.map(r=>r.tx),90,bands);
+  }
+  document.getElementById('pRain').innerHTML=barsP(rows.map(r=>r.p),80,bands);
+  document.getElementById('pLevel').innerHTML=lineP(rows.map(r=>r.lv),90,'#8a4f9e',null,bands);
+  document.getElementById('xaxis').innerHTML=xAxis(dates);
+  document.getElementById('ensoLeg').innerHTML=
+    '<span class="li">El Niño&nbsp;'+ensoLegSw(1)+'</span>'
+   +'<span class="li">La Niña&nbsp;'+ensoLegSw(-1)+'</span>'
+   +'<span class="li" style="color:#8a8f98">fraco → muito forte</span>'
+   +'<span class="li" style="color:#8a8f98;font-weight:600">'+ensoSummary(dates)+'</span>';
+  const q=s.qc||{}, pct=q.frac!=null?Math.round(q.frac*100):null;
+  document.getElementById('qcDaily').textContent='Nível (cota) referido à referência da régua · '+fmtN(q.n_kept)+' de '+fmtN(q.n_raw)+' dias'+(pct!=null?` (${pct}% aprovados no controle)`:'')+' · '+s.level_period[0]+' a '+s.level_period[1]+tideNote(s)+(s.datum_note?' · '+s.datum_note:'')+' · faixas El Niño/La Niña: ONI (NOAA/CPC).';
+}
+init();
+</script>
+</body>
+</html>

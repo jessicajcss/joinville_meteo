@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Ciência Cidadã</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.lead{font-size:15px;color:#3a4048;line-height:1.6;margin:6px 0 2px}
+.why{background:#eef3fd;border:1px solid #dbe6fb;border-radius:14px;padding:14px 16px;margin:14px 0;font-size:13.5px;color:#274063;line-height:1.6}
+.why b{color:#12233a}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.step{display:flex;gap:13px;align-items:flex-start}
+.step .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.step .bd{flex:1}
+.step h3{margin:2px 0 8px;font-size:15px;font-weight:700;color:var(--ink)}
+.bsel{font-size:15px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;min-width:240px;cursor:pointer}
+.fcast{margin-top:10px;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:16px;border:1px solid var(--line);background:#fff}
+.fcast .ico{font-size:38px;line-height:1}
+.fcast .txt{flex:1}
+.fcast .st{font-size:20px;font-weight:800;color:var(--ink)}
+.fcast .sub{font-size:12.5px;color:var(--mut);margin-top:3px;line-height:1.5}
+.fcast.dry{background:#fff8ec;border-color:#f0e0bd}
+.fcast.light{background:#eef6ff;border-color:#cfe3fb}
+.fcast.mod{background:#e5f0fb;border-color:#bcd8f4}
+.fcast.heavy{background:#e7ecfa;border-color:#c3cdf0}
+.embedwrap{margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.embedwrap iframe{width:100%;border:0;display:block;min-height:680px}
+.noform{padding:18px;font-size:13.5px;color:#8a6d1f;background:#fff7ea;border:1px solid #f2dfb0;border-radius:12px;line-height:1.55}
+.count{font-size:13px;color:var(--mut);margin-top:10px;text-align:center}
+.count b{color:var(--blue);font-size:15px}
+.contact{margin-top:8px;font-size:13.5px;color:#3a4048;line-height:1.6}
+.contact a{color:var(--blue);font-weight:600}
+.mini{font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div>
+      <div class="search">🔍 Buscar estação, bairro, variável…</div><div class="tbtn">🔔</div><div class="tbtn">☰</div></div>
+    <div class="head">
+      <div class="htitle">Ciência Cidadã<small>Você é o sensor — ajude a melhorar a previsão do tempo de Joinville</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <!-- intro + porquê -->
+    <div class="card">
+      <div class="ct">Participe da ciência do tempo</div>
+      <p class="lead">Leva <b>menos de 1 minuto</b>. Você só nos conta se está <b>chovendo (ou não)</b> onde você está agora.
+      A gente compara a sua resposta com o que o <b>modelo de previsão</b> disse para o seu bairro — e isso ajuda a
+      <b>corrigir e melhorar os avisos de chuva e de risco</b> para a cidade inteira.</p>
+      <div class="why">
+        <b>Por que a sua resposta importa?</b> Os modelos de computador acertam muito, mas não enxergam tudo:
+        a chuva pode cair forte num bairro e o vizinho ficar seco. Cada resposta sua é um <b>“ponto no mapa” real</b>
+        que o modelo não tem. Juntando muitas respostas, conseguimos ver <b>onde chove de verdade</b> — e ensinar o
+        modelo a errar menos. Ciência de verdade, feita por você, de graça, com o celular.
+      </div>
+    </div>
+
+    <!-- passos -->
+    <div class="card" style="margin-top:16px">
+      <div class="steps">
+
+        <div class="step">
+          <div class="num">1</div>
+          <div class="bd">
+            <h3>Onde você está agora?</h3>
+            <select class="bsel" id="bairro"><option value="">Escolha o seu bairro…</option></select>
+            <div class="mini" id="pickmini">Selecione o bairro para ver o que a previsão diz para você.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <div class="bd">
+            <h3>O que a previsão diz para agora</h3>
+            <div class="fcast" id="fcast">
+              <div class="ico" id="fico">⏳</div>
+              <div class="txt"><div class="st" id="fst">Escolha o seu bairro acima</div>
+                <div class="sub" id="fsub">Vamos mostrar aqui a chuva prevista pelo modelo para o seu bairro, no horário de agora.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">3</div>
+          <div class="bd">
+            <h3>E na vida real? Está chovendo aí?</h3>
+            <p class="lead" style="margin-top:0">Responda no formulário abaixo — é anônimo e rapidinho. Sua observação vira um dado científico.</p>
+            <div id="formhost"></div>
+            <div class="count" id="count"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- rodapé do projeto + contato -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Sobre o projeto</div>
+      <p class="contact">Esta iniciativa faz parte do projeto de pesquisa do <b>Laboratório de Ciência das Águas (LaCiA)</b> —
+      Programa de Pós-Graduação em Engenharia Civil (PPGEC), <b>UDESC — CCT, Joinville</b>.<br>
+      Tem alguma dúvida, sugestão ou quer saber mais? Fale com a gente:
+      <a href="mailto:jessica.jcss@gmail.com">jessica.jcss@gmail.com</a></p>
+      <p class="mini">As respostas são usadas apenas para pesquisa e para melhorar a previsão e os alertas da cidade.
+      Não pedimos nome nem dados pessoais — só o seu bairro e o que você observa no céu. 💧</p>
+    </div>
+
+    <div class="foot">Ciência Cidadã · <b>Joinville Meteo</b> · a previsão mostrada é a saída direta do modelo <b>CPTEC/INPE WRF (7 km)</b> — use como orientação.<br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="ribbon" id="ribbon">Ciência Cidadã — sua observação melhora a previsão</div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   CONFIGURAÇÃO DO FORMULÁRIO (Google Forms)  — preencha depois de criar o Form.
+   Passo a passo em CIENCIA_CIDADA_SETUP.md. Enquanto estiver vazio, a página
+   mostra um aviso amigável no lugar do formulário (tudo o resto funciona).
+   ----------------------------------------------------------------------------
+   FORM_EMBED_URL : link do Form "…/viewform?embedded=true"
+   PREFILL        : (opcional) para já mandar o bairro e a previsão para o CSV,
+                    sem a pessoa digitar de novo. Pegue os IDs no "link
+                    pré-preenchido" do Form (ver o guia).
+   ============================================================================ */
+const CONFIG = {
+  FORM_EMBED_URL: "https://docs.google.com/forms/d/e/1FAIpQLSfENwcxiqNuksF92VDK0bjiCRLtXSzL4AcUhMiYYPF34_979g/viewform?embedded=true",            // ex.: "https://docs.google.com/forms/d/e/AAAA/viewform?embedded=true"
+  PREFILL: {
+    enabled: false,             // mude para true depois de preencher os IDs abaixo
+    base: "",                   // ex.: "https://docs.google.com/forms/d/e/AAAA/viewform?embedded=true&usp=pp_url"
+    bairro_entry:   "",         // ex.: "entry.111111111"  (campo "Bairro" do Form)
+    forecast_entry: ""          // ex.: "entry.222222222"  (campo "Previsão do modelo (automático)")
+  }
+};
+
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',
+ estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='ciencia'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+// ---- rain status in very simple words (aligned to WMO intensity classes) ----
+function rainStatus(mmh){
+  if(mmh==null)       return {k:'dry',  ico:'❓', st:'Sem previsão para este horário', sub:''};
+  if(mmh<0.1)         return {k:'dry',  ico:'🌤️', st:'Sem chuva prevista agora',       sub:'O modelo não indica chuva neste horário.'};
+  if(mmh<0.5)         return {k:'light',ico:'🌦️', st:'Talvez uma garoa',               sub:'Chuva bem fraca, quase um chuvisco.'};
+  if(mmh<2.5)         return {k:'light',ico:'🌧️', st:'Chuva fraca prevista',           sub:'Uma chuvinha leve pode cair.'};
+  if(mmh<10)          return {k:'mod',  ico:'🌧️', st:'Chuva moderada prevista',        sub:'Dá pra molhar — leve um guarda-chuva.'};
+  if(mmh<50)          return {k:'heavy',ico:'⛈️', st:'Chuva forte prevista',           sub:'Chuva intensa; atenção a alagamentos.'};
+  return                     {k:'heavy',ico:'⛈️', st:'Chuva muito forte prevista',     sub:'Temporal; acompanhe os alertas.'};
+}
+function nearestStep(times){
+  // times: ["YYYY-MM-DD HH:MM", ...] in LOCAL time. Return index nearest to now, or null if far.
+  const now=new Date();
+  let best=-1, bd=1e15;
+  times.forEach((s,i)=>{const t=new Date(s.replace(' ','T'));const d=Math.abs(t-now);if(d<bd){bd=d;best=i;}});
+  return {i:best, hoursOff: bd/3600000};
+}
+
+let RUN=null, BYNAME={};
+function updateForecast(){
+  const name=document.getElementById('bairro').value;
+  const F=document.getElementById('fcast'), ico=document.getElementById('fico'),
+        st=document.getElementById('fst'), sub=document.getElementById('fsub');
+  if(!name||!RUN){ico.textContent='⏳';st.textContent='Escolha o seu bairro acima';
+    sub.textContent='Vamos mostrar aqui a chuva prevista pelo modelo para o seu bairro, no horário de agora.';
+    F.className='fcast';return;}
+  const b=BYNAME[name.toUpperCase()];
+  const {i,hoursOff}=nearestStep(RUN.valid_times);
+  let mmh = (b && i>=0) ? b.rain.series[i] : null;
+  if(hoursOff>2) mmh=null;                 // now is outside the run window
+  const s=rainStatus(mmh);
+  ico.textContent=s.ico; st.textContent=s.st; F.className='fcast '+s.k;
+  if(mmh==null){
+    sub.textContent = RUN.valid_times ? `A rodada atual do modelo vale de ${RUN.valid_times[0]} a ${RUN.valid_times[RUN.valid_times.length-1]} (hora local). Responda mesmo assim — sua observação é sempre útil!` : '';
+  }else{
+    const hhmm=RUN.valid_times[i].slice(11,16);
+    sub.innerHTML = `${s.sub} <span style="color:#98a0aa">· ≈ ${mmh.toFixed(1)} mm/h previstos para <b>${name}</b> por volta das ${hhmm} (hora local) · modelo WRF ~7 km</span>`;
+  }
+  // pré-preenche o formulário (bairro + previsão) se configurado
+  if(CONFIG.PREFILL.enabled && CONFIG.PREFILL.base){
+    const st2 = (mmh==null?'sem previsão':s.st);
+    let u=CONFIG.PREFILL.base;
+    if(CONFIG.PREFILL.bairro_entry)   u+=`&${CONFIG.PREFILL.bairro_entry}=`+encodeURIComponent(name);
+    if(CONFIG.PREFILL.forecast_entry) u+=`&${CONFIG.PREFILL.forecast_entry}=`+encodeURIComponent(st2+(mmh!=null?` (${mmh.toFixed(1)} mm/h)`:''));
+    const ifr=document.getElementById('theform'); if(ifr) ifr.src=u;
+  }
+}
+
+function mountForm(){
+  const host=document.getElementById('formhost');
+  if(CONFIG.FORM_EMBED_URL){
+    host.innerHTML=`<div class="embedwrap"><iframe id="theform" src="${CONFIG.FORM_EMBED_URL}" loading="lazy">Carregando…</iframe></div>`;
+  }else{
+    host.innerHTML=`<div class="noform">⚙️ <b>Formulário ainda não configurado.</b> Quem administra o site deve criar um
+      Google Form (perguntas prontas no arquivo <code>CIENCIA_CIDADA_SETUP.md</code>) e colar o link em
+      <code>CONFIG.FORM_EMBED_URL</code> nesta página. Enquanto isso, a previsão acima já funciona.</div>`;
+  }
+}
+
+async function loadCount(){
+  try{
+    const r=await fetch('data/ciencia_cidada.csv',{cache:'no-store'}); if(!r.ok)return;
+    const txt=(await r.text()).trim(); if(!txt)return;
+    const n=Math.max(0, txt.split(/\r?\n/).length-1);      // linhas menos cabeçalho
+    document.getElementById('count').innerHTML = n>0
+      ? `🙌 <b>${n.toLocaleString('pt-BR')}</b> ${n===1?'pessoa já participou':'pessoas já participaram'}. Obrigado!`
+      : `Seja a primeira pessoa a participar! 💧`;
+  }catch(e){/* CSV ainda não existe — tudo bem */}
+}
+
+async function init(){
+  mountForm(); loadCount();
+  try{ RUN=await fetch('data/wrf_forecast.json').then(r=>r.ok?r.json():null); }catch(e){ RUN=null; }
+  const sel=document.getElementById('bairro');
+  if(RUN && RUN.bairros){
+    RUN.bairros.forEach(b=>BYNAME[b.name.toUpperCase()]=b);
+    RUN.bairros.map(b=>b.name).sort((a,b)=>a.localeCompare(b,'pt-BR'))
+      .forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});
+    document.getElementById('ribbon').textContent='Ciência Cidadã · previsão da rodada '+(RUN.run_time||'—')+' (UTC) · horários em hora local (UTC−3)';
+  }else{
+    document.getElementById('pickmini').textContent='A previsão do modelo ainda não foi processada — você pode responder mesmo assim.';
+  }
+  sel.onchange=updateForecast;
+}
+init();
+</script>
+</body>
+</html>
