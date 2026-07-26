@@ -1,0 +1,46 @@
+name: Deploy dashboard to Pages
+
+# Publishes the static dashboard in site/ to GitHub Pages.
+# Set repo Settings → Pages → Source = "GitHub Actions" for this to take effect.
+#
+# Triggers:
+#  - push to main touching site/**            → redeploy on your own edits
+#  - a 6-hourly schedule                      → picks up the data the bot commits
+#    (the WRF + citizen-science jobs push with the built-in GITHUB_TOKEN, and GitHub
+#     does NOT let a token-push trigger another workflow — so this schedule is what
+#     makes those automatic data updates go live)
+#  - manual "Run workflow"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "30 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site                 # <-- the folder that IS the website
+      - id: deployment
+        uses: actions/deploy-pages@v4
