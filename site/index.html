@@ -104,12 +104,12 @@ function sunTimes(lat,lng,y,mo,d,tz){
 // ---------- chart renderers ----------
 function windRoseSVG(rose){
   const cx=112,cy=116,hole=9,R=88,hw=9.6;
-  const RAMP=["#deebf7","#9ecae1","#4292c6","#2171b5","#084594"],SCLASS=["0–2","2–4","4–6","6–8","≥8"];
+  const RAMP=["#c6dbef","#6baed6","#3182bd","#08519c","#08306b"],SCLASS=["0–2","2–4","4–6","6–8","≥8"];
   const freq=rose.freq, tot=freq.map(f=>f.reduce((a,b)=>a+b,0)), maxtot=Math.max(...tot)||1, k=(R-hole)/maxtot;
   const P=(ang,r)=>{const a=rad(ang-90);return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
   const sector=(a0,a1,ri,ro,fill)=>{const[x0,y0]=P(a0,ri),[x1,y1]=P(a0,ro),[x2,y2]=P(a1,ro),[x3,y3]=P(a1,ri);
     return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} L${x1.toFixed(1)} ${y1.toFixed(1)} A${ro} ${ro} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)} L${x3.toFixed(1)} ${y3.toFixed(1)} A${ri} ${ri} 0 0 0 ${x0.toFixed(1)} ${y0.toFixed(1)} Z" fill="${fill}"/>`;};
-  let g='';[2,4,6].forEach(p=>{const rr=hole+p*k;g+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#e2e4e8"/><text x="${cx+3}" y="${(cy-rr+3).toFixed(1)}" font-size="11" fill="#b7bcc4">${p}%</text>`;});
+  let g='';[2,4,6].forEach(p=>{const rr=hole+p*k;g+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="#c3cbd3"/><text x="${cx+3}" y="${(cy-rr+3).toFixed(1)}" font-size="11" fill="#9aa0a8">${p}%</text>`;});
   let seg='';freq.forEach((cls,d)=>{const a=d*22.5;let r0=hole;cls.forEach((v,ci)=>{const r1=r0+v*k;if(v>0)seg+=sector(a-hw,a+hw,r0,r1,RAMP[ci]);r0=r1;});});
   let dl='';[["N",0],["L",90],["S",180],["O",270]].forEach(([lab,ang])=>{const[x,y]=P(ang,R+13);dl+=`<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="11" fill="#8a9099" text-anchor="middle" font-weight="700">${lab}</text>`;});
   const leg=SCLASS.map((s,i)=>`<span class="wl"><i style="background:${RAMP[i]}"></i>${s}</span>`).join('')+'<span class="wl mut2">m/s</span>';

@@ -106,11 +106,13 @@ function yearStrip(annual,rmp,fmt,unit){
 }
 
 // ---- item 6: wind DIRECTION (Grange vector resultant) ----
-// Arrow points TOWARD the source bearing (meteorological "de onde vem"): base points up
-// (North); SVG rotate(deg) turns it clockwise so 90->E, 180->S, 270->W.
+// Arrow shows the FLOW direction — where the wind is GOING. `deg` is the FROM bearing, so
+// the flow points to deg+180. Base points up (North); SVG rotate() turns it clockwise.
+// Wind FROM the south (deg 180) flows north -> arrow up; FROM the east ("L", deg 90) flows
+// west -> arrow left. (The sector label stays the meteorological FROM direction.)
 function dirArrow(deg,cx,cy,len,col){
   const h=len/2;
-  return `<g transform="translate(${cx},${cy}) rotate(${deg})" pointer-events="none">`
+  return `<g transform="translate(${cx},${cy}) rotate(${(deg+180)%360})" pointer-events="none">`
     +`<line x1="0" y1="${h}" x2="0" y2="${-h}" stroke="${col}" stroke-width="2.3" stroke-linecap="round"/>`
     +`<path d="M0 ${-h} L${-4.3} ${-h+8.5} M0 ${-h} L4.3 ${-h+8.5}" fill="none" stroke="${col}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`
     +`</g>`;
@@ -176,7 +178,7 @@ async function init(){
       ${dirStrip(WD.clim,MN,plo,phi,false)}
       <div class="striplab">Direção predominante por ano <span>${WD.annual[0].year}–${WD.annual[WD.annual.length-1].year}</span></div>
       ${dirStrip(WD.annual,null,plo,phi,true)}
-      <div class="dlegend">A <b>cor</b> indica a predominância (% das horas no setor da resultante ±22,5°); a <b>seta</b> aponta para a direção <b>de onde o vento sopra</b> (convenção meteorológica) — p.ex. seta para baixo = vento de sul, para a direita = de leste. Estações com cata-vento travado (direção presa em 0°) são descartadas. Método: resultante vetorial (Grange, 2014; <i>openair</i>), peso igual por estação.</div>
+      <div class="dlegend">A <b>cor</b> indica a predominância (% das horas no setor da resultante ±22,5°). O <b>rótulo</b> (ex.: <b>S</b>, <b>L</b>, <b>SO</b>) é a direção meteorológica <b>de onde</b> o vento vem; a <b>seta</b> mostra o sentido do fluxo — <b>para onde</b> o vento vai (o oposto): vento de sul (S) → seta para cima (norte); vento de leste (L) → seta para a esquerda (oeste). Estações com cata-vento travado (direção presa em 0°) são descartadas. Método: resultante vetorial (Grange, 2014; <i>openair</i>), peso igual por estação.</div>
     </div>`;
   }
   document.getElementById('sections').innerHTML=html;

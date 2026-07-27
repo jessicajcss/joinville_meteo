@@ -224,7 +224,8 @@ def wind_rose():
     n_total = len(wd)
     calm = ws < CALM_MS
     calm_pct = round(float(np.mean(calm) * 100), 1)
-    wd = wd[~calm]; ws = ws[~calm]                  # sectors use non-calm winds only
+    keep = (~calm) & (wd != 0.0)                    # non-calm winds only, AND drop the exact-0.000
+    wd = wd[keep]; ws = ws[keep]                     # stuck-vane sentinel even on kept stations
     n = len(wd)
     if n == 0: return None
     # 16 sectors centred on N=0; sector width 22.5deg (shift by +11.25 so N spans -11.25..11.25)
@@ -258,7 +259,8 @@ def bin_rose(wd, ws):
         return None
     calm = ws < CALM_MS
     calm_pct = round(float(np.mean(calm) * 100), 1)
-    wdn, wsn = wd[~calm], ws[~calm]
+    keep = (~calm) & (wd != 0.0)                    # non-calm, AND drop exact-0.000 stuck-vane sentinel
+    wdn, wsn = wd[keep], ws[keep]
     n = len(wdn)
     freq = np.zeros((16, len(ROSE_CLASSES)))
     if n:

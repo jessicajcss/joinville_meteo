@@ -101,8 +101,10 @@ University of Auckland** (o mesmo do pacote R `openair`). A combinação **entre
 é feita com **peso igual por estação** (média dos vetores médios de cada estação), para
 que um registro litorâneo mais longo não domine o valor municipal. A **cor** das faixas
 codifica a **predominância** = % das horas dentro do octante (±22,5°) da resultante — é
-uma **frequência**, não uma grandeza de Grange; a **seta** aponta para a direção **de onde
-o vento vem** (convenção meteorológica). QC idêntico ao da rosa da página Agora: exclui
+uma **frequência**, não uma grandeza de Grange. O **rótulo** (ex.: S, L, SO) é a direção
+meteorológica **de onde** o vento vem; a **seta** mostra o **sentido do fluxo** — para onde
+o vento vai (o oposto do rótulo): vento de sul → seta para o norte. QC idêntico ao da rosa
+da página Agora: exclui
 calmaria (vel < 0,5 m/s) e o sentinela de cata-vento travado (exatamente 0,000°), e
 descarta estações com > 25 % das horas com vento cravadas em 0°. Requer ≥ 2 estações e
 ≥ 50 horas por grupo (mês-calendário ou ano). O estimador anterior — o setor de 22,5°
