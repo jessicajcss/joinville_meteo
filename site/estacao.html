@@ -34,6 +34,7 @@
 .dlpanel .fg{display:flex;flex-direction:column;gap:5px}
 .dlpanel label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase}
 .dlpanel select,.dlpanel input{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:11px;padding:9px 13px}
+.dlpanel select#dlSt{min-width:230px}
 .dlbtn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .dlnote{font-size:12px;color:var(--mut);margin-top:8px}
 @media(max-width:1000px){.g2{grid-template-columns:1fr}.itiles{grid-template-columns:1fr 1fr}}
@@ -83,6 +84,7 @@
 
     <div class="card" style="margin-top:16px" id="download"><div class="ct">Baixar dados <span class="mut">por estação e período</span></div>
       <div class="dlpanel">
+        <div class="fg"><label>Estação</label><select id="dlSt"></select></div>
         <div class="fg"><label>Resolução</label><select id="dlRes"><option value="daily">Diária</option></select></div>
         <div class="fg"><label>De</label><input type="date" id="dlFrom"></div>
         <div class="fg"><label>Até</label><input type="date" id="dlTo"></div>
@@ -174,6 +176,9 @@ async function init(){
   LIMITE=await fetch('data/limite.geojson').then(r=>r.json()).catch(()=>null);
   const sel=document.getElementById('selSt');
   sel.innerHTML=DATA.stations.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+  const dlSt=document.getElementById('dlSt');
+  dlSt.innerHTML=DATA.stations.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+  dlSt.onchange=renderDownload;
   const yr=document.getElementById('selYear'); yr.innerHTML=DATA.all_years.slice().reverse().map(y=>`<option>${y}</option>`).join('');
   curYear=DATA.all_years[DATA.all_years.length-1]; yr.value=curYear;
   const mo=document.getElementById('selMonth'); mo.innerHTML=MFULL.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''); mo.value=6; curMonth=6;
@@ -245,20 +250,26 @@ function renderStation(){
   document.getElementById('rainhm').innerHTML=rainHM(s.rain);
   const rall=Object.values(s.rain).flat().filter(v=>v!=null); document.getElementById('rmaxlab').textContent=(rall.length?Math.round(Math.max(...rall)):0)+' mm';
   document.getElementById('cover').innerHTML=coverStrip(s.coverage);
+  document.getElementById('dlSt').value=document.getElementById('selSt').value;
+  renderDownload();
+  document.getElementById('stsub').textContent=`em operação em ${curYear}`;
+}
+function renderDownload(){
+  const s=DATA.stations[+document.getElementById('dlSt').value]||cur;
   document.getElementById('dlFrom').value=s.period[0]; document.getElementById('dlTo').value=s.period[1];
   document.getElementById('dlFrom').min=document.getElementById('dlTo').min=s.period[0];
   document.getElementById('dlFrom').max=document.getElementById('dlTo').max=s.period[1];
-  document.getElementById('dlnote').innerHTML=`Variáveis: ${s.vars.map(v=>DATA.var_labels[v]).join(', ')}. O arquivo diário traz máxima, mínima, média e acumulados. Resoluções horária e de 5 min podem ser adicionadas.`;
-  document.getElementById('stsub').textContent=`em operação em ${curYear}`;
+  document.getElementById('dlnote').innerHTML=`Estação: <b>${s.name}</b>. Variáveis: ${s.vars.map(v=>DATA.var_labels[v]).join(', ')}. O arquivo diário traz máxima, mínima, média e acumulados. Resoluções horária e de 5 min podem ser adicionadas.`;
 }
 async function doDownload(){
+  const s=DATA.stations[+document.getElementById('dlSt').value]||cur;
   const from=document.getElementById('dlFrom').value,to=document.getElementById('dlTo').value,btn=document.getElementById('dlBtn');
   btn.textContent='… preparando';
-  try{const txt=await fetch(`data/stations/daily/${cur.code}.csv`).then(r=>r.text());
+  try{const txt=await fetch(`data/stations/daily/${s.code}.csv`).then(r=>r.text());
     const lines=txt.split(/\r?\n/),di=lines[0].split(',').indexOf('date'),out=[lines[0]];
     for(let i=1;i<lines.length;i++){const ln=lines[i];if(!ln)continue;const dt=ln.split(',')[di];if(dt>=from&&dt<=to)out.push(ln);}
     const blob=new Blob([out.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);a.download=`${cur.code}_diaria_${from}_${to}.csv`;document.body.appendChild(a);a.click();a.remove();
+    a.href=URL.createObjectURL(blob);a.download=`${s.code}_diaria_${from}_${to}.csv`;document.body.appendChild(a);a.click();a.remove();
     btn.textContent=`⭳ Baixado (${out.length-1} dias)`;}
   catch(e){btn.textContent='⭳ Baixar CSV';alert('Falha: '+e);}
   setTimeout(()=>btn.textContent='⭳ Baixar CSV',2500);

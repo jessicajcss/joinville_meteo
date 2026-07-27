@@ -244,6 +244,66 @@ def wind_rose():
 
 rose = wind_rose()
 
+# ---- last-24h wind rose, per station AND network-average (same QC/binning as wind_rose) ----
+# Powers the interactive rose on the Início page: default = network average of the last 24 h;
+# clicking a station on the map shows that station's own last-24h rose.
+def bin_rose(wd, ws):
+    """16-sector x speed-class frequency (%) from raw wd/ws arrays; calm winds (< CALM_MS)
+    excluded from the sectors and reported as calm_pct. Identical convention to wind_rose()."""
+    wd = np.asarray(wd, float); ws = np.asarray(ws, float)
+    m = np.isfinite(wd) & np.isfinite(ws)
+    wd, ws = wd[m], ws[m]
+    n_total = len(wd)
+    if n_total == 0:
+        return None
+    calm = ws < CALM_MS
+    calm_pct = round(float(np.mean(calm) * 100), 1)
+    wdn, wsn = wd[~calm], ws[~calm]
+    n = len(wdn)
+    freq = np.zeros((16, len(ROSE_CLASSES)))
+    if n:
+        sec = (np.floor(((wdn % 360) + 11.25) / 22.5).astype(int)) % 16
+        for i in range(16):
+            wsi = wsn[sec == i]
+            for j, (lo, hi) in enumerate(ROSE_CLASSES):
+                freq[i, j] = np.sum((wsi >= lo) & (wsi < hi))
+        freq = freq / n * 100.0
+    return {"freq": np.round(freq, 2).tolist(), "n": int(n), "n_total": int(n_total),
+            "calm_pct": calm_pct, "ws_mean": round(float(np.nanmean(ws)), 2)}
+
+def wind_rose_24h():
+    end = ref_now.floor("h"); start = end - pd.Timedelta(hours=WIND_HOURS - 1)
+    by = {}; pool_wd, pool_ws = [], []; used, dropped = [], []
+    for c, d in hourly.items():
+        if "wd" not in d.columns or "ws" not in d.columns:
+            continue
+        s = d.dropna(subset=["wd", "ws"])
+        s = s[(s["date"] >= start) & (s["date"] <= end)]
+        if s.empty:
+            continue
+        wd_s = s["wd"].to_numpy(); ws_s = s["ws"].to_numpy()
+        windy = ws_s >= CALM_MS
+        dir_ok = True
+        if windy.sum() >= 4:                                  # only judge the vane with enough windy hours
+            stuck = float(np.mean(wd_s[windy] == 0.0))        # stuck/absent-vane artefact
+            if stuck > STUCK_FRAC:
+                dir_ok = False; dropped.append({"code": c, "stuck0_pct": round(stuck * 100, 1)})
+        r = bin_rose(wd_s, ws_s)
+        if r is None:
+            continue
+        r["dir_ok"] = dir_ok
+        by[c] = r
+        if dir_ok:
+            used.append(c); pool_wd.append(wd_s); pool_ws.append(ws_s)
+    network = bin_rose(np.concatenate(pool_wd), np.concatenate(pool_ws)) if pool_wd else None
+    return {"window": [start.isoformat(), end.isoformat()], "hours": WIND_HOURS, "dirs": 16,
+            "classes": [f"{lo}–{hi if hi < 900 else ''}".rstrip("–") for lo, hi in ROSE_CLASSES],
+            "class_edges": ROSE_CLASSES, "calm_ms": CALM_MS,
+            "network": network, "by_station": by,
+            "stations_used": sorted(used), "stations_dropped": dropped}
+
+rose24 = wind_rose_24h()
+
 # ---- WMO/OMM severe-weather alert (data-driven) ----
 def rain_class(mmph):
     for name, lo, hi in RAIN_CLASSES:
@@ -302,6 +362,7 @@ snap = {
     "wind24h": wind24,
     "daily_temp": daily_temp,
     "windrose": rose,
+    "windrose24": rose24,
     "alert": alert,
 }
 

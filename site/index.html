@@ -8,6 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="assets/css/app.css">
+<style>
+.bl-inner.bl-sel .bl-c{outline:2.5px solid var(--blue);outline-offset:1px;box-shadow:0 3px 10px rgba(64,120,242,.35)}
+#rose .rose-empty{padding:26px 6px;color:#a0a1a7;font-size:12.5px;text-align:center;line-height:1.5}
+.wrcard #rosenote{align-self:flex-start;margin-top:6px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -41,7 +46,7 @@
       <div>
         <div class="card kma" id="kma"></div>
         <div class="card state" style="margin-top:16px" id="estado"></div>
-        <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div></div>
+        <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div><div class="capt" id="rosenote"></div></div>
         <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut">agora</span></div><div class="rowlist" id="rows"></div></div>
       </div>
     </div>
@@ -131,11 +136,11 @@ function sparkSVG(w24){
 }
 
 // ---------- balloon HTML per mode ----------
-function balloonHTML(s,mode){
+function balloonHTML(s,mode,selected){
   // freshness is PER VARIABLE: a station can be online via wind yet have a stale temperature
   const v = mode==='wind'?s.wind:(mode==='rain'?s.rain:s.temp);
   if(!v) return null;
-  const fresh=!!v.fresh, cls=fresh?'fresh':'stale';
+  const fresh=!!v.fresh, cls=(fresh?'fresh':'stale')+(selected?' bl-sel':'');
   const dt=fresh?'':`<span class="bl-dt">${fmtDate(v.t)}</span>`;
   let inner;
   if(mode==='wind'){ const dir=(v.wd==null?0:v.wd);
@@ -145,6 +150,28 @@ function balloonHTML(s,mode){
   return `<div class="bl-inner ${cls}"><div class="bl-c"><span class="bl-nm">${s.name.split(' ')[0]}</span>${inner}${dt}</div><span class="pt"></span></div>`;
 }
 const MAPLEG={temp:'Temperatura · °C',rain:'Chuva 24 h · mm',wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s`};
+
+// ---------- interactive wind rose (last 24 h; network default, per-station on map click) ----------
+let ROSE_SEL=null;                         // null = network average; else a station code
+function stationName(code){const s=SNAP.stations.find(x=>x.code===code);return s?s.name:code;}
+function renderRose(){
+  const R=SNAP.windrose24;
+  const roseEl=document.getElementById('rose'), subEl=document.getElementById('rosesub'), noteEl=document.getElementById('rosenote');
+  if(!R){                                  // legacy snapshot without 24 h roses — fall back to the old rose
+    const Lg=SNAP.windrose; if(Lg){roseEl.innerHTML=windRoseSVG(Lg);subEl.textContent=`frequência · ${(Lg.n||0).toLocaleString('pt-BR')} obs`;}
+    if(noteEl) noteEl.textContent='Rosa histórica (dados das últimas 24 h indisponíveis nesta versão).'; return;
+  }
+  const sel = ROSE_SEL!=null;
+  const rose = sel ? (R.by_station&&R.by_station[ROSE_SEL]) : R.network;
+  const who  = sel ? stationName(ROSE_SEL) : 'média da rede';
+  if(!rose || !rose.n){
+    roseEl.innerHTML=`<div class="rose-empty">Sem vento suficiente nas últimas ${R.hours} h ${sel?'nesta estação':'na rede'} para desenhar a rosa.</div>`;
+  } else { roseEl.innerHTML=windRoseSVG(rose); }
+  const w=R.window||[], t0=w[0]?w[0].slice(11,16):'', t1=w[1]?w[1].slice(11,16):'', d1=w[1]?fmtDate(w[1]):'';
+  subEl.textContent=`últimas ${R.hours} h · ${who}`;
+  const stats=(rose&&rose.n)?` · ${rose.n} obs${rose.calm_pct!=null?` · calmaria ${rose.calm_pct}%`:''}`:'';
+  if(noteEl) noteEl.innerHTML=`Rosa dos ventos das <b>últimas ${R.hours} h</b> (janela ${t0}–${t1}, ${d1}) — <b>${who}</b>${stats}. Clique numa estação no mapa para ver a dela; clique no mapa, fora das estações, para voltar à média da rede.`;
+}
 
 // ---------- main ----------
 let MAP, MARKERS, MODE='wind', SNAP;
@@ -201,11 +228,8 @@ async function init(){
   document.getElementById('estado').innerHTML=`<div class="ct">Estado da rede</div>
     <div class="txt">${N.n_online} de ${N.n_total} estações online agora. As demais estão defasadas — última leitura há mais de ${SNAP.fresh_days} dias.</div>
     <div style="display:flex;gap:8px">${GLYPH.part}${GLYPH.sun}${GLYPH.cloud}${GLYPH.rain}</div>`;
-  // rose
-  if(SNAP.windrose){const R=SNAP.windrose;document.getElementById('rose').innerHTML=windRoseSVG(R);
-    const nd=(R.stations_dropped||[]).length, calm=(R.calm_pct!=null)?` · calmaria ${R.calm_pct}%`:'';
-    const drop=nd?` · ${nd} anemômetro(s) com cata-vento inválido excluído(s)`:'';
-    document.getElementById('rosesub').textContent=`frequência (ventos ≥ ${R.calm_ms??0.5} m/s)${calm} · ${R.n.toLocaleString('pt-BR')} obs · ${(R.stations_used||[]).length} estações com direção válida${drop}`;}
+  // rose (interactive: last 24 h; network by default, per-station when a station is clicked on the map)
+  renderRose();
   // daily
   const dc=dailyChart(SNAP.daily_temp);
   document.getElementById('daily').innerHTML=dc.svg;
@@ -243,14 +267,17 @@ function buildMap(){
   }).catch(()=>{});
   drawMarkers();
   document.getElementById('mapleg').innerHTML=MAPLEG[MODE];
+  // click empty map (not a station) → back to the network-average rose
+  MAP.on('click',()=>{ if(ROSE_SEL!==null){ ROSE_SEL=null; renderRose(); drawMarkers(); } });
 }
 function drawMarkers(){
   if(!MARKERS)return; MARKERS.clearLayers();
   document.getElementById('mapleg').innerHTML=MAPLEG[MODE];
   SNAP.stations.forEach(s=>{
-    const html=balloonHTML(s,MODE); if(!html)return;
+    const html=balloonHTML(s,MODE,s.code===ROSE_SEL); if(!html)return;
     const icon=L.divIcon({className:'bl',html,iconSize:[0,0],iconAnchor:[0,0]});
-    L.marker([s.lat,s.lon],{icon,zIndexOffset:s.fresh?1000:0,riseOnHover:true}).addTo(MARKERS);
+    const mk=L.marker([s.lat,s.lon],{icon,zIndexOffset:s.code===ROSE_SEL?2000:(s.fresh?1000:0),riseOnHover:true}).addTo(MARKERS);
+    mk.on('click',()=>{ ROSE_SEL = (ROSE_SEL===s.code ? null : s.code); renderRose(); drawMarkers(); });
   });
 }
 init();

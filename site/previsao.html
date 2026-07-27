@@ -34,6 +34,11 @@
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
 @media(max-width:900px){.twocol{grid-template-columns:1fr}}
 #bairromap{margin-bottom:8px}
+.mapwrap{position:relative}
+.mapwrap>div[id]{overflow:hidden;touch-action:none;cursor:grab}
+.zc{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:3px;z-index:5}
+.zc button{width:27px;height:27px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.14);line-height:1;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.zc button:hover{background:#eef3fd;color:var(--blue)}
 .regfig{width:100%;height:auto;border-radius:10px;display:block;margin-top:8px}
 .bsearch{width:100%;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-bottom:8px}
 .blist{max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
@@ -61,13 +66,12 @@
 
     <div id="demo"></div>
 
-    <!-- 0 · alerta de risco de chuva (previsão) — fase de teste -->
-    <div class="card" id="fcalert" style="margin-bottom:16px;display:none"></div>
-
-    <!-- 1+2+3 · [mapa + por bacia]  |  por bairro -->
+    <!-- 1+2+3 · [alerta + mapa + por bacia]  |  por bairro -->
     <div class="twocol">
-      <!-- coluna esquerda: mapa de previsão + previsão por bacia -->
+      <!-- coluna esquerda: alerta de risco (fase de teste) + mapa de previsão + previsão por bacia -->
       <div>
+        <!-- 0 · alerta de risco de chuva (previsão) — fase de teste -->
+        <div class="card" id="fcalert" style="margin-bottom:16px;display:none"></div>
         <div class="card">
           <div class="ct">Mapa de previsão <span class="mut" id="mapsub"></span></div>
           <div class="pick">
@@ -75,7 +79,7 @@
             <div class="fg"><label>Instante</label><select id="selStep"></select></div>
             <div class="fg" style="flex:1;min-width:160px"><label>&nbsp;</label><input type="range" id="slStep" min="0" max="0" value="0" style="width:100%"></div>
           </div>
-          <div id="wmap"></div>
+          <div class="mapwrap"><div id="wmap"></div><div class="zc"><button data-z="in" title="ampliar">+</button><button data-z="out" title="reduzir">−</button><button data-z="reset" title="redefinir">⟲</button></div></div>
           <div class="capt" id="mapcapt"></div>
         </div>
         <div class="card" style="margin-top:16px">
@@ -87,7 +91,7 @@
       <!-- coluna direita: previsão por bairro -->
       <div class="card">
         <div class="ct">Previsão por bairro <span class="mut" id="bairrosub"></span></div>
-        <div id="bairromap"></div>
+        <div class="mapwrap"><div id="bairromap"></div><div class="zc"><button data-z="in" title="ampliar">+</button><button data-z="out" title="reduzir">−</button><button data-z="reset" title="redefinir">⟲</button></div></div>
         <input class="bsearch" id="bairroSearch" placeholder="🔍 buscar bairro…">
         <div class="blist" id="bairrolist"></div>
         <div class="capt" id="bairrocapt"></div>
@@ -112,7 +116,7 @@
     <div class="card" style="margin-top:16px">
       <div class="ct">Mapa regional — domínio do modelo <span class="mut">6 painéis · CPTEC-WRF 7 km</span></div>
       <img class="regfig" id="regfig" src="data/wrf_regional.png" alt="WRF Joinville — 6 painéis: chuva, temperatura e vento (séries + mapas)">
-      <div class="capt">Painel científico de 6 quadros sobre <b>todo o domínio do modelo</b>, gerado automaticamente a cada rodada do WRF (GitHub Action): <b>(a,b)</b> chuva — série e mapa; <b>(c,d)</b> temperatura a 2 m; <b>(e,f)</b> vento a 10 m (mapa com setas). Observe a chuva realçada sobre a Serra do Mar (oeste) e o contraste térmico costa–interior — interpretados no texto abaixo. Contornos cinza tênues: divisa de <b>Santa Catarina</b> e limite de <b>Joinville</b> (IBGE). Horários dos mapas em <b>hora local (UTC−3)</b>; a rodada no título é rotulada em UTC.</div>
+      <div class="capt">Painel científico de 6 quadros sobre <b>todo o domínio do modelo</b>, gerado automaticamente a cada rodada do WRF (GitHub Action): <b>(a,c,e)</b> séries das próximas horas; <b>(b,d,f)</b> mapas na <b>próxima hora prevista</b> (chuva, temperatura a 2 m e vento a 10 m com setas). Observe a chuva realçada sobre a Serra do Mar (oeste) e o contraste térmico costa–interior — interpretados no texto abaixo. Contornos cinza tênues: divisa de <b>Santa Catarina</b> e limite de <b>Joinville</b> (IBGE). Horários dos mapas em <b>hora local (UTC−3)</b>; a rodada no título é rotulada em UTC.</div>
     </div>
 
     <!-- 6 · texto explicativo -->
@@ -159,7 +163,7 @@ const VARS={
   wind:{label:'Vento', color:'#225ea8', ramp:WINDR, accum:false, unit:'m/s', sUnit:'m/s', bunit:'m/s',
         bval:b=>b.wind.mean_ms, blabel:'média', series:b=>b.wind.series, vlims:(V)=>[0, V.spd_max], field:(V,view)=>V.spd_hourly[view]}};
 
-let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', PROJ, PROJB, BCOL={};
+let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', CURHOUR=0, PROJ, PROJB, BCOL={};
 
 function mkproj(bb,W,padFrac){padFrac=padFrac==null?0.06:padFrac;
   const px=(bb[2]-bb[0])*padFrac+0.01, py=(bb[3]-bb[1])*padFrac+0.01;
@@ -199,18 +203,18 @@ function drawGrid(pr,lat,lon,field,rmp,lo,hi,unit,zeroWhite){const rng=(hi-lo)||
 function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/12));let a='';
   const cell=Math.min(cw,ch);
   let spmax=0.5;for(let i=0;i<nlat;i++)for(let j=0;j<nlon;j++){const sp=Math.hypot(U[i][j],V[i][j]);if(sp>spmax)spmax=sp;}
-  const Lmax=cell*1.35;                                     // longest arrow (fastest cell)
+  const Lmax=cell*0.85;                                     // longest arrow (fastest cell) — kept short
   for(let i=0;i<nlat;i+=s)for(let j=0;j<nlon;j+=s){const uu=U[i][j],vv=V[i][j],sp=Math.hypot(uu,vv);if(sp<0.3)continue;
     const [cx0,cy0]=P(pr,lon[j],lat[i]);
     const dx=uu/sp, dy=-vv/sp;                              // screen direction (y down)
-    const L=Math.max(cell*0.5,(sp/spmax)*Lmax);           // length ∝ speed (quiver)
-    const ahl=L*0.32, ahw=L*0.15;                          // slender head, proportional to arrow length
+    const L=Math.max(cell*0.32,(sp/spmax)*Lmax);          // length ∝ speed (quiver)
+    const ahl=L*0.30, ahw=L*0.13;                          // small slender head, proportional to arrow length
     const tx=cx0-dx*L*0.5, ty=cy0-dy*L*0.5;                // centred on the cell
     const ex=cx0+dx*L*0.5, ey=cy0+dy*L*0.5;                // arrow tip
     const bx=ex-dx*ahl, by=ey-dy*ahl;                      // base of the head, set back along shaft
     const px=-dy, py=dx;                                    // unit perpendicular
     const h1x=bx+px*ahw, h1y=by+py*ahw, h2x=bx-px*ahw, h2y=by-py*ahw;
-    a+=`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#12233a" stroke-width="1.4" opacity="0.85"/>`
+    a+=`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#12233a" stroke-width="1.1" opacity="0.8"/>`
       +`<path d="M${h1x.toFixed(1)} ${h1y.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${h2x.toFixed(1)} ${h2y.toFixed(1)} Z" fill="#12233a" opacity="0.9"/>`;}
   return a;}
 
@@ -222,16 +226,18 @@ function drawMap(){
   let outl=''; if(BAI) outl+=`<path d="${polyPathsFC(pr,BAI)}" fill="none" stroke="#4a5763" stroke-width="0.5" opacity="0.5"/>`;
   // each basin outlined in ITS bar colour (below) — the coloured bars are the legend, so no on-map text labels
   (BAS.features||[]).forEach(f=>{const nm=f.properties.basin||f.properties.Nomes;const col=BCOL[nm]||'#12233a';
-    outl+=`<path d="${polyPathF(pr,f)}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round" opacity="0.95"><title>${nm}</title></path>`;});
+    outl+=`<path d="${polyPathF(pr,f)}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" opacity="0.45"><title>${nm}</title></path>`;});
   if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2" stroke-linejoin="round" opacity="0.85"/>`;
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+18,10,H-20);
-  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${g.s}${arrows}${outl}${cb}</svg>`;
+  const topo=`<defs><clipPath id="mclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#mclip)">${topoTiles(pr)}</g>`;
+  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" data-home="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${topo}${g.s}${arrows}${outl}${cb}</svg>`;
+  applyZoom('wmap');
   const when=(vn==='rain'&&view==='accum')?'acumulado da rodada':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
   document.getElementById('mapsub').textContent=M.label+' · '+when;
   document.getElementById('mapcapt').innerHTML=(vn==='rain'&&view==='accum'
     ? '<b>Acumulado</b> = chuva total prevista na rodada (mm), somando todas as horas, por célula da grade WRF de 7 km. Escolha uma hora em “Instante” para ver a taxa horária (mm/h) — em chuva fraca cada hora fica perto de 0, mas o acumulado soma esses pinguinhos. '
     : M.label+' prevista para '+RUN.valid_times[view]+' (taxa da hora). ')
-    +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z).';
+    +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z). Relevo: OpenTopoMap (CC-BY-SA).';
 }
 // ---- 2. basin bars ----
 function drawBars(){const vn=CURVAR, M=VARS[vn];
@@ -248,6 +254,22 @@ function drawBars(){const vn=CURVAR, M=VARS[vn];
   document.getElementById('barcapt').textContent=cap[vn];
 }
 // ---- 3. bairro choropleth + list ----
+// OpenTopoMap relief tiles behind an SVG map, positioned by the map projection
+// (equirectangular ≈ Web-Mercator over this small domain); 50% opacity, degrades to white if offline.
+function topoTiles(pr){const dlon=Math.max(1e-3,pr.lonmax-pr.lonmin);
+  const z=Math.max(10,Math.min(12,Math.round(Math.log2(1800/dlon)))),n=Math.pow(2,z);
+  const lon2x=l=>(l+180)/360*n, lat2y=l=>{const r=l*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*n;};
+  const x2lon=x=>x/n*360-180, y2lat=y=>{const t=Math.PI*(1-2*y/n);return Math.atan(Math.sinh(t))*180/Math.PI;};
+  const x0=Math.floor(lon2x(pr.lonmin)),x1=Math.floor(lon2x(pr.lonmax)),y0=Math.floor(lat2y(pr.latmax)),y1=Math.floor(lat2y(pr.latmin));
+  const sub=['a','b','c'];let img='',k=0;
+  for(let xt=x0;xt<=x1;xt++)for(let yt=y0;yt<=y1;yt++){const [ax,ay]=P(pr,x2lon(xt),y2lat(yt)),[bx,by]=P(pr,x2lon(xt+1),y2lat(yt+1));
+    img+=`<image href="https://${sub[(k++)%3]}.tile.opentopomap.org/${z}/${xt}/${yt}.png" x="${ax.toFixed(1)}" y="${ay.toFixed(1)}" width="${(bx-ax).toFixed(1)}" height="${(by-ay).toFixed(1)}" opacity="0.5" preserveAspectRatio="none"/>`;}
+  return img;}
+// per-bairro value at the selected instant (rain 'accum' → run total; otherwise the hourly series)
+function bairroValAt(b,vn,view){if(!b)return null;
+  if(vn==='rain')return (view==='accum'||view==null)?b.rain.total_mm:(b.rain.series?b.rain.series[view]:b.rain.total_mm);
+  if(vn==='temp')return (b.temp.series&&view!=='accum'&&view!=null)?b.temp.series[view]:b.temp.mean;
+  return (b.wind.series&&view!=='accum'&&view!=null)?b.wind.series[view]:b.wind.mean_ms;}
 // meaningful color span per variable, so a near-uniform field (e.g. temp at 7 km) doesn't
 // get stretched into false red-vs-blue drama
 function bairroRange(vn,vals){let lo=Math.min(...vals),hi=Math.max(...vals);
@@ -257,19 +279,26 @@ function bairroRange(vn,vals){let lo=Math.min(...vals),hi=Math.max(...vals);
   return [lo,hi];}
 function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn], pr=PROJB, {W,H}=pr;
   const byName={}; RUN.bairros.forEach(b=>byName[b.name.toUpperCase()]=b);
-  const vals=RUN.bairros.map(M.bval), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
-  let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?M.bval(b):null;
+  const view=CURVIEW, valOf=b=>bairroValAt(b,vn,view);
+  const vals=RUN.bairros.map(valOf).filter(v=>v!=null), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
+  let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?valOf(b):null;
     const fill=v==null?'#eef1f5':M.ramp((v-lo)/rng);
     fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="1"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
   const outl=LIM?`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="1.6" opacity="0.9"/>`:'';
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+16,10,H-20);
-  document.getElementById('bairromap').innerHTML=`<svg viewBox="0 0 ${W+66} ${H+8}" width="100%" style="max-height:520px">${fills}${outl}${cb}</svg>`;
-  const sorted=RUN.bairros.slice().sort((a,b)=>M.bval(b)-M.bval(a));
-  document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(M.bval(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${M.bunit}</i></span></div>`).join('');
+  const topo=`<defs><clipPath id="bclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#bclip)">${topoTiles(pr)}</g>`;
+  document.getElementById('bairromap').innerHTML=`<svg viewBox="0 0 ${W+66} ${H+8}" data-home="0 0 ${W+66} ${H+8}" width="100%" style="max-height:520px">${topo}${fills}${outl}${cb}</svg>`;
+  applyZoom('bairromap');
+  const sorted=RUN.bairros.slice().sort((a,b)=>valOf(b)-valOf(a));
+  document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(valOf(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${M.bunit}</i></span></div>`).join('');
   const q=document.getElementById('bairroSearch').value.toLowerCase();
   if(q)filterBairros(q);
-  document.getElementById('bairrosub').textContent=M.label+' · '+M.blabel+' por bairro';
-  document.getElementById('bairrocapt').textContent='Previsão média por bairro (43 bairros). Como o WRF tem células de ~7 km — maiores que um bairro — bairros dentro da mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal.';
+  const whenLbl=(vn==='rain'&&view==='accum')?'acumulado':('+'+RUN.lead_h[view]+' h');
+  document.getElementById('bairrosub').textContent=M.label+' · '+whenLbl+' por bairro';
+  document.getElementById('bairrocapt').textContent=((vn==='rain'&&view==='accum')
+    ? 'Chuva acumulada da rodada por bairro (43 bairros).'
+    : M.label+' prevista por bairro em '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h).')
+    +' Como o WRF tem células de ~7 km — maiores que um bairro — bairros na mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal. Relevo: OpenTopoMap (CC-BY-SA).';
 }
 function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEach(r=>{r.style.display=r.dataset.nm.includes(q)?'':'none';});}
 // ---- 4. basin hourly ----
@@ -284,15 +313,59 @@ function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
   document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+')';
 }
+// ---- SVG pan/zoom for the two forecast maps (buttons + wheel + drag; survives re-render) ----
+const ZOOM={};
+function svgOf(id){return document.querySelector('#'+id+' svg');}
+function homeVB(id){const s=svgOf(id);return (s&&s.getAttribute('data-home'))?s.getAttribute('data-home').split(' ').map(Number):null;}
+function curVB(id){const s=svgOf(id);if(!s)return null;return ZOOM[id]?ZOOM[id].slice():(s.getAttribute('viewBox')||'').split(' ').map(Number);}
+function setVB(id,vb){const s=svgOf(id);if(!s)return;const h=homeVB(id);
+  if(h){vb[2]=Math.max(h[2]*0.22,Math.min(h[2],vb[2])); vb[3]=vb[2]*h[3]/h[2];
+    vb[0]=Math.max(h[0],Math.min(h[0]+h[2]-vb[2],vb[0]));
+    vb[1]=Math.max(h[1],Math.min(h[1]+h[3]-vb[3],vb[1]));}
+  ZOOM[id]=vb; s.setAttribute('viewBox',vb.join(' '));}
+function applyZoom(id){if(ZOOM[id])setVB(id,ZOOM[id].slice());}
+function resetZoom(id){delete ZOOM[id];const h=homeVB(id),s=svgOf(id);if(h&&s)s.setAttribute('viewBox',h.join(' '));}
+function zoomAt(id,f,cx,cy){const vb=curVB(id),s=svgOf(id);if(!vb||!s)return;const r=s.getBoundingClientRect();
+  const mx=vb[0]+((cx==null?r.width/2:cx-r.left)/r.width)*vb[2], my=vb[1]+((cy==null?r.height/2:cy-r.top)/r.height)*vb[3];
+  setVB(id,[mx-(mx-vb[0])*f, my-(my-vb[1])*f, vb[2]*f, vb[3]*f]);}
+function setupZoom(id){const cont=document.getElementById(id);if(!cont)return;
+  cont.addEventListener('wheel',e=>{e.preventDefault();zoomAt(id,e.deltaY<0?0.85:1/0.85,e.clientX,e.clientY);},{passive:false});
+  let drag=null;
+  cont.addEventListener('pointerdown',e=>{const vb=curVB(id),s=svgOf(id);if(!vb||!s)return;drag={x:e.clientX,y:e.clientY,vb,r:s.getBoundingClientRect()};try{cont.setPointerCapture(e.pointerId);}catch(_){}cont.style.cursor='grabbing';});
+  cont.addEventListener('pointermove',e=>{if(!drag)return;const dx=(e.clientX-drag.x)/drag.r.width*drag.vb[2], dy=(e.clientY-drag.y)/drag.r.height*drag.vb[3];setVB(id,[drag.vb[0]-dx,drag.vb[1]-dy,drag.vb[2],drag.vb[3]]);});
+  const end=()=>{if(drag){drag=null;cont.style.cursor='grab';}};
+  cont.addEventListener('pointerup',end);cont.addEventListener('pointercancel',end);cont.addEventListener('pointerleave',end);
+  cont.addEventListener('dblclick',()=>resetZoom(id));}
+function wireZoom(){document.querySelectorAll('.zc').forEach(zc=>{const id=zc.parentElement.querySelector('div[id]').id;
+  zc.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const z=btn.dataset.z;if(z==='in')zoomAt(id,0.8);else if(z==='out')zoomAt(id,1.25);else resetZoom(id);});});}
+
+// ---- forecast window: show only the future hours (now → next run), never the past ----
+let FUT=[];
+function computeFuture(){
+  if(!RUN||!RUN.lead_h) return [];
+  const all=RUN.lead_h.map((_,i)=>i);
+  const base=RUN.run_time?Date.parse(RUN.run_time.replace(' ','T')+'Z'):NaN;   // run_time is in UTC
+  if(isNaN(base)) return all;
+  const now=Date.now()-30*60000;                                              // 30-min grace so the current hour still shows
+  const fut=RUN.lead_h.map((h,i)=>({i,t:base+h*3600e3})).filter(o=>o.t>=now).map(o=>o.i);
+  return fut.length?fut:all;                                                  // fallback: stale/demo run → show all
+}
+
 // ---- controls / downloads ----
 function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado — soma de todas as horas</option>':'';
-  RUN.lead_h.forEach((h,i)=>o+=`<option value="${i}">+${h} h · ${RUN.valid_times[i]}</option>`);return o;}
-function redrawMaps(){drawMap();}
+  FUT.forEach(i=>o+=`<option value="${i}">+${RUN.lead_h[i]} h · ${RUN.valid_times[i]}</option>`);return o;}
+function redrawMaps(){drawMap();drawBairros();}
 function redrawAll(){drawMap();drawBars();drawBairros();drawSeries();}
 function setVar(vn){CURVAR=vn;document.querySelectorAll('#segVar button').forEach(b=>b.classList.toggle('on',b.dataset.v===vn));
-  const sel=document.getElementById('selStep');sel.innerHTML=stepOptions();CURVIEW=VARS[vn].accum?'accum':0;sel.value=String(CURVIEW);
-  document.getElementById('slStep').value='0';redrawAll();}
-function setView(v){CURVIEW=(v==='accum')?'accum':+v;const sl=document.getElementById('slStep');if(v!=='accum')sl.value=String(+v);redrawMaps();}
+  const sel=document.getElementById('selStep');sel.innerHTML=stepOptions();
+  const f0=FUT[0], fN=FUT[FUT.length-1];
+  // keep the same instant across all three variables (Chuva keeps 'Acumulado' only when already selected)
+  if(CURVIEW==='accum'&&!VARS[vn].accum) CURVIEW=CURHOUR;            // Temperatura/Vento have no 'accum' → keep the hour
+  if(CURVIEW!=='accum') CURVIEW=Math.min(Math.max(CURHOUR,f0),fN);  // stay within the future window
+  sel.value=String(CURVIEW);
+  document.getElementById('slStep').value=(CURVIEW==='accum')?String(f0):String(CURVIEW);
+  redrawAll();}
+function setView(v){CURVIEW=(v==='accum')?'accum':+v;const sl=document.getElementById('slStep');if(v!=='accum'){CURHOUR=+v;sl.value=String(+v);}redrawMaps();}
 function downloads(){document.getElementById('dlrow').innerHTML=
    '<a class="dl" href="data/wrf_basins.csv" download>⬇ Bacias (CSV)</a>'
   +'<a class="dl" href="data/wrf_bairros.csv" download>⬇ Bairros (CSV)</a>'
@@ -305,10 +378,12 @@ function downloads(){document.getElementById('dlrow').innerHTML=
 // ---- 0. forecast rain-risk alert (same OMM logic as the 'Agora' page, on the forecast) ----
 function renderForecastAlert(){
   const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has||!RUN.has.rain) return;
-  // worst predicted hourly rain rate anywhere in the city over the run window (peak, area-weighted per bairro)
+  // worst predicted hourly rain rate anywhere in the city over the FUTURE window (peak, area-weighted per bairro)
   const src=(RUN.bairros&&RUN.bairros.length)?RUN.bairros:(RUN.basins||[]);
   let pk={v:0,name:'',time:''};
-  src.forEach(b=>{const p=b.rain&&b.rain.peak_mm_h; if(p!=null&&p>pk.v)pk={v:p,name:b.name,time:b.rain.peak_time};});
+  src.forEach(b=>{if(!b.rain)return;
+    if(b.rain.series){FUT.forEach(i=>{const val=b.rain.series[i]; if(val!=null&&val>pk.v)pk={v:val,name:b.name,time:RUN.valid_times[i]};});}
+    else if(b.rain.peak_mm_h!=null&&b.rain.peak_mm_h>pk.v)pk={v:b.rain.peak_mm_h,name:b.name,time:b.rain.peak_time};});
   const v=pk.v;
   const cls = v<2.5?'leve':(v<10?'moderada':(v<50?'forte':'violenta'));
   const active = v>=10;                                   // "forte"+ => alerta ativo — igual à página Agora
@@ -343,16 +418,18 @@ async function init(){
   const isDemo=/synth|demo|test/i.test(RUN.source||'')||!RUN.run_time;
   if(isDemo)document.getElementById('demo').innerHTML='<div class="demo">⚠️ Campo de <b>demonstração</b> (sintético) — os números serão substituídos pela rodada real do WRF assim que o NetCDF for processado.</div>';
   document.getElementById('ribbon').innerHTML='CPTEC/INPE WRF AMS 7 km · rodada '+(RUN.run_time||'—')+' UTC · horários válidos em hora local (UTC−3) · gerado '+(RUN.generated_at||'');
+  FUT=computeFuture(); CURHOUR=FUT[0];                                       // future-only forecast window
   const order=[['rain','Chuva'],['temp','Temperatura'],['wind','Vento']].filter(([k])=>RUN.has&&RUN.has[k]);
   document.getElementById('segVar').innerHTML=order.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('');
   document.querySelectorAll('#segVar button').forEach(btn=>btn.onclick=()=>setVar(btn.dataset.v));
   document.getElementById('selStep').onchange=function(){setView(this.value);};
-  const sl=document.getElementById('slStep');sl.min='0';sl.max=String(RUN.lead_h.length-1);
-  sl.oninput=()=>{document.getElementById('selStep').value=String(+sl.value);CURVIEW=+sl.value;redrawMaps();};
+  const sl=document.getElementById('slStep');sl.min=String(FUT[0]);sl.max=String(FUT[FUT.length-1]);
+  sl.oninput=()=>{document.getElementById('selStep').value=String(+sl.value);CURVIEW=+sl.value;CURHOUR=+sl.value;redrawMaps();};
   document.getElementById('bairroSearch').oninput=function(){filterBairros(this.value.toLowerCase());};
   downloads();
   renderForecastAlert();
   setVar((RUN.has&&RUN.has.rain)?'rain':order[0][0]);
+  setupZoom('wmap'); setupZoom('bairromap'); wireZoom();                     // pan/zoom on both forecast maps
 }
 init();
 </script>
