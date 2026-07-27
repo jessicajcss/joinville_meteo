@@ -124,7 +124,7 @@
       <div class="ct">Evolução horária por bacia <span class="mut" id="hsub"></span></div>
       <div id="hourly"></div>
       <div class="hleg" id="hleg"></div>
-      <div class="capt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
+      <div class="capt" id="hcapt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
     </div>
 
     <!-- 5 · figura regional (6 painéis, estilo científico) -->
@@ -141,6 +141,7 @@
       <p><b>Contraste térmico mar–continente–relevo.</b> A temperatura a 2 m exibe um gradiente característico: o oceano e a orla, de maior inércia térmica, permanecem amenos; o interior elevado da Serra é mais frio; e a superfície continental aquece e resfria mais no ciclo diário. No mapa, isso aparece como faixas mais <b>quentes a leste</b> (costa/oceano) e mais <b>frias a oeste</b> (altitude), com aquecimento ao longo da manhã.</p>
       <p><b>Vento.</b> O vento a 10 m responde ao gradiente de pressão de grande escala e é <b>canalizado e desviado pelo relevo</b>; brisas marítima e terrestre modulam o ciclo diário junto à costa. As setas indicam a direção <i>para onde</i> o vento sopra; a cor, a velocidade.</p>
       <p><b>Escala e leitura.</b> O WRF do CPTEC tem resolução de <b>~7 km</b>: cada “retalho” do mapa é a média do modelo naquela célula. Isso resolve bem os padrões regionais (serra × costa), mas é mais grosseiro que um bairro — por isso vários bairros dentro de uma mesma célula recebem o mesmo valor previsto. É a <b>saída direta do modelo</b>, sem correção de viés; use-a como orientação de padrão e tendência, confirmada pelas estações observadas nas demais páginas.</p>
+      <p><b>O que é “OMM” e quais são os “limiares”.</b> <b>OMM</b> = <b>Organização Meteorológica Mundial</b> — a agência das Nações Unidas para meteorologia, clima e água (em inglês, <i>WMO</i>). Os <b>limiares</b> citados no alerta são as classes de <b>intensidade de chuva</b>, definidas pela <b>taxa horária</b> (mm por hora) segundo a convenção meteorológica de precipitação: <b>leve</b> &lt; 2,5 mm/h · <b>moderada</b> 2,5–10 mm/h · <b>forte</b> 10–50 mm/h · <b>violenta</b> ≥ 50 mm/h. O alerta de risco acende a partir de <b>forte</b> (≥ 10 mm/h). São <i>taxas instantâneas</i> (o quanto choveria numa hora naquele ritmo), não o total acumulado do dia — a mesma escala usada nas páginas <a href="index.html">Agora</a> e <a href="sobre.html">Sobre</a>.</p>
     </div>
 
     <div class="foot">Modelo: <b>CPTEC/INPE WRF AMS 7 km</b> · agregação por bacia/bairro: LaCiA · metodologia na página <a href="sobre.html">Sobre</a><br>
@@ -252,7 +253,7 @@ function drawMap(){
   document.getElementById('mapcapt').innerHTML=(vn==='rain'&&view==='accum'
     ? '<b>Acumulado</b> = chuva total prevista na rodada (mm), somando todas as horas, por célula da grade WRF de 7 km. Escolha uma hora em “Instante” para ver a taxa horária (mm/h) — em chuva fraca cada hora fica perto de 0, mas o acumulado soma esses pinguinhos. '
     : M.label+' prevista para '+RUN.valid_times[view]+' (taxa da hora). ')
-    +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z). Relevo: OpenTopoMap (CC-BY-SA).';
+    +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z). Relevo: OpenTopoMap (CC-BY-SA).'+runFtr();
 }
 // ---- 2. basin bars ----
 function drawBars(){const vn=CURVAR, M=VARS[vn];
@@ -263,11 +264,14 @@ function drawBars(){const vn=CURVAR, M=VARS[vn];
     const col=BCOL[b.name]||M.color;
     return `<div class="brow"><span class="nm" title="${b.name}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${col};margin-right:6px;vertical-align:middle"></span>${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${col}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${M.bunit}${dir}</i></span></div>`;}).join('');
   document.getElementById('totsub').textContent=M.label+' · '+M.blabel;
-  const cap={rain:'Total previsto por bacia = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, CRS de área igual).',
+  const cap={rain:'Total previsto por bacia = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, em CRS métrico — UTM 22S / SIRGAS 2000).',
     temp:'Temperatura média prevista por bacia (média no tempo da média espacial ponderada por área).',
     wind:'Vento médio previsto por bacia: velocidade média (m/s) e direção predominante, do vetor médio u,v ponderado por área.'};
-  document.getElementById('barcapt').textContent=cap[vn];
+  document.getElementById('barcapt').textContent=cap[vn]+runFtr();
 }
+// footnote anchoring the "+X h" lead times to the WRF run (rodada), shown under each plot/map
+function runFtr(){return (typeof RUN!=='undefined'&&RUN&&RUN.run_time)
+  ? ' · Rodada WRF: '+RUN.run_time.slice(0,16)+' UTC — os instantes “+X h” são horas contadas a partir dela.' : '';}
 // ---- 3. bairro choropleth + list ----
 // OpenTopoMap relief tiles behind an SVG map, positioned by the map projection
 // (equirectangular ≈ Web-Mercator over this small domain); 85% opacity so the relief reads
@@ -314,7 +318,7 @@ function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn],
   document.getElementById('bairrocapt').textContent=((vn==='rain'&&view==='accum')
     ? 'Chuva acumulada da rodada por bairro (43 bairros).'
     : M.label+' prevista por bairro em '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h).')
-    +' Como o WRF tem células de ~7 km — maiores que um bairro — bairros na mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal. Relevo: OpenTopoMap (CC-BY-SA).';
+    +' Como o WRF tem células de ~7 km — maiores que um bairro — bairros na mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal. Relevo: OpenTopoMap (CC-BY-SA).'+runFtr();
 }
 function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEach(r=>{r.style.display=r.dataset.nm.includes(q)?'':'none';});}
 // ---- 4. basin hourly ----
@@ -331,6 +335,7 @@ function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=
   document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
   document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h';
+  document.getElementById('hcapt').textContent='Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.'+runFtr();
 }
 // ---- SVG pan/zoom for the two forecast maps (buttons + wheel + drag; survives re-render) ----
 const ZOOM={};
@@ -442,6 +447,9 @@ async function init(){
   const isDemo=/synth|demo|test/i.test(RUN.source||'')||!RUN.run_time;
   if(isDemo)document.getElementById('demo').innerHTML='<div class="demo">⚠️ Campo de <b>demonstração</b> (sintético) — os números serão substituídos pela rodada real do WRF assim que o NetCDF for processado.</div>';
   document.getElementById('ribbon').innerHTML='CPTEC/INPE WRF AMS 7 km · rodada '+(RUN.run_time||'—')+' UTC · horários válidos em hora local (UTC−3) · gerado '+(RUN.generated_at||'');
+  // cache-bust the regional figure: a freshly rebuilt PNG shares the same URL, so pin a version
+  // (run/generation stamp) to force the browser to fetch the new image instead of a stale cache
+  const _rf=document.getElementById('regfig'); if(_rf) _rf.src='data/wrf_regional.png?v='+encodeURIComponent((RUN.run_time||RUN.generated_at||'x').replace(/[^0-9]/g,''));
   FUT=computeFuture(); CURHOUR=FUT[0];                                       // future-only forecast window
   const order=[['rain','Chuva'],['temp','Temperatura'],['wind','Vento']].filter(([k])=>RUN.has&&RUN.has[k]);
   document.getElementById('segVar').innerHTML=order.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('');

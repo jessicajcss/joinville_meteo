@@ -164,7 +164,7 @@ function tempChart(s,year){
 function rainHM(rain){
   const years=Object.keys(rain).map(Number).sort((a,b)=>a-b); if(!years.length)return '<div style="padding:30px 0;color:#a0a1a7">Sem dados de chuva.</div>';
   const all=years.flatMap(y=>rain[y].filter(v=>v!=null)); const mx=Math.max(...all,1);
-  const cw=Math.max(30,Math.min(52,760/years.length)),ch=20,PL=30,PT=20,rowsH=12*ch,W=PL+years.length*cw,H=PT+rowsH+26;
+  const cw=Math.max(30,Math.min(52,760/years.length)),ch=20,PL=42,PT=20,rowsH=12*ch,W=PL+years.length*cw,H=PT+rowsH+26;
   let s='';
   years.forEach((y,j)=>s+=`<text x="${PL+j*cw+cw/2}" y="14" font-size="11.5" fill="#6b7178" text-anchor="middle" font-weight="700">${y}</text>`);
   for(let m=0;m<12;m++){s+=`<text x="${PL-4}" y="${PT+m*ch+ch/2+3.5}" font-size="11.5" fill="#a0a1a7" text-anchor="end">${M3[m]}</text>`;
@@ -174,7 +174,9 @@ function rainHM(rain){
   // totals row
   const ty=PT+rowsH+16;s+=`<text x="${PL-4}" y="${ty}" font-size="11.5" fill="#383a42" text-anchor="end" font-weight="800">Total</text>`;
   years.forEach((y,j)=>{const tot=rain[y].reduce((a,b)=>a+(b||0),0);s+=`<text x="${PL+j*cw+cw/2}" y="${ty}" font-size="11.5" fill="#383a42" text-anchor="middle" font-weight="800">${Math.round(tot)}</text>`;});
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W}px">${s}</svg>`;
+  // render at natural width (cells stay ~52px), capped to the card — a 2-year record no longer
+  // stretches to fill the box; wide records scale down to fit. Centred within the card.
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto;display:block;margin:0 auto">${s}</svg>`;
 }
 function coverStrip(cov){
   const years=Object.keys(cov).map(Number).sort((a,b)=>a-b); if(!years.length)return '';

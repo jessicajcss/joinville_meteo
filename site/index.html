@@ -223,7 +223,8 @@ async function init(){
     <div class="kh"><span><span class="warn">&#9888;</span> Alertas de tempo severo <small>· limiares OMM</small></span>
       <span class="kstat ${stat.c}" style="${stat.s}">${stat.t}</span></div>
     <div class="kb">${chip(rlvl,HZ.rain,'Chuva')}${chip(tlvl,HZ.temp,'Temperatura')}${chip(wlvl,HZ.wind,'Vento')}</div>
-    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">${offline?'sem dados recentes das estações — alerta indisponível':'níveis de aviso'}</span></div>`;
+    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">${offline?'sem dados recentes das estações — alerta indisponível':'níveis de aviso'}</span></div>
+    <div style="font-size:10px;color:var(--mut);margin-top:9px;line-height:1.5"><b>OMM</b> = Organização Meteorológica Mundial (<i>WMO</i>). <b>Limiares de chuva</b> (taxa por hora): leve &lt; 2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥ 50 mm/h — o alerta acende a partir de <b>forte</b> (≥ 10 mm/h). Detalhes na página <a href="sobre.html" style="color:inherit;text-decoration:underline">Sobre</a>.</div>`;
   // estado
   document.getElementById('estado').innerHTML=`<div class="ct">Estado da rede</div>
     <div class="txt">${N.n_online} de ${N.n_total} estações online agora. As demais estão defasadas — última leitura há mais de ${SNAP.fresh_days} dias.</div>

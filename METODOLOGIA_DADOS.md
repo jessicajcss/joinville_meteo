@@ -283,8 +283,9 @@ AMS, 7 km), resumidos por bacia, com o **limite municipal** sobreposto no mapa.
     `u10_ms`, `v10_ms`).
 
 ### 7.2 Agregação por bacia (peso exato de área)
-- Cada célula de 7 km vira polígono; células e bacias vão a um **CRS de área igual**
-  (EPSG:31982, SIRGAS/UTM 22S) e são cruzadas (`geopandas.overlay`). Valor da bacia por
+- Cada célula de 7 km vira polígono; células e bacias vão a um **CRS métrico**
+  (EPSG:31982 — SIRGAS 2000 / UTM 22S; projeção conforme, com distorção de área desprezível
+  nesta escala) e são cruzadas (`geopandas.overlay`). Valor da bacia por
   hora = **média ponderada pela área**: Σ(valor·área∩) / Σ(área∩). A grade é recortada à
   janela de Joinville (bbox bacias ∪ município + margem). **Invariante testado** para os
   três campos: campo uniforme → mesmo valor em toda bacia; cobertura ~100%.
