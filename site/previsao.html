@@ -40,6 +40,10 @@
 .zc button{width:27px;height:27px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.14);line-height:1;display:flex;align-items:center;justify-content:center;font-family:inherit}
 .zc button:hover{background:#eef3fd;color:var(--blue)}
 .regfig{width:100%;height:auto;border-radius:10px;display:block;margin-top:8px}
+.rgb{width:34px;height:34px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit}
+.rgb:hover{background:#eef3fd;color:var(--blue)}
+.rgnow{font-weight:800;font-size:13px;white-space:nowrap;color:var(--blue)}
+.rgnow small{color:var(--mut);font-weight:600}
 .bsearch{width:100%;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:11px;padding:8px 12px;margin-bottom:8px}
 .blist{max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
 .brow2{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #f3f4f6;font-size:12.5px}
@@ -127,6 +131,21 @@
       <div class="capt" id="hcapt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
     </div>
 
+    <!-- 4b · mapas regionais por hora (interativo) — acima da figura estática -->
+    <div class="card" style="margin-top:16px" id="reghourcard" hidden>
+      <div class="ct">Mapas regionais por hora <span class="mut">interativo · escolha o instante</span></div>
+      <div class="pick" style="margin:8px 0 10px;align-items:center">
+        <button class="rgb" id="rgPrev" title="hora anterior">‹</button>
+        <select id="rgSel"></select>
+        <input type="range" id="rgSl" min="0" max="0" value="0" style="flex:1;min-width:160px;accent-color:var(--blue)">
+        <button class="rgb" id="rgNext" title="próxima hora">›</button>
+        <button class="rgb" id="rgPlay" style="width:auto;padding:0 14px">▶ animar</button>
+        <span class="rgnow" id="rgNow"></span>
+      </div>
+      <img class="regfig" id="rgImg" alt="Mapas regionais WRF por hora — chuva, temperatura e vento">
+      <div class="capt" id="rgCap"></div>
+    </div>
+
     <!-- 5 · figura regional (6 painéis, estilo científico) -->
     <div class="card" style="margin-top:16px">
       <div class="ct">Mapa regional — domínio do modelo <span class="mut">6 painéis · CPTEC-WRF 7 km</span></div>
@@ -141,7 +160,7 @@
       <p><b>Contraste térmico mar–continente–relevo.</b> A temperatura a 2 m exibe um gradiente característico: o oceano e a orla, de maior inércia térmica, permanecem amenos; o interior elevado da Serra é mais frio; e a superfície continental aquece e resfria mais no ciclo diário. No mapa, isso aparece como faixas mais <b>quentes a leste</b> (costa/oceano) e mais <b>frias a oeste</b> (altitude), com aquecimento ao longo da manhã.</p>
       <p><b>Vento.</b> O vento a 10 m responde ao gradiente de pressão de grande escala e é <b>canalizado e desviado pelo relevo</b>; brisas marítima e terrestre modulam o ciclo diário junto à costa. As setas indicam a direção <i>para onde</i> o vento sopra; a cor, a velocidade.</p>
       <p><b>Escala e leitura.</b> O WRF do CPTEC tem resolução de <b>~7 km</b>: cada “retalho” do mapa é a média do modelo naquela célula. Isso resolve bem os padrões regionais (serra × costa), mas é mais grosseiro que um bairro — por isso vários bairros dentro de uma mesma célula recebem o mesmo valor previsto. É a <b>saída direta do modelo</b>, sem correção de viés; use-a como orientação de padrão e tendência, confirmada pelas estações observadas nas demais páginas.</p>
-      <p><b>O que é “OMM” e quais são os “limiares”.</b> <b>OMM</b> = <b>Organização Meteorológica Mundial</b> — a agência das Nações Unidas para meteorologia, clima e água (em inglês, <i>WMO</i>). Os <b>limiares</b> citados no alerta são as classes de <b>intensidade de chuva</b>, definidas pela <b>taxa horária</b> (mm por hora) segundo a convenção meteorológica de precipitação: <b>leve</b> &lt; 2,5 mm/h · <b>moderada</b> 2,5–10 mm/h · <b>forte</b> 10–50 mm/h · <b>violenta</b> ≥ 50 mm/h. O alerta de risco acende a partir de <b>forte</b> (≥ 10 mm/h). São <i>taxas instantâneas</i> (o quanto choveria numa hora naquele ritmo), não o total acumulado do dia — a mesma escala usada nas páginas <a href="index.html">Agora</a> e <a href="sobre.html">Sobre</a>.</p>
+      <p><b>O que é “OMM” e quais são os “limiares”.</b> <b>OMM</b> = <b>Organização Meteorológica Mundial</b> — a agência das Nações Unidas para meteorologia, clima e água (em inglês, <i>WMO</i>). Os <b>limiares</b> citados no alerta são as classes de <b>intensidade de chuva</b>, definidas pela <b>taxa horária</b> (mm por hora) segundo a convenção meteorológica de precipitação: <b>leve</b> &lt; 2,5 mm/h · <b>moderada</b> 2,5–10 mm/h · <b>forte</b> 10–50 mm/h · <b>violenta</b> ≥ 50 mm/h. O alerta de risco acende a partir de <b>forte</b> (≥ 10 mm/h). São <i>taxas instantâneas</i> (o quanto choveria numa hora naquele ritmo), não o total acumulado do dia — a mesma escala detalhada na página <a href="sobre.html">Sobre</a>.</p>
     </div>
 
     <div class="foot">Modelo: <b>CPTEC/INPE WRF AMS 7 km</b> · agregação por bacia/bairro: LaCiA · metodologia na página <a href="sobre.html">Sobre</a><br>
@@ -180,6 +199,36 @@ const VARS={
         bval:b=>b.wind.mean_ms, blabel:'média', series:b=>b.wind.series, vlims:(V)=>[0, V.spd_max], field:(V,view)=>V.spd_hourly[view]}};
 
 let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', CURHOUR=0, PROJ, PROJB, BCOL={};
+let RH=null, RGI=0, RGT=null;
+// ---- interactive per-hour regional maps (menu above the static 6-panel figure) ----
+function setupRegHours(){
+  const card=document.getElementById('reghourcard');
+  if(!RH||!RH.hours||!RH.hours.length){ if(card) card.hidden=true; return; }
+  card.hidden=false;
+  const hrs=RH.hours, ver=encodeURIComponent((RH.run_time||'x').replace(/[^0-9]/g,''));
+  const shortT=vt=>vt.slice(5,16).replace('-','/');          // 'MM-DD HH:MM' -> 'MM/DD HH:MM'
+  document.getElementById('rgSel').innerHTML=hrs.map((h,k)=>`<option value="${k}">+${h.lead_h} h · ${shortT(h.valid_time)}</option>`).join('');
+  const sl=document.getElementById('rgSl'); sl.max=hrs.length-1;
+  // default = the hour closest to the viewer's current time (valid_times are local, UTC-3)
+  const now=Date.now(); let best=0,bd=Infinity;
+  hrs.forEach((h,k)=>{const t=Date.parse(h.valid_time.replace(' ','T')+':00-03:00'); const d=Math.abs(t-now); if(d<bd){bd=d;best=k;}});
+  RGI=best;
+  function draw(){const h=hrs[RGI];
+    document.getElementById('rgImg').src='data/'+h.file+'?v='+ver;
+    document.getElementById('rgSel').value=RGI; document.getElementById('rgSl').value=RGI;
+    document.getElementById('rgNow').innerHTML=`+${h.lead_h} h <small>· ${shortT(h.valid_time)} (local)</small>`;
+    document.getElementById('rgCap').innerHTML=`Chuva, temperatura (2 m) e vento (10 m) previstos sobre todo o domínio do modelo, na hora escolhida — mesmos mapas da figura abaixo, navegáveis. Começa na hora mais próxima de agora. <b>Rodada WRF: ${(RH.run_time||'—')} UTC</b> — os instantes “+X h” contam a partir dela.`;
+  }
+  const step=d=>{RGI=(RGI+d+hrs.length)%hrs.length; draw();};
+  document.getElementById('rgPrev').onclick=()=>step(-1);
+  document.getElementById('rgNext').onclick=()=>step(1);
+  document.getElementById('rgSel').onchange=function(){RGI=+this.value; draw();};
+  sl.oninput=function(){RGI=+this.value; draw();};
+  const play=document.getElementById('rgPlay');
+  play.onclick=function(){ if(RGT){clearInterval(RGT);RGT=null;this.textContent='▶ animar';}
+    else{this.textContent='⏸ pausar';RGT=setInterval(()=>step(1),900);} };
+  draw();
+}
 
 function mkproj(bb,W,padFrac){padFrac=padFrac==null?0.06:padFrac;
   const px=(bb[2]-bb[0])*padFrac+0.01, py=(bb[3]-bb[1])*padFrac+0.01;
@@ -399,7 +448,7 @@ function downloads(){document.getElementById('dlrow').innerHTML=
   +'<a class="dl alt" href="data/wrf_basins.geojson" download>⬇ Bacias (GeoJSON)</a>'
   +'<a class="dl alt" href="data/wrf_bairros.geojson" download>⬇ Bairros (GeoJSON)</a>';}
 
-// ---- 0. forecast rain-risk alert (same OMM logic as the 'Agora' page, on the forecast) ----
+// ---- 0. forecast rain-risk alert (OMM intensity thresholds applied to the WRF forecast) ----
 function renderForecastAlert(){
   const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has||!RUN.has.rain) return;
   // worst predicted hourly rain rate anywhere in the city over the FUTURE window (peak, area-weighted per bairro)
@@ -410,7 +459,7 @@ function renderForecastAlert(){
     else if(b.rain.peak_mm_h!=null&&b.rain.peak_mm_h>pk.v)pk={v:b.rain.peak_mm_h,name:b.name,time:b.rain.peak_time};});
   const v=pk.v;
   const cls = v<2.5?'leve':(v<10?'moderada':(v<50?'forte':'violenta'));
-  const active = v>=10;                                   // "forte"+ => alerta ativo — igual à página Agora
+  const active = v>=10;                                   // "forte"+ => alerta ativo (limiar OMM)
   const lvl = active?'alert':(v>=2.5?'warn':'ok');
   const label = v<2.5?'Sem chuva significativa prevista'
               : v<10?'Atenção — chuva moderada prevista'
@@ -427,9 +476,9 @@ function renderForecastAlert(){
           <div><div class="fclabel">${label}</div><div class="fcstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alerta'}</div></div>
         </div>
         <div class="kb" style="margin-top:11px"><span class="chip ${lvl}">🌧️ Chuva prevista: ${cls} · pico ${v.toFixed(1)} mm/h</span></div>
-        <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">mesma lógica da página Agora</span></div>
+        <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">níveis de aviso · limiares OMM</span></div>
       </div>
-      <div class="capt fccapt">Maior taxa de chuva horária que o modelo prevê em algum bairro na janela da rodada${when?(' ('+when+')'):''}. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h), igual à página Agora. <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>
+      <div class="capt fccapt">Maior taxa de chuva horária que o modelo prevê em algum bairro na janela da rodada${when?(' ('+when+')'):''}. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h). <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>
     </div>`;
 }
 
@@ -450,6 +499,7 @@ async function init(){
   // cache-bust the regional figure: a freshly rebuilt PNG shares the same URL, so pin a version
   // (run/generation stamp) to force the browser to fetch the new image instead of a stale cache
   const _rf=document.getElementById('regfig'); if(_rf) _rf.src='data/wrf_regional.png?v='+encodeURIComponent((RUN.run_time||RUN.generated_at||'x').replace(/[^0-9]/g,''));
+  RH=await gj('data/wrf_regional_hours.json'); setupRegHours();
   FUT=computeFuture(); CURHOUR=FUT[0];                                       // future-only forecast window
   const order=[['rain','Chuva'],['temp','Temperatura'],['wind','Vento']].filter(([k])=>RUN.has&&RUN.has[k]);
   document.getElementById('segVar').innerHTML=order.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('');

@@ -258,6 +258,71 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
     plt.close(fig)
 
 
+def regional_hourly_maps(lat, lon, fields, vt, lead_h, out_dir, overlays=None, run_time=None, idx=None, maxh=24):
+    """Per-hour regional map images (the 3 map panels b/d/f, 1x3) for the interactive hour menu
+    on the Previsão page. FIXED filenames wrf_reg_00.png..wrf_reg_NN.png -> OVERWRITTEN every run
+    (the working tree / live site never accumulate). A manifest wrf_regional_hours.json lists which
+    hours are valid this run. Colour scales are FIXED across the window so hours are comparable.
+    Same look as the static figure's maps (viridis / RdYlBu_r / YlGnBu + quiver + faint borders)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    rain = fields["rain"]; temp = fields["temp"]; u = fields["u"]; v = fields["v"]
+    T = rain.shape[0]
+    idx = [int(i) for i in (range(T) if idx is None else idx) if 0 <= int(i) < T][:maxh]
+    if not idx:
+        return 0
+    ia = np.array(idx)
+    lbl = [s[5:16] for s in vt]
+    xlim = (float(np.min(lon)), float(np.max(lon))); ylim = (float(np.min(lat)), float(np.max(lat)))
+    geo_aspect = 1.0 / np.cos(np.deg2rad(0.5 * (ylim[0] + ylim[1]))); overlays = overlays or []
+    have_t = temp is not None; have_w = (u is not None and v is not None)
+    sp = np.hypot(u, v) if have_w else None
+    # fixed colour scales across the whole window (so the menu/animation is comparable hour-to-hour)
+    rvmax = float(np.nanpercentile(rain[ia], 99)) or 1.0
+    tvmin = float(np.nanmin(temp[ia])) if have_t else 0.0
+    tvmax = float(np.nanmax(temp[ia])) if have_t else 1.0
+    svmax = float(np.nanpercentile(sp[ia], 99)) if have_w else 1.0
+
+    def deco(a):
+        for ov in overlays:
+            for lo_r, la_r in ov["rings"]:
+                a.plot(lo_r, la_r, color=ov["color"], lw=ov["lw"], alpha=ov["alpha"], zorder=6)
+        a.set_xlim(*xlim); a.set_ylim(*ylim); a.set_aspect(geo_aspect, adjustable="box")
+
+    manifest = []
+    for k, i in enumerate(idx):
+        fig, ax = plt.subplots(1, 3, figsize=(15, 5.2))
+        im = ax[0].pcolormesh(lon, lat, rain[i], vmin=0, vmax=rvmax, cmap="viridis", shading="auto")
+        deco(ax[0]); ax[0].set_title(f"(b) chuva · +{int(lead_h[i])} h · {lbl[i]}")
+        plt.colorbar(im, ax=ax[0], label="mm h$^{-1}$", fraction=0.046, pad=0.04)
+        if have_t:
+            im2 = ax[1].pcolormesh(lon, lat, temp[i], vmin=tvmin, vmax=tvmax, cmap="RdYlBu_r", shading="auto")
+            deco(ax[1]); ax[1].set_title(f"(d) temperatura 2 m · +{int(lead_h[i])} h")
+            plt.colorbar(im2, ax=ax[1], label="°C", fraction=0.046, pad=0.04)
+        else:
+            ax[1].text(.5, .5, "sem t2m", ha="center"); ax[1].axis("off")
+        if have_w:
+            im3 = ax[2].pcolormesh(lon, lat, sp[i], vmin=0, vmax=svmax, cmap="YlGnBu", shading="auto")
+            s = max(1, sp.shape[2] // 12)
+            ax[2].quiver(lon[::s], lat[::s], u[i, ::s, ::s], v[i, ::s, ::s], scale=200, width=0.003)
+            deco(ax[2]); ax[2].set_title(f"(f) vento 10 m · +{int(lead_h[i])} h")
+            plt.colorbar(im3, ax=ax[2], label="m s$^{-1}$", fraction=0.046, pad=0.04)
+        else:
+            ax[2].text(.5, .5, "sem vento", ha="center"); ax[2].axis("off")
+        run_lbl = (f"rodada {run_time} UTC · " if run_time else "")
+        fig.suptitle(f"CPTEC/INPE WRF AMS 7 km — Joinville · {run_lbl}{lbl[i]} (local, UTC−3)",
+                     y=1.02, fontsize=12, fontweight="bold")
+        plt.tight_layout()
+        fn = f"wrf_reg_{k:02d}.png"
+        plt.savefig(str(out_dir / fn), dpi=95, bbox_inches="tight"); plt.close(fig)
+        manifest.append({"i": k, "lead_h": int(lead_h[i]), "valid_time": vt[i], "file": fn})
+    (out_dir / "wrf_regional_hours.json").write_text(
+        json.dumps({"run_time": run_time, "generated_at": vt[0] if vt else "", "hours": manifest},
+                   ensure_ascii=False), encoding="utf-8")
+    return len(manifest)
+
+
 def grid_block(lat, lon, fields, T):
     """Full-box grid fields for the regional patchwork map."""
     block = {"lat": [round(float(x), 4) for x in lat], "lon": [round(float(x), 4) for x in lon], "vars": {}}
@@ -332,7 +397,7 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     T = len(fh)
     # regional maps (b,d,f): show the NEXT forecast hour from generation time — a true forecast
     # snapshot, not the middle of the run. Falls back to mid-run if valid_time is unavailable.
-    tgt_next = None
+    tgt_next = None; future = None
     if "valid_time" in ds:
         vt_utc = ds["valid_time"].values.astype("datetime64[s]")
         now_utc = np.datetime64(datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0), "s")
@@ -430,6 +495,15 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     except Exception as e:      # matplotlib missing / plotting error must not break the data build
         print(f"[wrf] regional figure skipped: {e}")
         have_fig = False
+
+    # --- per-hour regional maps for the interactive hour menu (fixed names, overwritten each run) ---
+    n_reg_hours = 0
+    try:
+        fut = future.tolist() if (isinstance(future, np.ndarray) and future.size) else list(range(T))
+        n_reg_hours = regional_hourly_maps(lat_full, lon_full, fields_full, vt, fh, outdir,
+                                           overlays=overlays, run_time=run_time, idx=fut, maxh=24)
+    except Exception as e:
+        print(f"[wrf] hourly regional maps skipped: {e}")
 
     # --- forecast JSON: local (window) grid + basins + bairros ---
     local = grid_block(latw, lonw, fields_win, T)
