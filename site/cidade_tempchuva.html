@@ -32,6 +32,13 @@
 .rank .bar span{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#6baed6,#08519c)}
 .rank .mm{font-weight:800;color:var(--blue);width:56px;text-align:right;flex:none}.rank .mm i{font-style:normal;font-weight:600;font-size:11px;color:var(--mut)}
 .subt{font-size:12.5px;font-weight:800;color:var(--ink);margin:2px 0 8px}
+.rgrp{display:flex;flex-direction:column;gap:9px}
+.rlab{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.rlab.hot{color:var(--red)}.rlab.cold{color:var(--blue)}
+.rank .n.hot{background:var(--red)}.rank .n.cold{background:var(--blue)}
+.rank .bar span.hot{background:linear-gradient(90deg,#f0a56b,#d55e00)}
+.rank .bar span.cold{background:linear-gradient(90deg,#8fb8e8,#2171b5)}
+.rank .mm.hot{color:var(--red)}.rank .mm.cold{color:var(--blue)}
 @media(max-width:1000px){.twocol{grid-template-columns:1fr}}
 </style>
 </head>
@@ -49,12 +56,10 @@
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
     </div>
 
-    <!-- overview climograph -->
+    <!-- overview intro -->
     <div class="card">
       <div class="ct">O ano climatológico de Joinville <span class="mut" id="clyears"></span></div>
       <div class="sec-narr lead-wrap" id="overtext"></div>
-      <div class="capt">barras = chuva mensal (mm, eixo esquerdo, pluviômetros da Defesa Civil + estações meteorológicas) · linha = temperatura média (°C, eixo direito)</div>
-      <div id="climo"></div>
     </div>
 
     <!-- Section 1: Temperature -->
@@ -62,6 +67,18 @@
       <div class="sec-h"><span class="sec-n t">1</span><span class="sec-t">Temperatura</span></div>
       <div class="sec-lead lead-wrap" id="tlead"></div>
       <div class="sec-narr lead-wrap" id="tnarr"></div>
+      <div class="twocol">
+        <div>
+          <div class="subt">Climatologia mensal — °C médios por mês</div>
+          <div id="tempClimo"></div>
+        </div>
+        <div>
+          <div class="subt">Dias mais quentes e mais frios já registrados</div>
+          <div class="rank" id="trank"></div>
+          <div class="capt" style="margin-top:8px">recorde diário = mediana das máximas / mínimas das estações naquele dia (≥ 3 estações, com limites físicos)</div>
+        </div>
+      </div>
+      <div class="subt" style="margin-top:18px">Temperatura média mensal — °C por ano (média da rede de estações meteorológicas)</div>
       <div class="hm-wrap" id="hmTemp"></div>
       <div class="hcbar"><span id="tlo"></span><span class="g" style="background:linear-gradient(90deg,#4078f2,#8aa0e0,#e0e0a0,#d55e00)"></span><span id="thi"></span></div>
       <div class="krow" id="tkeys"></div>
@@ -133,18 +150,26 @@ function heatmap(mat,years,months,colorFn,fmt){
       else{const c=colorFn(v);s+=`<rect x="${x+1}" y="${yy+1}" width="${cw-2}" height="${ch-2}" rx="3" fill="${c}"/><text x="${x+cw/2}" y="${yy+ch/2+3.5}" font-size="11.5" fill="${textOn(c)}" text-anchor="middle">${fmt(v)}</text>`;}}});
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${W}px">${s}</svg>`;
 }
-function climograph(clim){
-  const R=clim.rain,T=clim.temp,W=560,H=220,PL=40,PR=42,PB=26,PT=12,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
-  const rmax=Math.max(50,Math.ceil(Math.max(...R.filter(x=>x!=null))/50)*50);
-  const tv=T.filter(x=>x!=null),tmn=Math.floor(Math.min(...tv)/5)*5,tmx=Math.ceil(Math.max(...tv)/5)*5;
-  const ry=v=>PT+plotH-(v/rmax)*plotH,ty=v=>PT+plotH-((v-tmn)/(tmx-tmn))*plotH;let g='',bars='',tpts=[];
-  for(let r=0;r<=rmax;r+=50){const y=ry(r);g+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11.5" fill="#8fb0d6" text-anchor="end">${r}</text>`;}
-  for(let t=tmn;t<=tmx;t+=5){const y=ty(t);g+=`<text x="${W-PR+6}" y="${y+3}" font-size="11.5" fill="#c98a5c" text-anchor="start">${t}°</text>`;}
-  R.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw*0.2,y=ry(v);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#4078f2" opacity="0.75"/>`;}});
-  T.forEach((v,i)=>{if(v!=null)tpts.push(`${(PL+i*bw+bw/2).toFixed(1)},${ty(v).toFixed(1)}`);});
-  const dots=T.map((v,i)=>v!=null?`<circle cx="${(PL+i*bw+bw/2).toFixed(1)}" cy="${ty(v).toFixed(1)}" r="3" fill="#d55e00"/>`:'').join('');
-  const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-8}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="230">${g}${bars}<polyline points="${tpts.join(' ')}" fill="none" stroke="#d55e00" stroke-width="2.4"/>${dots}${labs}</svg>`;
+function tempClimo(T){
+  const W=560,H=190,PL=38,PR=12,PT=16,PB=22,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
+  const tv=T.filter(x=>x!=null);
+  const tmn=Math.floor(Math.min(...tv)/2)*2-2,tmx=Math.ceil(Math.max(...tv)/2)*2+2;
+  const ty=v=>PT+plotH-((v-tmn)/(tmx-tmn))*plotH;let g='',tpts=[],dots='';
+  for(let t=tmn;t<=tmx;t+=2){const y=ty(t);g+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11.5" fill="#c98a5c" text-anchor="end">${t}°</text>`;}
+  T.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw/2,y=ty(v);tpts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="#d55e00"/><text x="${x.toFixed(1)}" y="${(y-7).toFixed(1)}" font-size="10.5" fill="#6b7178" text-anchor="middle">${Math.round(v)}</text>`;}});
+  const area=`${PL},${ty(tmn).toFixed(1)} ${tpts.join(' ')} ${W-PR},${ty(tmn).toFixed(1)}`;
+  const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-7}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="200"><polygon points="${area}" fill="#d55e00" opacity="0.06"/>${g}<polyline points="${tpts.join(' ')}" fill="none" stroke="#d55e00" stroke-width="2.4"/>${dots}${labs}</svg>`;
+}
+function tempRank(hot,cold){
+  const hmax=Math.max(...hot.map(d=>d.tmax)),hmin=Math.min(...hot.map(d=>d.tmax));
+  const cmin=Math.min(...cold.map(d=>d.tmin)),cmax=Math.max(...cold.map(d=>d.tmin));
+  const wq=v=>hmax===hmin?100:Math.round(30+70*(v-hmin)/(hmax-hmin));
+  const wf=v=>cmax===cmin?100:Math.round(30+70*(cmax-v)/(cmax-cmin));
+  const hotRows=hot.map((d,i)=>`<div class="r2"><span class="n hot">${i+1}</span><span class="dt">${fmtBR(d.date)}</span><span class="bar"><span class="hot" style="width:${wq(d.tmax)}%"></span></span><span class="mm hot">${d.tmax}<i> °C</i></span></div>`).join('');
+  const coldRows=cold.map((d,i)=>`<div class="r2"><span class="n cold">${i+1}</span><span class="dt">${fmtBR(d.date)}</span><span class="bar"><span class="cold" style="width:${wf(d.tmin)}%"></span></span><span class="mm cold">${d.tmin}<i> °C</i></span></div>`).join('');
+  return `<div class="rgrp"><div class="rlab hot">Mais quentes — máxima do dia</div>${hotRows}</div><div class="rgrp" style="margin-top:12px"><div class="rlab cold">Mais frios — mínima do dia</div>${coldRows}</div>`;
 }
 function rainClimo(R){
   const W=560,H=190,PL=34,PR=10,PT=10,PB=22,plotW=W-PL-PR,plotH=H-PT-PB,bw=plotW/12;
@@ -182,13 +207,14 @@ async function init(){
   const wettestYr=C.annual.filter(a=>a.rain_total!=null).sort((a,b)=>b.rain_total-a.rain_total)[0];
   // overview
   document.getElementById('overtext').innerHTML=`Joinville tem clima subtropical úmido: verões quentes e chuvosos, invernos amenos e mais secos. Este resumo combina ${C.years[C.years.length-1]-C.years[0]+1} anos de dados — a temperatura vem da rede de estações meteorológicas e a chuva, da média espacial combinada da rede de pluviômetros da Defesa Civil e das estações meteorológicas.`;
-  document.getElementById('climo').innerHTML=climograph(cl);
   // temp scale
   const tall=C.temp.flat().filter(x=>x!=null),tlo=Math.floor(Math.min(...tall)),thi=Math.ceil(Math.max(...tall));
   document.getElementById('tlo').textContent=tlo+'°';document.getElementById('thi').textContent=thi+'°';
   // Section 1
   document.getElementById('tlead').innerHTML=`A temperatura média de Joinville vai de <b class="t">${cl.temp[coldM]} °C</b> em ${mn[coldM].toLowerCase()} a <b class="t">${cl.temp[hotM]} °C</b> em ${mn[hotM].toLowerCase()}, com média anual de <b class="t">${tmean} °C</b>.`;
-  document.getElementById('tnarr').textContent='Cada célula do mapa é a temperatura média de um mês em um ano — laranja para os meses quentes, azul para os frios. Lê-se de cima (mais antigo) para baixo (mais recente).';
+  document.getElementById('tnarr').innerHTML='À esquerda, a temperatura média de cada mês (climatologia); à direita, os dias mais quentes e mais frios já medidos pela rede. Abaixo, o mapa de calor mostra cada mês de cada ano — laranja nos meses quentes, azul nos frios, de cima (mais antigo) para baixo (mais recente).';
+  document.getElementById('tempClimo').innerHTML=tempClimo(cl.temp);
+  if(st.hottest_days&&st.coldest_days) document.getElementById('trank').innerHTML=tempRank(st.hottest_days,st.coldest_days);
   document.getElementById('hmTemp').innerHTML=heatmap(C.temp,C.years,C.months,v=>ramp(TEMPRAMP,(v-tlo)/(thi-tlo)),v=>Math.round(v));
   const TK=[['Mês mais quente',`${mn[hotM]} · ${cl.temp[hotM]}`,'°C'],['Mês mais frio',`${mn[coldM]} · ${cl.temp[coldM]}`,'°C'],['Temperatura média anual',tmean,'°C']];
   document.getElementById('tkeys').innerHTML=TK.map(([l,v,u])=>`<div class="kt t"><div class="kl">${l}</div><div class="kv">${v}<i>${u}</i></div></div>`).join('');

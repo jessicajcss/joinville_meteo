@@ -77,7 +77,7 @@
     <!-- 0 -->
     <div class="card doc sec" id="base">
       <div class="ct"><span>Da observação bruta às séries “master”</span><span class="tag">base</span></div>
-      <p><b>Por quê.</b> Cada registrador (Campbell/TOA5) grava tabelas horárias e diárias em formatos próprios, com sentinelas de falha e ocasionais valores fisicamente impossíveis. Antes de qualquer gráfico, tudo é consolidado em duas séries por estação — horária e diária — sobre as quais todas as páginas operam.</p>
+      <p><b>Por quê.</b> Cada registrador das Estações Meteorológicas (Campbell/TOA5) grava tabelas horárias e diárias em formatos próprios, com sentinelas de falha e ocasionais valores fisicamente impossíveis. Antes de qualquer gráfico, tudo é consolidado em duas séries por estação — horária e diária — sobre as quais todas as páginas operam.</p>
       <h3>Como</h3>
       <ul>
         <li><b>Origem.</b> Apenas produtos nativos do registrador (planilhas anuais <code>*_HR</code> e <code>*_DIARIA</code>, 2011–2026, e arquivos <code>.dat</code> recentes). Nenhum valor é derivado no lugar de uma medição.</li>
@@ -281,7 +281,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
 const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='sobre'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
-fetch('data/river.json').then(r=>r.json()).then(d=>{document.getElementById('ribbon').innerHTML='Tema Atom One Light · metodologia · '+(d.qc_method||'')+' · gerado '+(d.generated_at||'');}).catch(()=>{document.getElementById('ribbon').textContent='Tema Atom One Light · metodologia';});
+fetch('data/river.json').then(r=>r.json()).then(d=>{document.getElementById('ribbon').innerHTML='Tema Atom One Light · metodologia · gerado '+(d.generated_at||'');}).catch(()=>{document.getElementById('ribbon').textContent='Tema Atom One Light · metodologia';});
 </script>
 </body>
 </html>

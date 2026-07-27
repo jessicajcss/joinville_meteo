@@ -194,17 +194,24 @@ function drawGrid(pr,lat,lon,field,rmp,lo,hi,unit,zeroWhite){const rng=(hi-lo)||
     const vtxt=(unit==='mm'&&Math.abs(v)<1)?v.toFixed(2):v.toFixed(1);
     s+=`<rect x="${(cx-cw/2).toFixed(1)}" y="${(cy-ch/2).toFixed(1)}" width="${(cw+0.6).toFixed(1)}" height="${(ch+0.6).toFixed(1)}" fill="${fill}"><title>${lat[i].toFixed(2)}, ${lon[j].toFixed(2)}: ${vtxt} ${unit}</title></rect>`;}
   return {s,cw,ch};}
-function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/14));let a='';
-  const cell=Math.min(cw,ch), L=cell*0.92, ah=cell*0.42;   // longer shaft + a real arrowhead
+// quiver-style arrows to match the regional figure (f): filled triangular heads,
+// shaft length proportional to the local wind speed (matplotlib-quiver look).
+function windArrows(pr,lat,lon,U,V,cw,ch){const nlat=lat.length,nlon=lon.length,s=Math.max(1,Math.round(nlon/12));let a='';
+  const cell=Math.min(cw,ch);
+  let spmax=0.5;for(let i=0;i<nlat;i++)for(let j=0;j<nlon;j++){const sp=Math.hypot(U[i][j],V[i][j]);if(sp>spmax)spmax=sp;}
+  const Lmax=cell*1.35;                                     // longest arrow (fastest cell)
   for(let i=0;i<nlat;i+=s)for(let j=0;j<nlon;j+=s){const uu=U[i][j],vv=V[i][j],sp=Math.hypot(uu,vv);if(sp<0.3)continue;
-    const [cx0,cy0]=P(pr,lon[j],lat[i]);                    // draw centred: tail behind, tip ahead
-    const dx=uu/sp, dy=-vv/sp;                              // screen dir (y down)
-    const cx=cx0-dx*L*0.45, cy=cy0-dy*L*0.45, ex=cx0+dx*L*0.55, ey=cy0+dy*L*0.55;
-    const ang=Math.atan2(ey-cy,ex-cx);
-    const h1x=ex-ah*Math.cos(ang-0.42), h1y=ey-ah*Math.sin(ang-0.42);
-    const h2x=ex-ah*Math.cos(ang+0.42), h2y=ey-ah*Math.sin(ang+0.42);
-    a+=`<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#12233a" stroke-width="1.5" opacity="0.8"/>`
-      +`<path d="M${h1x.toFixed(1)} ${h1y.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${h2x.toFixed(1)} ${h2y.toFixed(1)}" fill="none" stroke="#12233a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>`;}
+    const [cx0,cy0]=P(pr,lon[j],lat[i]);
+    const dx=uu/sp, dy=-vv/sp;                              // screen direction (y down)
+    const L=Math.max(cell*0.5,(sp/spmax)*Lmax);           // length ∝ speed (quiver)
+    const ahl=L*0.32, ahw=L*0.15;                          // slender head, proportional to arrow length
+    const tx=cx0-dx*L*0.5, ty=cy0-dy*L*0.5;                // centred on the cell
+    const ex=cx0+dx*L*0.5, ey=cy0+dy*L*0.5;                // arrow tip
+    const bx=ex-dx*ahl, by=ey-dy*ahl;                      // base of the head, set back along shaft
+    const px=-dy, py=dx;                                    // unit perpendicular
+    const h1x=bx+px*ahw, h1y=by+py*ahw, h2x=bx-px*ahw, h2y=by-py*ahw;
+    a+=`<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#12233a" stroke-width="1.4" opacity="0.85"/>`
+      +`<path d="M${h1x.toFixed(1)} ${h1y.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${h2x.toFixed(1)} ${h2y.toFixed(1)} Z" fill="#12233a" opacity="0.9"/>`;}
   return a;}
 
 // ---- 1. local map ----
@@ -253,7 +260,7 @@ function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn],
   const vals=RUN.bairros.map(M.bval), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
   let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?M.bval(b):null;
     const fill=v==null?'#eef1f5':M.ramp((v-lo)/rng);
-    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#fff" stroke-width="0.6"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
+    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="1"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
   const outl=LIM?`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="1.6" opacity="0.9"/>`:'';
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+16,10,H-20);
   document.getElementById('bairromap').innerHTML=`<svg viewBox="0 0 ${W+66} ${H+8}" width="100%" style="max-height:520px">${fills}${outl}${cb}</svg>`;

@@ -69,6 +69,33 @@ STORY = {
 _rd = [v for v in STORY["rainy_days_by_year"].values()]
 STORY["rainy_days_mean"] = round(float(np.mean(_rd))) if _rd else None
 
+# ---- temperature record days (robust city daily extremes) ----
+# City daily high/low = the across-station MEDIAN of that day's station daily
+# max/min (median resists a single sun-baked or shaded sensor), requiring >= 3
+# stations and applying physical bounds before ranking. Reported as the hottest
+# and coldest days on record for the network.
+tx_rows = []
+for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
+    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"])
+    tx_rows.append(pd.DataFrame({
+        "date": d["date"],
+        "tmax": d["temp_max"] if "temp_max" in d else np.nan,
+        "tmin": d["temp_min"] if "temp_min" in d else np.nan,
+    }))
+tx = pd.concat(tx_rows, ignore_index=True)
+tx.loc[(tx["tmax"] > 42) | (tx["tmax"] < -5), "tmax"] = np.nan
+tx.loc[(tx["tmin"] > 35) | (tx["tmin"] < -10), "tmin"] = np.nan
+gx = tx.dropna(subset=["tmax"]).groupby("date")["tmax"]
+gn = tx.dropna(subset=["tmin"]).groupby("date")["tmin"]
+city_tmax = gx.median().where(gx.count() >= 3)
+city_tmin = gn.median().where(gn.count() >= 3)
+_hot = city_tmax.dropna().sort_values(ascending=False).head(5)
+_cold = city_tmin.dropna().sort_values().head(5)
+STORY["hottest_days"] = [{"date": str(i.date()), "tmax": round(float(v), 1)} for i, v in _hot.items()]
+STORY["coldest_days"] = [{"date": str(i.date()), "tmin": round(float(v), 1)} for i, v in _cold.items()]
+STORY["temp_record_method"] = ("mediana das máximas/mínimas diárias das estações naquele dia "
+                               "(>= 3 estações), com limites físicos")
+
 # ---- assemble year x month matrices ----
 idx = pd.period_range(min(city_temp.index.min(), city_rain.index.min() if len(city_rain) else city_temp.index.min()),
                       max(city_temp.index.max(), city_rain.index.max() if len(city_rain) else city_temp.index.max()),

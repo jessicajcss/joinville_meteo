@@ -342,7 +342,8 @@ rain_years = sorted([y for y, c in year_station_count.items() if c >= 3])
 stamp = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%MZ"],
                        capture_output=True, text=True).stdout.strip()
 qc_note = (f"Controle de qualidade do nível: limite físico |h| < {HARD_M:.0f} m e janela robusta "
-           f"mediana ± o maior entre {MAD_K:.0f}·MADn e a faixa física (−{LO_SPAN:.1f} / +{HI_SPAN:.1f} m) "
+           f"mediana ± o maior entre {MAD_K:.0f}·MADn (MAD normalizada = 1,4826·MAD ≈ desvio-padrão "
+           f"robusto) e a faixa física (−{LO_SPAN:.1f} / +{HI_SPAN:.1f} m) "
            "por estação — remove apenas falhas de sensor. Joinville é "
            "cidade de baía (Babitonga): as estações a jusante sofrem influência de maré, portanto "
            "as oscilações e os níveis abaixo da régua (negativos) são reais e foram preservados.")

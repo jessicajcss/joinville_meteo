@@ -101,6 +101,7 @@
       <div class="hleg" id="lleg"></div>
       <div class="capt" id="lcapt">Nível da água por mês: amplitude (mín–máx do nível diário) e mediana mensal. O nível é a cota relativa à referência (zero) da régua — não é a profundidade da lâmina d’água.</div>
       <div class="qcnote" id="qcLevel"></div>
+      <div class="qcnote" id="levelQcMethod" style="border-top:none;padding-top:0;margin-top:6px"></div>
     </div>
 
     <!-- 5 · nível do rio — perfil horário (heatmap hora × mês) -->
@@ -468,7 +469,8 @@ async function init(){
   (RV.rain_panels||[]).forEach(p=>{CI[p.code]=p.ci;});
   document.getElementById('rainwrap').insertAdjacentHTML('beforeend',smallMultiples(RV.rain_panels||[]));
   pluvMap(RV.rain_panels||[]);
-  document.getElementById('ribbon').innerHTML='Tema Atom One Light · '+(RV.qc_method||'')+' · gerado '+RV.generated_at;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · metodologia · gerado '+RV.generated_at;
+  { const _qm=document.getElementById('levelQcMethod'); if(_qm) _qm.textContent=RV.qc_method||''; }
   // 2 · precipitação mensal (cidade/estação + ano)
   const stB=document.getElementById('selStB'),yrB=document.getElementById('selYearB');
   stB.innerHTML='<option value="city">Média da cidade</option>'+(RV.rain_panels||[]).map((p,i)=>`<option value="${i}">${p.name}</option>`).join('');

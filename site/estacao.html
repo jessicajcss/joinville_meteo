@@ -14,7 +14,7 @@
 .pick label{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
 .pick select{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 13px;cursor:pointer}
 .pick select#selSt{min-width:260px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.g2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:16px;align-items:start}
 .emap{width:100%;height:420px;border-radius:12px;background:#fff;z-index:1}
 .leaflet-tooltip.st{background:#fff;border:1px solid var(--line);border-radius:7px;box-shadow:0 2px 7px rgba(0,0,0,.12);font-family:inherit;font-size:10.5px;font-weight:700;padding:2px 6px;color:var(--ink)}
 .leaflet-tooltip.st:before{display:none}
@@ -24,8 +24,8 @@
 .wleg .g{height:10px;flex:1;max-width:220px;border-radius:5px;background:linear-gradient(90deg,#1a9850,#91cf60,#fee08b,#fc8d59,#d73027)}
 .minfo{font-size:13.5px;color:var(--mut);margin-top:12px}
 .minfo b{color:var(--ink);font-weight:700}
-.bigstats{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:36px;margin:12px 8px 0}
-.bigstats .s{text-align:right}
+.bigstats{display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;padding:14px 18px;background:var(--card);border-radius:18px;box-shadow:0 3px 14px rgba(40,58,66,.05)}
+.bigstats .s{text-align:left}
 .bigstats .s .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
 .bigstats .s .v{font-size:31px;font-weight:800;color:var(--ink);line-height:1;margin-top:4px;letter-spacing:-.01em}
 .bigstats .s .v.sm{font-size:19px}
@@ -50,17 +50,7 @@
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
     </div>
 
-    <div class="card">
-      <div class="pick">
-        <div class="fg"><label>Estação (gráficos à direita)</label><select id="selSt"></select></div>
-        <div class="fg"><label>Ano</label><select id="selYear"></select></div>
-        <div class="fg"><label>Mês (mapa de vento)</label><select id="selMonth"></select></div>
-      </div>
-      <div class="minfo" id="minfo"></div>
-    </div>
-    <div class="bigstats" id="bigstats"></div>
-
-    <div class="g2" style="margin-top:16px">
+    <div class="g2">
       <div>
         <div class="card"><div class="ct">Estações — localização e operação <span class="mut" id="stsub"></span></div>
           <div id="mapSt" class="emap"></div></div>
@@ -69,9 +59,18 @@
           <div class="wleg">mais fraco<span class="g"></span>mais forte · <span id="wmax"></span></div></div>
       </div>
       <div>
-        <div class="card"><div class="ct">Condições de temperatura <span class="mut" id="tsub"></span></div>
+        <div class="card">
+          <div class="pick">
+            <div class="fg"><label>Estação (gráficos abaixo)</label><select id="selSt"></select></div>
+            <div class="fg"><label>Ano</label><select id="selYear"></select></div>
+            <div class="fg"><label>Mês (mapa de vento)</label><select id="selMonth"></select></div>
+          </div>
+          <div class="minfo" id="minfo"></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="ct">Condições de temperatura <span class="mut" id="tsub"></span></div>
           <div class="tleg"><span><i style="background:#d7301f"></i>Máx. registrada</span><span><i style="background:#0184bc"></i>Mín. registrada</span><span><i style="background:#e0a020"></i>Máx. diária (média)</span><span><i style="background:#50a14f"></i>Mín. diária (média)</span></div>
           <div id="tempchart"></div></div>
+        <div class="bigstats" id="bigstats" style="margin-top:16px"></div>
         <div class="card" style="margin-top:16px"><div class="ct">Chuva histórica <span class="mut" id="rsub"></span></div>
           <div class="hm-wrap" id="rainhm"></div>
           <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#ffffd9,#c7e9b4,#7fcdbb,#41b6c4,#1d91c0,#225ea8)"></span><span id="rmaxlab"></span></div></div>
