@@ -24,6 +24,7 @@
 .cbmini i{font-style:normal;font-weight:600;color:#b0b3b8;margin-left:1px}
 .tolink{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:6px}
 .tolink:hover{filter:brightness(.96)}
+.dlegend{font-size:11.5px;color:#6b7178;line-height:1.55;margin-top:9px;padding:9px 12px;background:#f6f8f7;border-left:3px solid var(--green,#238b45);border-radius:6px;max-width:900px}
 </style>
 </head>
 <body>
@@ -104,12 +105,42 @@ function yearStrip(annual,rmp,fmt,unit){
   return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
 }
 
+// ---- item 6: wind DIRECTION (Grange vector resultant) ----
+// Arrow points TOWARD the source bearing (meteorological "de onde vem"): base points up
+// (North); SVG rotate(deg) turns it clockwise so 90->E, 180->S, 270->W.
+function dirArrow(deg,cx,cy,len,col){
+  const h=len/2;
+  return `<g transform="translate(${cx},${cy}) rotate(${deg})" pointer-events="none">`
+    +`<line x1="0" y1="${h}" x2="0" y2="${-h}" stroke="${col}" stroke-width="2.3" stroke-linecap="round"/>`
+    +`<path d="M0 ${-h} L${-4.3} ${-h+8.5} M0 ${-h} L4.3 ${-h+8.5}" fill="none" stroke="${col}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>`
+    +`</g>`;
+}
+function dirStrip(items,labels,lo,hi,isYear){
+  const W=1000,top=isYear?4:18,ch=86,H=ch+top+(isYear?18:2),n=items.length,cw=W/n,gap=2,span=(hi-lo)||1;
+  let s='';
+  items.forEach((d,i)=>{const x=i*cw,cx=x+cw/2;
+    if(labels)s+=`<text x="${cx}" y="12" font-size="11" fill="#a0a1a7" text-anchor="middle">${labels[i]}</text>`;
+    const lab=labels?labels[i]:(d?d.year:'');
+    if(!d){s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="#f1f2f4"><title>${lab}: sem dados</title></rect>`;return;}
+    const c=RAMPS.wind((d.pct-lo)/span),tc=textOn(c);
+    const tip=`${lab}: predominante de ${d.sector} (${Math.round(d.deg)}°) · ${d.pct}% das horas no setor (±22,5°)`+(d.nst?` · ${d.nst} estações`:'');
+    s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="${c}"><title>${tip}</title></rect>`;
+    s+=dirArrow(d.deg,cx,top+ch*0.40,Math.min(cw*0.55,34),tc);
+    s+=`<text x="${cx}" y="${top+ch-15}" font-size="${isYear?11:12.5}" font-weight="800" fill="${tc}" text-anchor="middle" pointer-events="none">${d.sector}</text>`;
+    s+=`<text x="${cx}" y="${top+ch-4}" font-size="9.5" fill="${tc}" opacity=".82" text-anchor="middle" pointer-events="none">${d.pct}%</text>`;
+  });
+  if(isYear){s+=`<text x="2" y="${top+ch+15}" font-size="11" fill="#a0a1a7">${items[0].year}</text>`
+    +`<text x="${W-2}" y="${top+ch+15}" font-size="11" fill="#a0a1a7" text-anchor="end">${items[items.length-1].year}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
+}
+const DIRDESC='A direção é resumida pela <b>resultante vetorial</b> (método de Grange, 2014; usado no pacote R <i>openair</i>): cada observação horária vira um vetor (u,v) e a média vetorial dá a direção predominante — a média aritmética de graus não funciona por causa da descontinuidade 0°/360°. O ciclo sazonal é nítido: no verão predomina o quadrante <b>L/ESE</b> (brisa marítima vinda da Baía da Babitonga); do outono ao inverno (abr–jul, pico mai–jun) a resultante gira para <b>S/SO</b>, refletindo massas de ar polar e frentes frias. Os ventos são variáveis (nenhum setor concentra mais de ~¼ das horas), então a resultante indica a tendência média, não uma direção fixa.';
+
 const DESC={
  temp:'Clima subtropical úmido: verões quentes, invernos amenos. A variação mensal é moderada e a temperatura anual é bastante estável.',
  rain:'Chuva combinando a rede de pluviômetros da Defesa Civil e as estações meteorológicas. Verão chuvoso, inverno mais seco. Referência: ~2.130 mm/ano.',
  umid:'Umidade relativa alta o ano inteiro (~80–84%), típica de uma cidade litorânea e chuvosa; dificulta a evaporação do suor no verão.',
  solar:'A radiação solar é maior no verão e menor no inverno, acompanhando a duração do dia e a nebulosidade.',
- wind:'Ventos em geral fracos a moderados, com alta proporção de calmarias; a rosa dos ventos (página Agora) mostra predomínio do quadrante leste (brisa marítima do Atlântico). Estações com cata-vento travado (direção fixa em 0°) são excluídas da rosa.'};
+ wind:'Ventos em geral fracos a moderados, com alta proporção de calmarias. A direção predominante varia com a estação do ano — detalhada no item 6 (Vento · direção) abaixo. Estações com cata-vento travado (direção fixa em 0°) são excluídas da análise de direção.'};
 const FMT={temp:v=>v.toFixed(1),rain:v=>Math.round(v),umid:v=>Math.round(v),solar:v=>Math.round(v),wind:v=>v.toFixed(1)};
 const ORDER=['temp','rain','umid','solar','wind'];
 
@@ -132,6 +163,22 @@ async function init(){
       ${yearStrip(v.annual,rmp,fmt,v.unit)}
     </div>`;
   });
+  // ---- item 6: wind DIRECTION ----
+  const WD=C.wind_dir;
+  if(WD && WD.clim && WD.clim.some(x=>x)){
+    const allp=[...WD.clim.filter(x=>x).map(d=>d.pct), ...WD.annual.map(a=>a.pct)];
+    const plo=Math.min(...allp), phi=Math.max(...allp);
+    html+=`<div class="card vsec">
+      <div class="vhead"><div class="ic wind">${IC.wind}</div>
+        <div><div class="tt"><span class="num">6.</span> Vento · direção <span class="u">(resultante vetorial)</span></div>
+        <div class="ds">${DIRDESC}</div></div></div>
+      <div class="striplab">Direção predominante por mês <span>climatologia ${yr}</span>${cbar('wind',plo,phi,v=>Math.round(v),'%')}</div>
+      ${dirStrip(WD.clim,MN,plo,phi,false)}
+      <div class="striplab">Direção predominante por ano <span>${WD.annual[0].year}–${WD.annual[WD.annual.length-1].year}</span></div>
+      ${dirStrip(WD.annual,null,plo,phi,true)}
+      <div class="dlegend">A <b>cor</b> indica a predominância (% das horas no setor da resultante ±22,5°); a <b>seta</b> aponta para a direção <b>de onde o vento sopra</b> (convenção meteorológica) — p.ex. seta para baixo = vento de sul, para a direita = de leste. Estações com cata-vento travado (direção presa em 0°) são descartadas. Método: resultante vetorial (Grange, 2014; <i>openair</i>), peso igual por estação.</div>
+    </div>`;
+  }
   document.getElementById('sections').innerHTML=html;
   document.getElementById('note').textContent=C.notes;
   document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+C.generated_at.slice(0,16).replace('T',' ')+' UTC';

@@ -96,6 +96,117 @@ STORY["coldest_days"] = [{"date": str(i.date()), "tmin": round(float(v), 1)} for
 STORY["temp_record_method"] = ("mediana das máximas/mínimas diárias das estações naquele dia "
                                "(>= 3 estações), com limites físicos")
 
+# ---- wind: city daily-mean speed + windiest days (by gust) + predominant direction ----
+CALM_MS = 0.5; STUCK_FRAC = 0.25
+COMPASS = ["N", "NNE", "NE", "ENE", "L", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"]
+wx_rows = []
+for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
+    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"])
+    wx_rows.append(pd.DataFrame({
+        "date": d["date"], "code": os.path.basename(f)[:-8],
+        "ws": d["ws_mean"] if "ws_mean" in d else np.nan,
+        "gust": d["gust_max"] if "gust_max" in d else np.nan,
+    }))
+wx = pd.concat(wx_rows, ignore_index=True)
+net_daily_w = wx.dropna(subset=["ws"]).groupby("date")["ws"].mean()
+mw = net_daily_w.resample("MS")
+city_wind = mw.mean().where(mw.count() >= 10)                  # monthly city-mean wind speed
+wx.loc[(wx["gust"] > 60) | (wx["gust"] < 0), "gust"] = np.nan  # physical bound (m/s)
+gg = wx.dropna(subset=["gust"]).groupby("date")["gust"]
+city_gust = gg.median().where(gg.count() >= 3)                # robust city daily peak gust
+_wind = city_gust.dropna().sort_values(ascending=False).head(5)
+STORY["windiest_days"] = [{"date": str(i.date()), "gust": round(float(v), 1)} for i, v in _wind.items()]
+STORY["wind_record_method"] = "mediana da rajada máxima diária das estações naquele dia (>= 3 estações)"
+
+# predominant wind DIRECTION (meteorological: the sector winds come FROM), from hourly wd.
+# Method: vector resultant (Grange 2014, "Averaging wind speeds and directions"; the method
+# used by the R `openair` package). Directions cannot be arithmetically averaged (the 0/360
+# discontinuity), so each hourly obs is resolved into flow vectors
+#   u = -ws*sin(theta),  v = -ws*cos(theta)      (theta = FROM bearing, radians)
+# the (u,v) are averaged, and the resultant FROM direction is atan2(mean_u, mean_v)+180 deg.
+# We average station-equal-weight (each station contributes its own mean vector, then those
+# are averaged) so a single long coastal record does not dominate the city-wide value —
+# consistent with the request for a "todo o município" (whole-city) view.
+# The single most-frequent 22.5 deg sector (mode) was rejected: Joinville's rose is near-flat
+# (no sector > ~11%), so the mode is noisy and, when checked, hid the real seasonal cycle.
+# The vector resultant recovers it: summer -> E/ESE (sea breeze off the Babitonga bay),
+# autumn-winter (Apr-Jul, peak May-Jun) -> S/SSO/SO (post-frontal polar air), matching the
+# physical expectation and the independent sea-breeze diurnal test.
+HOURLY = ROOT / "data" / "hourly"
+MIN_ST_HRS = 50        # min valid hours for a station to contribute to a month/year group
+MIN_STATIONS_DIR = 2   # need >=2 stations for a city-wide resultant
+
+def _uv(wd, ws):
+    th = np.deg2rad(wd)
+    return -ws * np.sin(th), -ws * np.cos(th)
+
+def resultant_dir(station_arrays):
+    # station_arrays: list of (wd, ws) arrays (one per station), already QC'd:
+    # calm winds (ws<CALM_MS) and the exact-0.0 stuck-vane sentinel are excluded upstream.
+    mus, mvs, ntot, nst = [], [], 0, 0
+    for wd, ws in station_arrays:
+        if len(wd) < MIN_ST_HRS:
+            continue
+        u, v = _uv(wd, ws)
+        mus.append(float(np.mean(u))); mvs.append(float(np.mean(v)))
+        ntot += int(len(wd)); nst += 1
+    if nst < MIN_STATIONS_DIR:
+        return None
+    mu, mv = float(np.mean(mus)), float(np.mean(mvs))
+    frm = (np.degrees(np.arctan2(mu, mv)) + 180.0) % 360.0   # resultant FROM bearing
+    sec = int(np.floor(((frm % 360) + 11.25) / 22.5)) % 16
+    band = [(sec - 1) % 16, sec, (sec + 1) % 16]
+    octs = []
+    for wd, ws in station_arrays:
+        if len(wd) < MIN_ST_HRS:
+            continue
+        s = (np.floor(((wd % 360) + 11.25) / 22.5).astype(int)) % 16
+        octs.append(float(np.mean(np.isin(s, band)) * 100))   # % hours within +/-1 sector
+    scalar = np.mean([float(np.mean(ws)) for wd, ws in station_arrays if len(wd) >= MIN_ST_HRS])
+    r = float(np.hypot(mu, mv))
+    return {"deg": round(frm, 1), "sector": COMPASS[sec],
+            "pct": round(float(np.mean(octs)), 1),            # predominancia (octant frequency)
+            "r": round(r, 3), "const": round(r / scalar, 3) if scalar else None,
+            "n": ntot, "nst": nst}
+
+# read hourly per station, apply stuck-vane station QC, keep per-station QC'd arrays
+st_hourly = {}   # code -> DataFrame(date, wd, ws) with calm/0-sentinel already removed
+for f in sorted(glob.glob(str(HOURLY / "*.csv"))):
+    code = os.path.basename(f)[:-4]
+    try:
+        d = pd.read_csv(f, usecols=lambda c: c in ("date", "wd", "ws"))
+    except Exception:
+        continue
+    if "wd" not in d.columns or "ws" not in d.columns:
+        continue
+    d["date"] = pd.to_datetime(d["date"], errors="coerce")
+    d = d.dropna(subset=["date", "wd", "ws"])
+    if d.empty:
+        continue
+    wd_s = d["wd"].to_numpy(); ws_s = d["ws"].to_numpy(); windy = ws_s >= CALM_MS
+    if windy.sum() >= 100 and float(np.mean(wd_s[windy] == 0.0)) > STUCK_FRAC:
+        continue                                              # stuck/absent vane -> drop station
+    m = (ws_s >= CALM_MS) & (wd_s != 0.0) & np.isfinite(wd_s) & np.isfinite(ws_s)
+    d = d[m]
+    if d.empty:
+        continue
+    d["mo"] = d["date"].dt.month; d["y"] = d["date"].dt.year
+    st_hourly[code] = d
+
+wind_dir = {"clim": [None] * 12, "annual": [], "method": "resultante vetorial (Grange 2014; openair), peso igual por estação"}
+if st_hourly:
+    for k in range(1, 13):
+        arrs = [(g["wd"].to_numpy(float), g["ws"].to_numpy(float))
+                for d in st_hourly.values() for _, g in [(k, d[d["mo"] == k])] if len(g)]
+        wind_dir["clim"][k - 1] = resultant_dir(arrs)
+    years = sorted({int(y) for d in st_hourly.values() for y in d["y"].unique()})
+    for y in years:
+        arrs = [(g["wd"].to_numpy(float), g["ws"].to_numpy(float))
+                for d in st_hourly.values() for _, g in [(y, d[d["y"] == y])] if len(g)]
+        r = resultant_dir(arrs)
+        if r:
+            r["year"] = int(y); wind_dir["annual"].append(r)
+
 # ---- assemble year x month matrices ----
 idx = pd.period_range(min(city_temp.index.min(), city_rain.index.min() if len(city_rain) else city_temp.index.min()),
                       max(city_temp.index.max(), city_rain.index.max() if len(city_rain) else city_temp.index.max()),
@@ -111,6 +222,7 @@ def matrix(series):
 
 temp_mat = matrix(city_temp)
 rain_mat = matrix(city_rain)
+wind_mat = matrix(city_wind)
 
 # ---- annual + climatology ----
 annual = []
@@ -177,8 +289,10 @@ payload = {
     "months": MONTHS,
     "temp": temp_mat,
     "rain": rain_mat,
+    "wind": wind_mat,
     "annual": annual,
-    "climatology": {"temp": climo(temp_mat), "rain": climo(rain_mat)},
+    "climatology": {"temp": climo(temp_mat), "rain": climo(rain_mat), "wind": climo(wind_mat)},
+    "wind_dir": wind_dir,
     "story": STORY,
     "reference_annual_rain_mm": 2130,
     "notes": "Temperatura, umidade, radiação e vento = média da rede meteorológica. Chuva = média espacial combinada da rede de pluviômetros da Defesa Civil e das estações meteorológicas (excluídos o pluviômetro Nova Brasília, com falha, e a estação UDESC, que superestima). Precipitação média anual de referência para Joinville: ~2.130 mm (média de 42 postos desde 1950; cf. De Mello, 2020). Meses/anos com poucos dias válidos aparecem em cinza.",

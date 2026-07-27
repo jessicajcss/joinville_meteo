@@ -91,6 +91,28 @@ sensores de chuva das estações meteorológicas.
   chuvosos por ano (anos com ≥ 330 dias de cobertura).
 - Referência: ~2.130 mm/ano (média de 42 postos desde 1950; De Mello, 2020).
 
+**Direção predominante do vento (item 6 — resultante vetorial de Grange).** A direção
+não pode ser promediada aritmeticamente (descontinuidade 0°/360°). Cada observação
+horária vira um vetor `u = −vel·sen θ`, `v = −vel·cos θ` (θ = direção meteorológica,
+de onde o vento vem); os vetores são promediados e a direção resultante é
+`Θ = atan2(ū, v̄) + 180°`, com o módulo da resultante `|R| = √(ū² + v̄²)` — método de
+**Grange, S. K. (2014), _Technical note: Averaging wind speeds and directions_,
+University of Auckland** (o mesmo do pacote R `openair`). A combinação **entre estações**
+é feita com **peso igual por estação** (média dos vetores médios de cada estação), para
+que um registro litorâneo mais longo não domine o valor municipal. A **cor** das faixas
+codifica a **predominância** = % das horas dentro do octante (±22,5°) da resultante — é
+uma **frequência**, não uma grandeza de Grange; a **seta** aponta para a direção **de onde
+o vento vem** (convenção meteorológica). QC idêntico ao da rosa da página Agora: exclui
+calmaria (vel < 0,5 m/s) e o sentinela de cata-vento travado (exatamente 0,000°), e
+descarta estações com > 25 % das horas com vento cravadas em 0°. Requer ≥ 2 estações e
+≥ 50 horas por grupo (mês-calendário ou ano). O estimador anterior — o setor de 22,5°
+**mais frequente** (moda) — foi substituído por ser ruidoso na rosa quase plana de
+Joinville e por **esconder o ciclo sazonal**. A resultante o recupera: verão de **L/ESE**
+(brisa marítima da Baía da Babitonga); outono–inverno (abr–jul, pico mai–jun) girando
+para **S/SO** (ar polar pós-frontal). A constância direcional `|R|/velocidade escalar`
+é baixa (0,10–0,27), sinalizando que a resultante é uma **tendência média**, não uma
+direção fixa.
+
 ---
 
 ## 3. Página **Risco Hidro-climático** (`risco.html` ← `build_disasters.py`)
@@ -113,6 +135,13 @@ desembrulhada no script).
 
 Tudo por estação e **não combinado** (registro próprio de cada uma):
 - Vento: climatologia mensal da velocidade média.
+- **Rosas dos ventos mensais** (12 meses, jan–dez): 16 setores de direção × 5 classes de
+  velocidade, frequência das horas com vento ≥ 0,5 m/s vindo de cada setor (direção
+  meteorológica, de onde o vento vem), acionadas pelos seletores estação+ano do topo da
+  página; escala comum aos 12 meses do ano escolhido. Mesmo CQ de calmaria/cata-vento
+  travado do §2/rosa da página Agora (`station_windrose.json` em `build_station_history.py`).
+  A **direção predominante** resumida (resultante vetorial de Grange) é a da página Cidade §2,
+  item 6.
 - Condições de temperatura, por ano × mês: recorde de máxima (máx de Tmax), recorde
   de mínima (mín de Tmin), média das máximas, média das mínimas.
 - Mapa de calor de chuva: totais mensais por ano (exigindo ≥ 15 dias válidos).

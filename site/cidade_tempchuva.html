@@ -12,17 +12,17 @@
 .sec{margin-top:20px}
 .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:4px}
 .sec-n{font-size:14px;font-weight:800;color:#fff;border-radius:9px;padding:3px 12px;flex:none}
-.sec-n.t{background:var(--red)}.sec-n.r{background:var(--blue)}.sec-n.y{background:var(--purple)}
+.sec-n.t{background:var(--red)}.sec-n.r{background:var(--blue)}.sec-n.y{background:var(--purple)}.sec-n.w{background:var(--green)}
 .sec-t{font-size:23px;font-weight:800;letter-spacing:-.01em}
 .sec-lead{font-size:17px;color:var(--ink);line-height:1.55;margin:8px 0 6px}
-.sec-lead b{font-weight:800}.sec-lead .t{color:var(--red)}.sec-lead .r{color:var(--blue)}
+.sec-lead b{font-weight:800}.sec-lead .t{color:var(--red)}.sec-lead .r{color:var(--blue)}.sec-lead .w{color:var(--green)}
 .sec-narr{font-size:13.5px;color:#6b7178;line-height:1.6;margin-bottom:16px}
 .krow{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
 .kt{flex:1;min-width:140px;background:#f7f8fa;border:1px solid var(--line);border-radius:13px;padding:12px 15px}
 .kt .kl{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
 .kt .kv{font-size:23px;font-weight:800;margin-top:5px;color:var(--ink)}
 .kt .kv i{font-style:normal;font-size:13px;color:var(--mut);font-weight:600;margin-left:2px}
-.kt.t .kv{color:var(--red)}.kt.r .kv{color:var(--blue)}
+.kt.t .kv{color:var(--red)}.kt.r .kv{color:var(--blue)}.kt.w .kv{color:var(--green)}
 .twocol{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start}
 .rank{display:flex;flex-direction:column;gap:9px;margin-top:6px}
 .rank .r2{display:flex;align-items:center;gap:10px;font-size:13px}
@@ -75,7 +75,7 @@
         <div>
           <div class="subt">Dias mais quentes e mais frios já registrados</div>
           <div class="rank" id="trank"></div>
-          <div class="capt" style="margin-top:8px">recorde diário = mediana das máximas / mínimas das estações naquele dia (≥ 3 estações, com limites físicos)</div>
+          <div class="capt" style="margin-top:8px">valor do dia = mediana, entre as estações, da máxima (mais quentes) ou da mínima (mais frios) daquele dia — ≥ 3 estações, descartando leituras fisicamente impossíveis.</div>
         </div>
       </div>
       <div class="subt" style="margin-top:18px">Temperatura média mensal — °C por ano (média da rede de estações meteorológicas)</div>
@@ -105,9 +105,31 @@
       <div class="krow" id="rkeys"></div>
     </div>
 
-    <!-- Section 3: Annual trend -->
+    <!-- Section 3: Wind speed -->
     <div class="card sec">
-      <div class="sec-h"><span class="sec-n y">3</span><span class="sec-t">Ano a ano</span></div>
+      <div class="sec-h"><span class="sec-n w">3</span><span class="sec-t">Vento</span></div>
+      <div class="sec-lead lead-wrap" id="wlead"></div>
+      <div class="sec-narr lead-wrap" id="wnarr"></div>
+      <div class="twocol">
+        <div>
+          <div class="subt">Climatologia mensal — m/s médios por mês</div>
+          <div id="windClimo"></div>
+        </div>
+        <div>
+          <div class="subt">Dias mais ventosos já registrados</div>
+          <div class="rank" id="wrank"></div>
+          <div class="capt" style="margin-top:8px">rajada do dia = mediana da rajada máxima das estações naquele dia (≥ 3 estações)</div>
+        </div>
+      </div>
+      <div class="subt" style="margin-top:18px">Velocidade média mensal — m/s por ano (média da rede de estações meteorológicas)</div>
+      <div class="hm-wrap" id="hmWind"></div>
+      <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#f7fcf5,#c7e9c0,#74c476,#238b45,#00441b)"></span><span id="whi"></span></div>
+      <div class="krow" id="wkeys"></div>
+    </div>
+
+    <!-- Section 4: Annual trend -->
+    <div class="card sec">
+      <div class="sec-h"><span class="sec-n y">4</span><span class="sec-t">Ano a ano</span></div>
       <div class="sec-lead lead-wrap" id="alead"></div>
       <div class="capt">barras = chuva anual (mm) · linha = temperatura média anual (°C)</div>
       <div id="annual"></div>
@@ -138,6 +160,7 @@ const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt
 function ramp(stops,t){t=Math.max(0,Math.min(1,t));const n=stops.length-1,i=Math.min(Math.floor(t*n),n-1),f=t*n-i;
   const a=hex2rgb(stops[i]),b=hex2rgb(stops[i+1]);const L=(x,y)=>Math.round(x+(y-x)*f);return `rgb(${L(a[0],b[0])},${L(a[1],b[1])},${L(a[2],b[2])})`;}
 const TEMPRAMP=['#4078f2','#8aa0e0','#e0e0a0','#d55e00'], RAINRAMP=['#f7fbff','#c6dbef','#6baed6','#2171b5','#08306b'];
+const WINDRAMP=['#f7fcf5','#c7e9c0','#74c476','#238b45','#00441b'];
 const textOn=rgb=>{const m=rgb.match(/\d+/g).map(Number);return (0.2126*m[0]+0.7152*m[1]+0.0722*m[2])>155?'#2b2b2b':'#fff';};
 const MN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
@@ -178,6 +201,15 @@ function rainClimo(R){
   R.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw*0.18,y=ry(v);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.64).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#3987e5"/><text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="11" fill="#6b7178" text-anchor="middle">${Math.round(v)}</text>`;}});
   const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-7}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="200">${g}${bars}${labs}</svg>`;
+}
+function windClimo(W){
+  const Wd=560,H=190,PL=34,PR=10,PT=10,PB=22,plotW=Wd-PL-PR,plotH=H-PT-PB,bw=plotW/12;
+  const wv=W.filter(x=>x!=null),wmax=Math.max(...wv,1),rmax=Math.ceil(wmax*10)/10;
+  const ry=v=>PT+plotH-(v/rmax)*plotH;let g='',bars='';
+  for(let t=0;t<=4;t++){const val=rmax*t/4,y=ry(val);g+=`<line x1="${PL}" y1="${y}" x2="${Wd-PR}" y2="${y}" stroke="#eef0f2"/><text x="${PL-6}" y="${y+3}" font-size="11" fill="#a0a1a7" text-anchor="end">${val.toFixed(1)}</text>`;}
+  W.forEach((v,i)=>{if(v!=null){const x=PL+i*bw+bw*0.18,y=ry(v);bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.64).toFixed(1)}" height="${(ry(0)-y).toFixed(1)}" rx="3" fill="#41946a"/><text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" font-size="10.5" fill="#6b7178" text-anchor="middle">${v.toFixed(1)}</text>`;}});
+  const labs=MN.map((m,i)=>`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-7}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${m}</text>`).join('');
+  return `<svg viewBox="0 0 ${Wd} ${H}" width="100%" height="200">${g}${bars}${labs}</svg>`;
 }
 function annualTrend(annual){
   const A=annual.filter(a=>a.temp_mean!=null||a.rain_total!=null);
@@ -230,7 +262,22 @@ async function init(){
   document.getElementById('hmRain').innerHTML=heatmap(C.rain,C.years,C.months,v=>ramp(RAINRAMP,v/rhi),v=>Math.round(v));
   const RK=[['Mês mais chuvoso',`${mn[wetM]} · ${Math.round(cl.rain[wetM])}`,'mm'],['Mês mais seco',`${mn[dryM]} · ${Math.round(cl.rain[dryM])}`,'mm'],['Dias de chuva/ano',rd,'dias'],['Dia mais chuvoso',`${wdd.mm}`,'mm']];
   document.getElementById('rkeys').innerHTML=RK.map(([l,v,u])=>`<div class="kt r"><div class="kl">${l}</div><div class="kv">${v}<i>${u}</i></div></div>`).join('');
-  // Section 3
+  // Section 3 — wind speed
+  if(cl.wind){
+    const wmaxM=argmax(cl.wind),wminM=argmin(cl.wind), gr=(st.windiest_days&&st.windiest_days[0])||null;
+    document.getElementById('wlead').innerHTML=`O vento em Joinville é geralmente fraco, com média mensal entre <b class="w">${cl.wind[wminM]}</b> e <b class="w">${cl.wind[wmaxM]} m/s</b>.`+(gr?` A rajada mais forte já medida pela rede chegou a <b class="w">${gr.gust} m/s</b> em ${fmtBR(gr.date)}.`:'');
+    document.getElementById('wnarr').innerHTML=`À esquerda, a velocidade média de cada mês (climatologia); à direita, os dias de rajada mais forte. Abaixo, o mapa de calor mostra a velocidade média de cada mês em cada ano. A direção predominante do vento está na página <a href="cidade.html">Cidade</a> (item 6).`;
+    document.getElementById('windClimo').innerHTML=windClimo(cl.wind);
+    if(gr){const wm=gr.gust;
+      document.getElementById('wrank').innerHTML=st.windiest_days.map((d,i)=>{const w=(d.gust/wm*100).toFixed(0);
+        return `<div class="r2"><span class="n" style="background:var(--green)">${i+1}</span><span class="dt">${fmtBR(d.date)}</span><span class="bar"><span style="width:${w}%;background:linear-gradient(90deg,#8fce9f,#238b45)"></span></span><span class="mm" style="color:var(--green)">${d.gust}<i> m/s</i></span></div>`;}).join('');}
+    const wall=(C.wind||[]).flat().filter(x=>x!=null),whi=wall.length?Math.max(0.5,Math.ceil(Math.max(...wall)*10)/10):2;
+    document.getElementById('whi').textContent=whi.toFixed(1)+' m/s';
+    document.getElementById('hmWind').innerHTML=heatmap(C.wind,C.years,C.months,v=>ramp(WINDRAMP,v/whi),v=>v.toFixed(1));
+    const WK=[['Mês mais ventoso',`${mn[wmaxM]} · ${cl.wind[wmaxM]}`,'m/s'],['Mês mais calmo',`${mn[wminM]} · ${cl.wind[wminM]}`,'m/s']].concat(gr?[['Rajada recorde',`${gr.gust}`,'m/s']]:[]);
+    document.getElementById('wkeys').innerHTML=WK.map(([l,v,u])=>`<div class="kt w"><div class="kl">${l}</div><div class="kv">${v}<i>${u}</i></div></div>`).join('');
+  }
+  // Section 4
   document.getElementById('alead').innerHTML=`Ano a ano, a temperatura média oscila pouco em torno de ${tmean} °C, enquanto a chuva varia bastante — o ano mais chuvoso da série foi <b class="r">${wettestYr.year}</b>, com <b class="r">${Math.round(wettestYr.rain_total)} mm</b>.`;
   document.getElementById('annual').innerHTML=annualTrend(C.annual);
   document.getElementById('note').textContent=C.notes;

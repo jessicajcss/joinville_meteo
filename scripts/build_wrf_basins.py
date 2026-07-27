@@ -189,6 +189,12 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
     T = rain.shape[0]
     tgt = (T // 2) if tgt is None else max(0, min(int(tgt), T - 1))   # maps (b,d,f): next forecast hour
     lbl = [s[5:16] for s in vt]                       # 'MM-DD HH:MM' (local)
+    # series panels (a,c,e) show only a 24-h window from the update forward (legible x-axis);
+    # the maps (b,d,f) keep the single next-hour snapshot at `tgt`.
+    s0 = tgt; s1 = min(T, s0 + 24); nx = s1 - s0; xx = list(range(nx)); xr = lbl[s0:s1]
+    def _xt(a):
+        step = max(1, nx // 8)
+        a.set_xticks(xx[::step]); a.set_xticklabels([xr[i] for i in xx[::step]], rotation=45, ha="right")
     have_t = temp is not None; have_w = u is not None
     xlim = (float(np.min(lon)), float(np.max(lon)))
     ylim = (float(np.min(lat)), float(np.max(lat)))
@@ -207,20 +213,20 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
 
     fig, ax = plt.subplots(3, 2, figsize=(13, 13))
     # (a) precip series
-    ax[0, 0].plot(lbl, rain.mean((1, 2)), "o-", label="box mean")
-    ax[0, 0].plot(lbl, rain.max((1, 2)), "s--", label="box max")
-    ax[0, 0].set_title("(a) hourly precip"); ax[0, 0].set_ylabel("mm h$^{-1}$")
-    ax[0, 0].legend(); ax[0, 0].tick_params(axis="x", rotation=45)
+    ax[0, 0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
+    ax[0, 0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
+    ax[0, 0].set_title("(a) hourly precip · próximas 24 h"); ax[0, 0].set_ylabel("mm h$^{-1}$")
+    ax[0, 0].legend(); _xt(ax[0, 0])
     # (b) precip map
     vmax = float(np.nanpercentile(rain, 99)) or 1
     im = ax[0, 1].pcolormesh(lon, lat, rain[tgt], vmin=0, vmax=vmax, cmap="viridis", shading="auto")
     deco(ax[0, 1])
     ax[0, 1].set_title(f"(b) precip @ {lbl[tgt]}"); plt.colorbar(im, ax=ax[0, 1])
     if have_t:
-        ax[1, 0].plot(lbl, temp.mean((1, 2)), "o-", color="#c0392b", label="box mean")
-        ax[1, 0].fill_between(range(T), temp.min((1, 2)), temp.max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
-        ax[1, 0].set_title("(c) 2-m temperature"); ax[1, 0].set_ylabel("°C")
-        ax[1, 0].legend(); ax[1, 0].tick_params(axis="x", rotation=45)
+        ax[1, 0].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="box mean")
+        ax[1, 0].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
+        ax[1, 0].set_title("(c) 2-m temperature · próximas 24 h"); ax[1, 0].set_ylabel("°C")
+        ax[1, 0].legend(); _xt(ax[1, 0])
         im2 = ax[1, 1].pcolormesh(lon, lat, temp[tgt], cmap="RdYlBu_r", shading="auto")
         deco(ax[1, 1])
         ax[1, 1].set_title(f"(d) 2-m T @ {lbl[tgt]}"); plt.colorbar(im2, ax=ax[1, 1])
@@ -228,10 +234,10 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
         for a in (ax[1, 0], ax[1, 1]): a.text(.5, .5, "no t2m", ha="center"); a.axis("off")
     if have_w:
         sp = np.hypot(u, v)
-        ax[2, 0].plot(lbl, sp.mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
-        ax[2, 0].plot(lbl, sp.max((1, 2)), "s--", color="#2c7fb8", label="box max")
-        ax[2, 0].set_title("(e) 10-m wind speed"); ax[2, 0].set_ylabel("m s$^{-1}$")
-        ax[2, 0].legend(); ax[2, 0].tick_params(axis="x", rotation=45)
+        ax[2, 0].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
+        ax[2, 0].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="box max")
+        ax[2, 0].set_title("(e) 10-m wind speed · próximas 24 h"); ax[2, 0].set_ylabel("m s$^{-1}$")
+        ax[2, 0].legend(); _xt(ax[2, 0])
         im3 = ax[2, 1].pcolormesh(lon, lat, sp[tgt], cmap="YlGnBu", vmin=0, shading="auto")
         s = max(1, sp.shape[2] // 12)
         ax[2, 1].quiver(lon[::s], lat[::s], u[tgt, ::s, ::s], v[tgt, ::s, ::s], scale=200, width=0.003)

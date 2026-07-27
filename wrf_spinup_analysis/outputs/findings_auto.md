@@ -1,7 +1,7 @@
 # Spin-up test — auto-generated status
 
 - **Status:** PRELIMINARY — need >= 20 runs AND >= 500 pairs (have 1 runs, 0 pairs)
-- Archive runs: **1** | lead-hour span in archive: **1..24 h**
+- Archive runs: **1** | lead-hour span in archive: **1..72 h**
 - Matched hourly precip pairs: **0** | temp pairs: **0**
 - Candidate spin-up window: **6 h**; settled reference: **13..24 h**
 

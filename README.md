@@ -27,6 +27,26 @@ elsewhere; apply these files there using `COMMIT_PLAN.md` (branch-per-feature). 
 
 ## What changed (this work, newest first)
 
+0aaa. **Wind-direction climatology + a batch of UI refinements** (`scripts/build_city_history.py`,
+   `scripts/build_station_history.py`, `scripts/build_wrf_basins.py`, and the pages
+   `index/cidade/cidade_tempchuva/estacao/previsao`). The **predominant wind direction** shown on
+   **Cidade (item 6)** and the **monthly wind roses on Estação** now use the **vector resultant of
+   Grange (2014)** — `u = −vel·sen θ`, `v = −vel·cos θ`, resultant `atan2(ū, v̄) + 180°` (the method of
+   the R `openair` package) — combined **station-equal-weight** so no single long record dominates the
+   city value. This replaced the earlier single-most-frequent-sector (mode) estimator, which was noisy
+   on Joinville's near-flat rose and **hid the seasonal cycle**. The convention was independently
+   confirmed (from-direction: summer afternoons blow from the E/ESE sea breeze). The colour of the
+   direction strips is a **frequency** (% of hours in the resultant's ±22.5° octant), not a Grange
+   quantity. Result (physically coherent): summer **L/ESE**, autumn–winter (Apr–Jul, peak May–Jun)
+   swinging to **S/SO** (post-frontal polar air). Same calm + stuck-vane QC as the Agora rose.
+   Reference: **Grange, S. K. (2014), _Technical note: Averaging wind speeds and directions_, Univ. of
+   Auckland**. Other items in the same batch: Início wind-rose note shows both window dates + arrow;
+   "estilo KMA" mentions removed; Cidade·Temp×Chuva gains a **[3] Vento (velocidade)** block (windiest
+   days ranked by peak gust); Previsão risk alert moved **full-width above the maps** (two-column);
+   forecast map overlay → 0.7 opacity, relief → 0.85; hourly series + regional (a/c/e) panels → **24 h
+   window** (maps/slider/downloads/archive stay 72 h — the regional-figure change takes effect on the
+   next WRF run). Documented in `sobre.html`, `METODOLOGIA_DADOS.md` and the forecast log (E4.10).
+
 0aa. **Forecast rain-risk alert on the Previsão page** (`site/previsao.html`). A small box at the top
    applies the **same OMM/WMO intensity logic as the Agora alert** — but to the forecast: it takes the
    worst predicted hourly rain in some bairro over the run and shows Normal / Atenção / Alerta (alert at

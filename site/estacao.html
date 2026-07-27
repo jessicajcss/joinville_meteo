@@ -38,6 +38,16 @@
 .dlbtn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .dlnote{font-size:12px;color:var(--mut);margin-top:8px}
 @media(max-width:1000px){.g2{grid-template-columns:1fr}.itiles{grid-template-columns:1fr 1fr}}
+.rosegrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:6px}
+.roseitem{border:1px solid var(--line);border-radius:12px;padding:6px 4px 8px;text-align:center;background:#fff}
+.roseitem .rm{font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:1px}
+.roseitem .rn{font-size:9.5px;color:var(--mut);font-weight:600}
+.roseitem.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mut);background:#f7f8f9}
+.roselegend{display:flex;flex-wrap:wrap;gap:5px 14px;align-items:center;font-size:11px;color:var(--mut);margin:4px 0 2px}
+.roselegend i{display:inline-block;width:14px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.roselegend .calm{margin-left:auto;font-weight:700}
+@media(max-width:900px){.rosegrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.rosegrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -77,6 +87,11 @@
           <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#ffffd9,#c7e9b4,#7fcdbb,#41b6c4,#1d91c0,#225ea8)"></span><span id="rmaxlab"></span></div></div>
       </div>
     </div>
+
+    <div class="card" style="margin-top:16px" id="rosecard"><div class="ct">Rosa dos ventos por mês <span class="mut" id="rosesub"></span></div>
+      <div class="roselegend" id="roselegend"></div>
+      <div class="rosegrid" id="roses"></div>
+      <div class="dlnote" id="rosenote"></div></div>
 
     <div class="card" style="margin-top:16px"><div class="ct">Cobertura de dados <span class="mut">% de dias com registro, por ano — estação selecionada</span></div>
       <div id="cover"></div>
@@ -170,10 +185,11 @@ function coverStrip(cov){
   return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
 }
 
-let DATA, cur, curYear, curMonth=5, mapSt, mapWind, layerSt, layerWind, LIMITE;
+let DATA, cur, curYear, curMonth=5, mapSt, mapWind, layerSt, layerWind, LIMITE, WR=null;
 async function init(){
   DATA=await fetch('data/station_history.json').then(r=>r.json());
   LIMITE=await fetch('data/limite.geojson').then(r=>r.json()).catch(()=>null);
+  WR=await fetch('data/station_windrose.json').then(r=>r.json()).catch(()=>null);
   const sel=document.getElementById('selSt');
   sel.innerHTML=DATA.stations.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
   const dlSt=document.getElementById('dlSt');
@@ -228,7 +244,7 @@ function renderWind(){
 }
 function renderYear(){
   document.getElementById('stsub').textContent=`em operação em ${curYear}`;
-  renderStationsMap(); renderTempAndInfo();
+  renderStationsMap(); renderTempAndInfo(); renderRoses();
 }
 function renderTempAndInfo(){
   document.getElementById('tsub').textContent=`${cur.name} · ${curYear}`;
@@ -252,7 +268,54 @@ function renderStation(){
   document.getElementById('cover').innerHTML=coverStrip(s.coverage);
   document.getElementById('dlSt').value=document.getElementById('selSt').value;
   renderDownload();
+  renderRoses();
   document.getElementById('stsub').textContent=`em operação em ${curYear}`;
+}
+// ---- monthly wind roses (16-sector x 5 speed classes), driven by station+year ----
+const ROSE_COLORS=['#c7e9b4','#7fcdbb','#41b6c4','#1d91c0','#225ea8'];
+const ROSE_CLABEL=['0–2','2–4','4–6','6–8','≥8'];
+function rosePt(cx,cy,r,b){const a=b*Math.PI/180;return [cx+r*Math.sin(a),cy-r*Math.cos(a)];}
+function roseWedge(cx,cy,r0,r1,b0,b1,fill){
+  const [x1,y1]=rosePt(cx,cy,r1,b0),[x2,y2]=rosePt(cx,cy,r1,b1),
+        [x3,y3]=rosePt(cx,cy,r0,b1),[x4,y4]=rosePt(cx,cy,r0,b0);
+  return `<path d="M${x1.toFixed(2)} ${y1.toFixed(2)} A${r1.toFixed(2)} ${r1.toFixed(2)} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} L${x3.toFixed(2)} ${y3.toFixed(2)} A${r0.toFixed(2)} ${r0.toFixed(2)} 0 0 0 ${x4.toFixed(2)} ${y4.toFixed(2)} Z" fill="${fill}" stroke="#fff" stroke-width="0.4"/>`;
+}
+function windRoseSVG(rose,maxTot){
+  const S=140,cx=S/2,cy=S/2,R=S/2-14,freq=rose.freq;
+  let g=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fafbfc" stroke="#e7e9ec" stroke-width="0.8"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="${(R*0.66).toFixed(1)}" fill="none" stroke="#e7e9ec" stroke-width="0.6"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="${(R*0.33).toFixed(1)}" fill="none" stroke="#eef0f2" stroke-width="0.6"/>`
+    +`<text x="${cx}" y="9.5" font-size="8" font-weight="700" fill="#9aa0a6" text-anchor="middle">N</text>`
+    +`<text x="${S-3}" y="${cy+3}" font-size="8" fill="#c3c9d0" text-anchor="end">L</text>`
+    +`<text x="${cx}" y="${S-2}" font-size="8" fill="#c3c9d0" text-anchor="middle">S</text>`
+    +`<text x="3" y="${cy+3}" font-size="8" fill="#c3c9d0" text-anchor="start">O</text>`;
+  const w=20;
+  for(let i=0;i<16;i++){const b=i*22.5,b0=b-w/2,b1=b+w/2;let r0=0;
+    for(let j=0;j<5;j++){const val=freq[i][j]; if(val<=0)continue;
+      const r1=r0+(val/maxTot)*R; g+=roseWedge(cx,cy,r0,r1,b0,b1,ROSE_COLORS[j]); r0=r1;}}
+  return `<svg viewBox="0 0 ${S} ${S}" width="100%">${g}</svg>`;
+}
+function renderRoses(){
+  const box=document.getElementById('roses'),leg=document.getElementById('roselegend'),note=document.getElementById('rosenote');
+  document.getElementById('rosesub').textContent=`${cur.name} · ${curYear}`;
+  const st=(WR&&WR.stations)?WR.stations[cur.code]:null;
+  if(!st){box.innerHTML='';leg.innerHTML='';
+    note.textContent='Sem dados de direção do vento para esta estação (sem cata-vento ou cata-vento travado em 0°, excluído da análise de direção).';return;}
+  const yd=st[String(curYear)]||{};
+  // scale petals to the busiest single 22.5° sector across the 12 months (shared, comparable)
+  let maxTot=0;
+  for(let m=1;m<=12;m++){const r=yd[String(m)]; if(r){r.freq.forEach(row=>{const t=row.reduce((x,y)=>x+y,0); if(t>maxTot)maxTot=t;});}}
+  if(maxTot<=0)maxTot=1;
+  let h='';
+  for(let m=1;m<=12;m++){const r=yd[String(m)];
+    if(r&&r.n>0) h+=`<div class="roseitem"><div class="rm">${MFULL[m-1]}</div>${windRoseSVG(r,maxTot)}<div class="rn">${r.n} h · ${r.calm}% calmaria</div></div>`;
+    else h+=`<div class="roseitem empty" style="min-height:150px"><div class="rm">${MFULL[m-1]}</div><div class="rn" style="margin-top:16px">sem dados</div></div>`;}
+  box.innerHTML=h;
+  const hasAny=Object.keys(yd).length>0;
+  leg.innerHTML=ROSE_CLABEL.map((l,j)=>`<span><i style="background:${ROSE_COLORS[j]}"></i>${l}</span>`).join('')+`<span style="color:#9aa0a6">m/s</span>`;
+  note.textContent=hasAny
+    ? 'Frequência por setor (16 direções) × classe de velocidade; comprimento do pétalo = % das horas com vento ≥ 0,5 m/s vindo daquela direção (direção meteorológica, de onde o vento vem). Escala comum aos 12 meses do ano selecionado.'
+    : `Sem registros de vento em ${curYear} para ${cur.name}. Escolha outro ano no seletor acima.`;
 }
 function renderDownload(){
   const s=DATA.stations[+document.getElementById('dlSt').value]||cur;

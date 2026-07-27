@@ -31,7 +31,7 @@
       <div>
         <div class="now2" id="now2"></div>
         <div class="card mapcard">
-          <div class="ct">Rede de estações — Joinville <span class="mut">base orográfica (OpenTopoMap) · balões estilo KMA</span></div>
+          <div class="ct">Rede de estações — Joinville <span class="mut">base orográfica (OpenTopoMap)</span></div>
           <div id="map"></div>
           <div class="tog" id="tog"><span data-m="temp">Temperatura</span><span data-m="rain">Chuva</span><span data-m="wind" class="on">Vento</span></div>
           <div class="mapleg" id="mapleg"></div>
@@ -167,10 +167,10 @@ function renderRose(){
   if(!rose || !rose.n){
     roseEl.innerHTML=`<div class="rose-empty">Sem vento suficiente nas últimas ${R.hours} h ${sel?'nesta estação':'na rede'} para desenhar a rosa.</div>`;
   } else { roseEl.innerHTML=windRoseSVG(rose); }
-  const w=R.window||[], t0=w[0]?w[0].slice(11,16):'', t1=w[1]?w[1].slice(11,16):'', d1=w[1]?fmtDate(w[1]):'';
+  const w=R.window||[], t0=w[0]?w[0].slice(11,16):'', t1=w[1]?w[1].slice(11,16):'', d0=w[0]?fmtDate(w[0]):'', d1=w[1]?fmtDate(w[1]):'';
   subEl.textContent=`últimas ${R.hours} h · ${who}`;
   const stats=(rose&&rose.n)?` · ${rose.n} obs${rose.calm_pct!=null?` · calmaria ${rose.calm_pct}%`:''}`:'';
-  if(noteEl) noteEl.innerHTML=`Rosa dos ventos das <b>últimas ${R.hours} h</b> (janela ${t0}–${t1}, ${d1}) — <b>${who}</b>${stats}. Clique numa estação no mapa para ver a dela; clique no mapa, fora das estações, para voltar à média da rede.`;
+  if(noteEl) noteEl.innerHTML=`Rosa dos ventos das <b>últimas ${R.hours} h</b> (janela ${d0} ${t0} → ${d1} ${t1}) — <b>${who}</b>${stats}. Clique numa estação no mapa para ver a dela; clique no mapa, fora das estações, para voltar à média da rede.`;
 }
 
 // ---------- main ----------
@@ -223,7 +223,7 @@ async function init(){
     <div class="kh"><span><span class="warn">&#9888;</span> Alertas de tempo severo <small>· limiares OMM</small></span>
       <span class="kstat ${stat.c}" style="${stat.s}">${stat.t}</span></div>
     <div class="kb">${chip(rlvl,HZ.rain,'Chuva')}${chip(tlvl,HZ.temp,'Temperatura')}${chip(wlvl,HZ.wind,'Vento')}</div>
-    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">${offline?'sem dados recentes das estações — alerta indisponível':'níveis de aviso (estilo KMA)'}</span></div>`;
+    <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">${offline?'sem dados recentes das estações — alerta indisponível':'níveis de aviso'}</span></div>`;
   // estado
   document.getElementById('estado').innerHTML=`<div class="ct">Estado da rede</div>
     <div class="txt">${N.n_online} de ${N.n_total} estações online agora. As demais estão defasadas — última leitura há mais de ${SNAP.fresh_days} dias.</div>

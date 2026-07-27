@@ -50,7 +50,21 @@
 .doc p b{color:var(--ink)}
 .doc h4{font-size:13px;font-weight:800;color:var(--ink);margin:14px 0 2px}
 .testtag{display:inline-block;background:#fff3cd;color:#8a6d1f;border:1px solid #f0e0bd;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:800;letter-spacing:.03em;margin-left:8px;vertical-align:middle;text-transform:uppercase}
-#fcalert .kma{box-shadow:none;padding:0;margin-top:8px;border:0}
+#fcalert .kma{box-shadow:none;padding:0;margin-top:0;border:0}
+#fcalert .fcct{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+#fcalert .fcsrc{margin-left:auto;font-size:11px;font-weight:600;color:var(--mut)}
+.fcgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;margin-top:12px;align-items:start}
+@media(max-width:760px){.fcgrid{grid-template-columns:1fr;gap:12px}}
+.fcstatus{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid}
+.fcstatus.ok{background:#f2f9f2;border-color:#cfe8cf}
+.fcstatus.warn{background:#fff8ec;border-color:#f2dca0}
+.fcstatus.alert{background:#fdece6;border-color:#f2c3ad}
+.fcstatus .fcicon{font-size:23px;line-height:1;flex:none}
+.fcstatus .fclabel{font-size:15px;font-weight:800;color:var(--ink);line-height:1.25}
+.fcstatus .fcstat{font-size:10.5px;font-weight:800;letter-spacing:.05em;margin-top:3px;text-transform:uppercase}
+.fcstatus .fcstat.ok{color:var(--green)}
+.fcstatus .fcstat.alert{color:var(--red)}
+#fcalert .fccapt{margin-top:0}
 </style>
 </head>
 <body>
@@ -66,12 +80,13 @@
 
     <div id="demo"></div>
 
-    <!-- 1+2+3 · [alerta + mapa + por bacia]  |  por bairro -->
+    <!-- 0 · alerta de risco de chuva (previsão) — fase de teste — largura total, acima dos mapas -->
+    <div class="card" id="fcalert" style="margin-top:16px;display:none"></div>
+
+    <!-- 1+2+3 · [mapa + por bacia]  |  por bairro -->
     <div class="twocol">
-      <!-- coluna esquerda: alerta de risco (fase de teste) + mapa de previsão + previsão por bacia -->
+      <!-- coluna esquerda: mapa de previsão + previsão por bacia -->
       <div>
-        <!-- 0 · alerta de risco de chuva (previsão) — fase de teste -->
-        <div class="card" id="fcalert" style="margin-bottom:16px;display:none"></div>
         <div class="card">
           <div class="ct">Mapa de previsão <span class="mut" id="mapsub"></span></div>
           <div class="pick">
@@ -230,7 +245,7 @@ function drawMap(){
   if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2" stroke-linejoin="round" opacity="0.85"/>`;
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+18,10,H-20);
   const topo=`<defs><clipPath id="mclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#mclip)">${topoTiles(pr)}</g>`;
-  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" data-home="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${topo}${g.s}${arrows}${outl}${cb}</svg>`;
+  document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" data-home="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${topo}<g opacity="0.7">${g.s}</g>${arrows}${outl}${cb}</svg>`;
   applyZoom('wmap');
   const when=(vn==='rain'&&view==='accum')?'acumulado da rodada':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
   document.getElementById('mapsub').textContent=M.label+' · '+when;
@@ -255,7 +270,8 @@ function drawBars(){const vn=CURVAR, M=VARS[vn];
 }
 // ---- 3. bairro choropleth + list ----
 // OpenTopoMap relief tiles behind an SVG map, positioned by the map projection
-// (equirectangular ≈ Web-Mercator over this small domain); 50% opacity, degrades to white if offline.
+// (equirectangular ≈ Web-Mercator over this small domain); 85% opacity so the relief reads
+// clearly under the semi-transparent forecast overlay; degrades to white if offline.
 function topoTiles(pr){const dlon=Math.max(1e-3,pr.lonmax-pr.lonmin);
   const z=Math.max(10,Math.min(12,Math.round(Math.log2(1800/dlon)))),n=Math.pow(2,z);
   const lon2x=l=>(l+180)/360*n, lat2y=l=>{const r=l*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*n;};
@@ -263,7 +279,7 @@ function topoTiles(pr){const dlon=Math.max(1e-3,pr.lonmax-pr.lonmin);
   const x0=Math.floor(lon2x(pr.lonmin)),x1=Math.floor(lon2x(pr.lonmax)),y0=Math.floor(lat2y(pr.latmax)),y1=Math.floor(lat2y(pr.latmin));
   const sub=['a','b','c'];let img='',k=0;
   for(let xt=x0;xt<=x1;xt++)for(let yt=y0;yt<=y1;yt++){const [ax,ay]=P(pr,x2lon(xt),y2lat(yt)),[bx,by]=P(pr,x2lon(xt+1),y2lat(yt+1));
-    img+=`<image href="https://${sub[(k++)%3]}.tile.opentopomap.org/${z}/${xt}/${yt}.png" x="${ax.toFixed(1)}" y="${ay.toFixed(1)}" width="${(bx-ax).toFixed(1)}" height="${(by-ay).toFixed(1)}" opacity="0.5" preserveAspectRatio="none"/>`;}
+    img+=`<image href="https://${sub[(k++)%3]}.tile.opentopomap.org/${z}/${xt}/${yt}.png" x="${ax.toFixed(1)}" y="${ay.toFixed(1)}" width="${(bx-ax).toFixed(1)}" height="${(by-ay).toFixed(1)}" opacity="0.85" preserveAspectRatio="none"/>`;}
   return img;}
 // per-bairro value at the selected instant (rain 'accum' → run total; otherwise the hourly series)
 function bairroValAt(b,vn,view){if(!b)return null;
@@ -283,7 +299,7 @@ function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn],
   const vals=RUN.bairros.map(valOf).filter(v=>v!=null), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
   let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?valOf(b):null;
     const fill=v==null?'#eef1f5':M.ramp((v-lo)/rng);
-    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="1"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
+    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="0.7"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
   const outl=LIM?`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="1.6" opacity="0.9"/>`:'';
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+16,10,H-20);
   const topo=`<defs><clipPath id="bclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#bclip)">${topoTiles(pr)}</g>`;
@@ -303,15 +319,18 @@ function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn],
 function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEach(r=>{r.style.display=r.dataset.nm.includes(q)?'':'none';});}
 // ---- 4. basin hourly ----
 function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=>b[vn]); if(!bs.length)return;
-  const n=RUN.lead_h.length,W=1000,H=250,PL=48,PR=12,PT=12,PB=30,plotW=W-PL-PR,plotH=H-PT-PB;
-  const all=bs.flatMap(M.series); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
+  // only the first 24 h from the run start (maps, slider, downloads and archive stay full 72 h)
+  const nAll=RUN.lead_h.length, n=Math.max(2,Math.min(nAll,(RUN.lead_h.filter(h=>h<=24).length)||Math.min(24,nAll)));
+  const W=1000,H=250,PL=48,PR=12,PT=12,PB=30,plotW=W-PL-PR,plotH=H-PT-PB;
+  const all=bs.flatMap(b=>M.series(b).slice(0,n)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
   const x=i=>PL+(n>1?i/(n-1):0.5)*plotW, y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH, adec=hi<1?2:(hi<10?1:0);
   let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4}" font-size="12" fill="#8a8f98" text-anchor="end">${t.toFixed(adec)}</text>`;});
-  RUN.lead_h.forEach((h,i)=>{if(i%Math.ceil(n/8)===0)ax+=`<text x="${x(i).toFixed(1)}" y="${H-10}" font-size="11" fill="#8a8f98" text-anchor="middle">+${h}h</text>`;});
-  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
+  const step=Math.max(1,Math.ceil(n/8));
+  for(let i=0;i<n;i++){if(i%step===0)ax+=`<text x="${x(i).toFixed(1)}" y="${H-10}" font-size="11" fill="#8a8f98" text-anchor="middle">+${RUN.lead_h[i]}h</text>`;}
+  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).slice(0,n).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
   document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
-  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+')';
+  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h';
 }
 // ---- SVG pan/zoom for the two forecast maps (buttons + wheel + drag; survives re-render) ----
 const ZOOM={};
@@ -393,15 +412,20 @@ function renderForecastAlert(){
               : v<50?'Alerta — chuva forte prevista'
               :      'Alerta — chuva muito forte prevista';
   const when = pk.time?('por volta das '+pk.time.slice(11,16)+(pk.name?(', em '+short(pk.name)):'')):'';
+  const icon = active ? '⚠️' : (lvl==='warn' ? '⚠️' : '✓');
   el.style.display='';
-  el.innerHTML=`<div class="ct">Risco de chuva — próximas horas <span class="mut">previsão WRF · limiares OMM</span><span class="testtag">Fase de teste</span></div>
-    <div class="kma">
-      <div class="kh"><span><span class="warn">&#9888;</span> ${label}</span>
-        <span class="kstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alerta'}</span></div>
-      <div class="kb"><span class="chip ${lvl}">🌧️ Chuva prevista: ${cls} · pico ${v.toFixed(1)} mm/h</span></div>
-      <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">mesma lógica da página Agora, aplicada à previsão</span></div>
-    </div>
-    <div class="capt">Maior taxa de chuva horária que o modelo prevê em algum bairro na janela da rodada${when?(' ('+when+')'):''}. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h), igual à página Agora. <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>`;
+  el.innerHTML=`<div class="ct fcct">Risco de chuva — próximas horas <span class="testtag">Fase de teste</span><span class="fcsrc">previsão WRF · limiares OMM</span></div>
+    <div class="fcgrid">
+      <div class="kma">
+        <div class="fcstatus ${lvl}">
+          <span class="fcicon">${icon}</span>
+          <div><div class="fclabel">${label}</div><div class="fcstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alerta'}</div></div>
+        </div>
+        <div class="kb" style="margin-top:11px"><span class="chip ${lvl}">🌧️ Chuva prevista: ${cls} · pico ${v.toFixed(1)} mm/h</span></div>
+        <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">mesma lógica da página Agora</span></div>
+      </div>
+      <div class="capt fccapt">Maior taxa de chuva horária que o modelo prevê em algum bairro na janela da rodada${when?(' ('+when+')'):''}. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h), igual à página Agora. <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>
+    </div>`;
 }
 
 async function init(){
