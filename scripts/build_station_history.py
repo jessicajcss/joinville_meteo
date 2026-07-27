@@ -93,6 +93,18 @@ for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
     if csv.exists():
         shutil.copy(csv, DLDIR / f"{code}.csv")
 
+# ---- gzipped HOURLY masters for the "Baixar dados" hourly option (decompressed client-side) ----
+# Kept gzipped so the repo stays lean (~20 MB vs ~77 MB raw); the page fetches + inflates on demand.
+import gzip as _gzip
+HRLYDIR = OUT / "stations" / "hourly"; HRLYDIR.mkdir(parents=True, exist_ok=True)
+HOURLYSRC = ROOT / "data" / "hourly"
+for f in sorted(glob.glob(str(HOURLYSRC / "*.csv"))):
+    code = os.path.basename(f)[:-4]
+    if code not in reg_by:
+        continue
+    with open(f, "rb") as fin, _gzip.open(HRLYDIR / f"{code}.csv.gz", "wb", compresslevel=6) as fout:
+        shutil.copyfileobj(fin, fout)
+
 stations.sort(key=lambda s: s["name"])
 all_years = sorted({y for s in stations for y in s["years"]})
 stamp = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%MZ"], capture_output=True, text=True).stdout.strip()
@@ -101,7 +113,7 @@ stamp = subprocess.run(["date", "-u", "+%Y-%m-%dT%H:%MZ"], capture_output=True, 
                ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 # ---- per-station monthly wind roses (Estação page) -> station_windrose.json ----
-# 16-sector x speed-class frequency per (station, year, month), from the hourly masters.
+# 16-sector x speed-class frequency per (station, year, month), from the 5-minute masters (hourly fallback).
 # Same QC as the network rose: drop stuck-vane stations (>25% of windy hours at exactly 0°),
 # exclude calm winds and the exact-0 sentinel from the sectors.
 HOURLY = ROOT / "data" / "hourly"
@@ -126,36 +138,67 @@ def bin_rose(wd, ws):
         freq = freq / n * 100.0
     return {"freq": np.round(freq, 1).tolist(), "n": int(n), "calm": cp}
 
-wr = {}
-for f in sorted(glob.glob(str(HOURLY / "*.csv"))):
-    code = os.path.basename(f)[:-4]
-    if code not in reg_by:
-        continue
-    try:
-        d = pd.read_csv(f, usecols=lambda c: c in ("date", "wd", "ws"))
-    except Exception:
-        continue
-    if "wd" not in d.columns or "ws" not in d.columns:
-        continue
-    d["date"] = pd.to_datetime(d["date"], errors="coerce")
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fivemin
+
+def _rose_wind(code):
+    """(DataFrame[date,wd,ws], src) preferring the 5-min store, else hourly master."""
+    d = fivemin.load_wind(code); src = "5min"
+    if d is None:
+        f = HOURLY / f"{code}.csv"
+        if not f.exists():
+            return None, None
+        try:
+            d = pd.read_csv(f, usecols=lambda c: c in ("date", "wd", "ws"))
+        except Exception:
+            return None, None
+        if "wd" not in d.columns or "ws" not in d.columns:
+            return None, None
+        d["date"] = pd.to_datetime(d["date"], errors="coerce"); src = "hourly"
     d = d.dropna(subset=["date", "wd", "ws"])
-    if d.empty:
+    return (d if len(d) else None), src
+
+wr = {}; wr_src = {}
+for code in sorted(reg_by):
+    d, src = _rose_wind(code)
+    if d is None:
         continue
     windy = d["ws"].to_numpy() >= CALM_MS
     if windy.sum() >= 100 and float(np.mean(d["wd"].to_numpy()[windy] == 0.0)) > STUCK_FRAC:
         continue
-    d["y"] = d["date"].dt.year; d["mo"] = d["date"].dt.month
+    d = d.assign(y=d["date"].dt.year, mo=d["date"].dt.month)
     st = {}
     for (y, mo), g in d.groupby(["y", "mo"]):
         r = bin_rose(g["wd"].values, g["ws"].values)
         if r and r["n"] >= 1:
             st.setdefault(str(int(y)), {})[str(int(mo))] = r
     if st:
-        wr[code] = st
+        wr[code] = st; wr_src[code] = src
+_wr_res = "5 min" if any(v == "5min" for v in wr_src.values()) else "horária"
 (OUT / "station_windrose.json").write_text(json.dumps(
     {"generated_at": stamp, "calm_ms": CALM_MS, "dirs": 16, "class_edges": ROSE_CLASSES,
-     "stations": wr}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+     "resolution": _wr_res, "source_by_station": wr_src, "stations": wr},
+    ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 print(f"windrose stations: {sorted(wr)} | roses: {sum(len(m) for s in wr.values() for m in s.values())}")
+
+# ---- 5-minute download manifest (which year chunks exist per station) ----
+# Small index the "Baixar dados" page can consult; also documents the archive.
+_fvdir = OUT / "stations" / "fivemin"
+if _fvdir.is_dir():
+    _fv = {}
+    for _d in sorted(_fvdir.iterdir()):
+        if not _d.is_dir():
+            continue
+        _yrs = sorted(int(p.name.rsplit("_", 1)[1][:4]) for p in _d.glob("*.csv.gz"))
+        if _yrs:
+            _fv[_d.name] = {"name": (str(reg_by[_d.name]["name"]) if _d.name in reg_by else _d.name),
+                            "years": _yrs}
+    (_fvdir / "fivemin_index.json").write_text(json.dumps(
+        {"generated_at": stamp, "resolution": "5min",
+         "note": "Um arquivo por ano, gzip. Descomprimir no cliente (DecompressionStream) ou pandas.",
+         "stations": _fv}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"fivemin manifest: {len(_fv)} stations")
 
 print(f"stations: {len(stations)} | years {all_years[0]}–{all_years[-1]}")
 for s in stations:

@@ -100,7 +100,7 @@
     <div class="card" style="margin-top:16px" id="download"><div class="ct">Baixar dados <span class="mut">por estação e período</span></div>
       <div class="dlpanel">
         <div class="fg"><label>Estação</label><select id="dlSt"></select></div>
-        <div class="fg"><label>Resolução</label><select id="dlRes"><option value="daily">Diária</option></select></div>
+        <div class="fg"><label>Resolução</label><select id="dlRes"><option value="daily">Diária</option><option value="hourly">Horária</option><option value="fivemin">5 minutos</option></select></div>
         <div class="fg"><label>De</label><input type="date" id="dlFrom"></div>
         <div class="fg"><label>Até</label><input type="date" id="dlTo"></div>
         <button class="dlbtn" id="dlBtn">⭳ Baixar CSV</button>
@@ -197,6 +197,7 @@ async function init(){
   const dlSt=document.getElementById('dlSt');
   dlSt.innerHTML=DATA.stations.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
   dlSt.onchange=renderDownload;
+  document.getElementById('dlRes').onchange=renderDownload;
   const yr=document.getElementById('selYear'); yr.innerHTML=DATA.all_years.slice().reverse().map(y=>`<option>${y}</option>`).join('');
   curYear=DATA.all_years[DATA.all_years.length-1]; yr.value=curYear;
   const mo=document.getElementById('selMonth'); mo.innerHTML=MFULL.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''); mo.value=6; curMonth=6;
@@ -324,19 +325,45 @@ function renderDownload(){
   document.getElementById('dlFrom').value=s.period[0]; document.getElementById('dlTo').value=s.period[1];
   document.getElementById('dlFrom').min=document.getElementById('dlTo').min=s.period[0];
   document.getElementById('dlFrom').max=document.getElementById('dlTo').max=s.period[1];
-  document.getElementById('dlnote').innerHTML=`Estação: <b>${s.name}</b>. Variáveis: ${s.vars.map(v=>DATA.var_labels[v]).join(', ')}. O arquivo diário traz máxima, mínima, média e acumulados. Resoluções horária e de 5 min podem ser adicionadas.`;
+  const res=document.getElementById('dlRes').value;
+  const note = res==='fivemin'
+      ? 'A resolução <b>5 minutos</b> é o registro bruto da estação (cada ~5 min), o mais fino disponível — a mesma base usada nas rosas dos ventos e na direção predominante. Os arquivos são grandes; prefira períodos curtos.'
+      : res==='hourly'
+      ? 'A resolução <b>horária</b> traz o valor de cada hora (temperatura, umidade, vento, chuva…), consolidado a partir dos registros de 5 min da estação.'
+      : 'O arquivo <b>diário</b> traz máxima, mínima, média e acumulados.';
+  document.getElementById('dlnote').innerHTML=`Estação: <b>${s.name}</b>. Variáveis: ${s.vars.map(v=>DATA.var_labels[v]).join(', ')}. `+note;
 }
 async function doDownload(){
   const s=DATA.stations[+document.getElementById('dlSt').value]||cur;
+  const res=document.getElementById('dlRes').value;
   const from=document.getElementById('dlFrom').value,to=document.getElementById('dlTo').value,btn=document.getElementById('dlBtn');
   btn.textContent='… preparando';
-  try{const txt=await fetch(`data/stations/daily/${s.code}.csv`).then(r=>r.text());
-    const lines=txt.split(/\r?\n/),di=lines[0].split(',').indexOf('date'),out=[lines[0]];
-    for(let i=1;i<lines.length;i++){const ln=lines[i];if(!ln)continue;const dt=ln.split(',')[di];if(dt>=from&&dt<=to)out.push(ln);}
+  try{
+    let header=null; const out=[];
+    const filt=(txt)=>{const lines=txt.split(/\r?\n/);const di=lines[0].split(',').indexOf('date');
+      if(header===null){header=lines[0];out.push(header);}
+      for(let i=1;i<lines.length;i++){const ln=lines[i];if(!ln)continue;const dt=ln.split(',')[di].slice(0,10);if(dt>=from&&dt<=to)out.push(ln);}};
+    if(res==='fivemin'){                             // year-chunked gzip → inflate + filter each chunk
+      const y0=+from.slice(0,4), y1=+to.slice(0,4); let got=0;
+      for(let y=y0;y<=y1;y++){
+        const r=await fetch(`data/stations/fivemin/${s.code}/${s.code}_${y}.csv.gz`);
+        if(!r.ok) continue;                          // year absent (data gap) → skip
+        filt(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text()); got++;
+      }
+      if(!got) throw new Error('arquivos de 5 min indisponíveis para este período');
+    } else if(res==='hourly'){                        // gzipped hourly master → inflate client-side
+      const r=await fetch(`data/stations/hourly/${s.code}.csv.gz`);
+      if(!r.ok) throw new Error('arquivo horário indisponível (gere pelo workflow de dados)');
+      filt(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text());
+    } else {
+      filt(await fetch(`data/stations/daily/${s.code}.csv`).then(r=>r.text()));
+    }
+    const tag=res==='fivemin'?'5min':(res==='hourly'?'horaria':'diaria');
+    const unit=res==='daily'?'dias':'registros';
     const blob=new Blob([out.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);a.download=`${s.code}_diaria_${from}_${to}.csv`;document.body.appendChild(a);a.click();a.remove();
-    btn.textContent=`⭳ Baixado (${out.length-1} dias)`;}
-  catch(e){btn.textContent='⭳ Baixar CSV';alert('Falha: '+e);}
+    a.href=URL.createObjectURL(blob);a.download=`${s.code}_${tag}_${from}_${to}.csv`;document.body.appendChild(a);a.click();a.remove();
+    btn.textContent=`⭳ Baixado (${out.length-1} ${unit})`;}
+  catch(e){btn.textContent='⭳ Baixar CSV';alert('Falha: '+(e.message||e));}
   setTimeout(()=>btn.textContent='⭳ Baixar CSV',2500);
 }
 init();

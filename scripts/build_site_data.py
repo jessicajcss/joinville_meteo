@@ -21,10 +21,13 @@ Freshness ("online"):
     FRESH_DAYS = 8 keeps a station "online" between weekly pushes.
 """
 from __future__ import annotations
-import json, math, glob, os
+import json, math, glob, os, sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fivemin
 
 ROOT = Path(__file__).resolve().parent.parent
 HOURLY = ROOT / "data" / "hourly"
@@ -202,22 +205,36 @@ ROSE_CLASSES = [(0, 2), (2, 4), (4, 6), (6, 8), (8, 999)]
 CALM_MS = 0.5            # m/s — below this, direction is undefined (calm)
 STUCK_FRAC = 0.25        # >25% of windy hours at exactly 0° -> broken/absent vane
 def wind_rose():
+    # Climatological network rose over the last ROSE_MONTHS. Pooled from the 5-MINUTE
+    # records (site/data/stations/fivemin/) for ~12x the sampling of the hourly master;
+    # a station whose 5-minute window is absent or too sparse falls back to its hourly
+    # master, so the rose still builds if the 5-minute archive lags. (The last-24h rose
+    # below stays on the live hourly feed — the 5-minute archive is not real-time.)
     cut = ref_now - pd.DateOffset(months=ROSE_MONTHS)
+    cyears = range(cut.year, ref_now.year + 1)
     wd_all, ws_all = [], []
-    used, dropped = [], []
-    for c, d in hourly.items():
-        if "wd" not in d.columns or "ws" not in d.columns: continue
-        s = d.dropna(subset=["wd", "ws"])
-        s = s[s["date"] >= cut]
-        wd_s = s["wd"].to_numpy(); ws_s = s["ws"].to_numpy()
+    used, dropped, srcs = [], [], {}
+    for c in sorted(set(hourly) | set(fivemin.codes())):
+        wd_s = ws_s = None; src = None
+        d5 = fivemin.load_wind(c, years=cyears)     # only the recent year chunks
+        if d5 is not None:
+            s = d5.dropna(subset=["wd", "ws"]); s = s[s["date"] >= cut]
+            w5 = s["ws"].to_numpy()
+            if (w5 >= CALM_MS).sum() >= 100:        # enough 5-min wind in the window
+                wd_s = s["wd"].to_numpy(); ws_s = w5; src = "5min"
+        if wd_s is None:                            # fall back to the hourly master
+            d = hourly.get(c)
+            if d is None or "wd" not in d.columns or "ws" not in d.columns: continue
+            s = d.dropna(subset=["wd", "ws"]); s = s[s["date"] >= cut]
+            wd_s = s["wd"].to_numpy(); ws_s = s["ws"].to_numpy(); src = "hourly"
         windy = ws_s >= CALM_MS
         if windy.sum() < 100:                       # too little wind to judge
             continue
-        stuck = np.mean(wd_s[windy] == 0.0)         # exact-0 share among windy hours
+        stuck = np.mean(wd_s[windy] == 0.0)         # exact-0 share among windy obs
         if stuck > STUCK_FRAC:
             dropped.append({"code": c, "stuck0_pct": round(float(stuck * 100), 1)})
             continue
-        used.append(c)
+        used.append(c); srcs[c] = src
         wd_all.append(wd_s); ws_all.append(ws_s)
     if not wd_all: return None
     wd = np.concatenate(wd_all); ws = np.concatenate(ws_all)
@@ -241,6 +258,8 @@ def wind_rose():
             "class_edges": ROSE_CLASSES, "freq": np.round(freq, 2).tolist(),
             "n": int(n), "months": ROSE_MONTHS, "calm_pct": calm_pct, "calm_ms": CALM_MS,
             "stations_used": sorted(used), "stations_dropped": dropped,
+            "resolution": ("5 min" if any(v == "5min" for v in srcs.values()) else "horária"),
+            "source_by_station": srcs,
             "period": [cut.isoformat(), ref_now.isoformat()]}
 
 rose = wind_rose()
