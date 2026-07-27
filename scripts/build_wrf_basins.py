@@ -177,7 +177,7 @@ def aggregate(polys_wgs, name_col, id_col, cells_win, fields, dt, T, ncells, vt,
     return json_list, recs, gj
 
 
-def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None):
+def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt=None):
     """Reproduce the 6-panel wrf_joinville_sanity scientific figure (matplotlib PNG),
     over the full WRF domain, for the Previsão page. Regenerated every run by the pipeline.
     `overlays` = list of {rings,color,lw,alpha} faint administrative borders (state, city)
@@ -186,7 +186,8 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     rain = fields["rain"]; temp = fields["temp"]; u = fields["u"]; v = fields["v"]
-    T = rain.shape[0]; tgt = T // 2
+    T = rain.shape[0]
+    tgt = (T // 2) if tgt is None else max(0, min(int(tgt), T - 1))   # maps (b,d,f): next forecast hour
     lbl = [s[5:16] for s in vt]                       # 'MM-DD HH:MM' (local)
     have_t = temp is not None; have_w = u is not None
     xlim = (float(np.min(lon)), float(np.max(lon)))
@@ -323,6 +324,14 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
         vt = [f"+{int(h)}h" for h in fh]
     dt = float(np.median(np.diff(fh))) if len(fh) > 1 else 1.0
     T = len(fh)
+    # regional maps (b,d,f): show the NEXT forecast hour from generation time — a true forecast
+    # snapshot, not the middle of the run. Falls back to mid-run if valid_time is unavailable.
+    tgt_next = None
+    if "valid_time" in ds:
+        vt_utc = ds["valid_time"].values.astype("datetime64[s]")
+        now_utc = np.datetime64(datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0), "s")
+        future = np.where(vt_utc >= now_utc)[0]
+        tgt_next = int(future[0]) if future.size else int(T - 1)
 
     def full(name):
         return np.nan_to_num(ds[name].values.astype(float), nan=0.0) if name in ds else None
@@ -410,7 +419,7 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     # --- regional 6-panel scientific figure (PNG, auto-updated by the pipeline) ---
     try:
         regional_figure(lat_full, lon_full, fields_full, vt, outdir / "wrf_regional.png",
-                        overlays=overlays, run_time=run_time)
+                        overlays=overlays, run_time=run_time, tgt=tgt_next)
         have_fig = True
     except Exception as e:      # matplotlib missing / plotting error must not break the data build
         print(f"[wrf] regional figure skipped: {e}")

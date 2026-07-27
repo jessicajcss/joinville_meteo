@@ -39,9 +39,10 @@ def build_url(run_dt, fcast_dt):
 def find_latest_run(sess, fhs, max_back_hours=72):
     now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0, tzinfo=None)
     anchor = now.replace(hour=(12 if now.hour >= 12 else 0))
+    probe = min(fhs[-1], 12)   # confirm the run is posted; longer leads may still be uploading (skipped gracefully)
     for k in range(max_back_hours // 12 + 1):
         cand = anchor - timedelta(hours=12 * k)
-        url = build_url(cand, cand + timedelta(hours=fhs[-1]))
+        url = build_url(cand, cand + timedelta(hours=probe))
         try:
             r = sess.get(url, stream=True, timeout=40, headers={"Range": "bytes=0-1"})
             ok = r.status_code in (200, 206); r.close()
@@ -79,6 +80,9 @@ def open_joinville(path):
                 if nm in d.data_vars:
                     wind[canon] = _norm(d[[nm]].rename({nm: canon})); break
     if rain is None:
+        for d in dss:
+            try: d.close()
+            except Exception: pass
         return None, None
     if "tp" in rain:
         tp_attrs = {k: v for k, v in rain["tp"].attrs.items() if "step" in k.lower() or "Grib" in k}
@@ -89,13 +93,17 @@ def open_joinville(path):
         if canon in wind:
             parts.append(wind[canon][canon].reset_coords(drop=True).reindex_like(rain, method="nearest").rename(canon))
     import xarray as xr
-    return xr.merge(parts), tp_attrs
+    merged = xr.merge(parts).load()          # read into memory so the source GRIB can be deleted immediately
+    for d in dss:
+        try: d.close()
+        except Exception: pass
+    return merged, tp_attrs
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="site/data/wrf_joinville_latest.nc")
-    ap.add_argument("--leads", default="0,24", help="first,last forecast hour (default: next 24 h)")
+    ap.add_argument("--leads", default="0,72", help="first,last forecast hour (default: next 72 h / 3 days)")
     ap.add_argument("--tmp", default="/tmp/cptec_wrf")
     a = ap.parse_args()
     import requests, xarray as xr
@@ -110,34 +118,35 @@ def main():
         return 2
     print(f"[fetch_wrf] latest available run: {run_dt:%Y-%m-%d %H}Z")
 
-    downloaded = []
+    # download → extract → delete, one lead at a time, so peak disk stays ~one GRIB
+    # even for the 72-hour (3-day) window (files can be tens of MB over the full AMS domain)
+    per_fh, grib_attrs = [], None
     for fh in fhs:
         url = build_url(run_dt, run_dt + timedelta(hours=fh))
         dest = tmp / Path(url).name
-        if dest.exists() and dest.stat().st_size > 1e5:
-            downloaded.append((fh, dest)); continue
         try:
             r = sess.get(url, stream=True, timeout=180)
-            if r.status_code == 200:
-                with open(dest, "wb") as f:
-                    for ch in r.iter_content(1 << 16): f.write(ch)
-                if dest.stat().st_size > 1e5: downloaded.append((fh, dest))
-                else: dest.unlink(missing_ok=True)
+            if r.status_code != 200:
+                r.close(); continue
+            with open(dest, "wb") as f:
+                for ch in r.iter_content(1 << 16): f.write(ch)
+            r.close()
+            if dest.stat().st_size <= 1e5:
+                continue
+            ds, tp_attrs = open_joinville(dest)
+            if ds is not None:
+                if grib_attrs is None and tp_attrs: grib_attrs = tp_attrs
+                per_fh.append(ds.expand_dims(forecast_hour=[fh]))
         except Exception as e:
             print(f"[fetch_wrf] +{fh}h err: {e}", file=sys.stderr)
-    if not downloaded:
-        print("[fetch_wrf] nothing downloaded (retention/access?)", file=sys.stderr)
-        return 3
-    print(f"[fetch_wrf] {len(downloaded)} lead files")
-
-    per_fh, grib_attrs = [], None
-    for fh, path in downloaded:
-        ds, tp_attrs = open_joinville(path)
-        if ds is None: continue
-        if grib_attrs is None and tp_attrs: grib_attrs = tp_attrs
-        per_fh.append(ds.expand_dims(forecast_hour=[fh]))
+        finally:
+            for p in tmp.glob(dest.name + "*"):     # remove the GRIB and any cfgrib .idx sidecar
+                try: p.unlink()
+                except Exception: pass
     if not per_fh:
-        print("[fetch_wrf] no precip extracted", file=sys.stderr); return 4
+        print("[fetch_wrf] nothing downloaded/extracted (retention/access?)", file=sys.stderr)
+        return 3
+    print(f"[fetch_wrf] {len(per_fh)} lead files extracted")
     common = set(per_fh[0].data_vars)
     for ds in per_fh[1:]: common &= set(ds.data_vars)
     per_fh = [ds[list(common)] for ds in per_fh]
