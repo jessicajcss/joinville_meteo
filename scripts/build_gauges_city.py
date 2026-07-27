@@ -25,8 +25,11 @@ Output: data/processed/gauge_city_daily.csv  (date, city_rain_mm, n_sites)
 """
 from __future__ import annotations
 from pathlib import Path
-import glob, os
+import glob, os, sys
 import numpy as np, pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import masters
 
 ROOT = Path(__file__).resolve().parent.parent
 PROC = ROOT / "data" / "processed"
@@ -71,14 +74,11 @@ if d2 is not None:
     rows.append(d2.assign(site="gauge:" + d2["gauge"])[["date", "site", "rain_mm"]])
 
 # --- meteo-station daily prec ---
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
+for code, d in masters.iter_masters(DAILY):
     if code in METEO_EXCLUDE:
         continue
-    d = pd.read_parquet(f)
     if "prec" not in d.columns:
         continue
-    d["date"] = pd.to_datetime(d["date"])
     s = d[["date", "prec"]].dropna(subset=["prec"]).rename(columns={"prec": "rain_mm"})
     if len(s):
         rows.append(s.assign(site="meteo:" + code)[["date", "site", "rain_mm"]])

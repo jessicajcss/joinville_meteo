@@ -16,10 +16,13 @@ Per station:
 Everything is the station's OWN record (unblended).
 """
 from __future__ import annotations
-import glob, json, os, shutil, subprocess
+import glob, json, os, shutil, subprocess, sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import masters
 
 ROOT = Path(__file__).resolve().parent.parent
 DAILY = ROOT / "data" / "daily"
@@ -32,12 +35,11 @@ VAR_LABELS = {"temp": "Temperatura", "rain": "Chuva", "umid": "Umidade", "wind":
 reg_by = {r["code"]: r for _, r in REG.iterrows()}
 stations = []
 
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
+for code, d in masters.iter_masters(DAILY):
     if code not in reg_by:
         continue
     r = reg_by[code]
-    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"]); d = d.sort_values("date")
+    d = d.sort_values("date")
     d["y"] = d["date"].dt.year; d["mo"] = d["date"].dt.month
     for c in ("temp_max", "temp_min", "prec", "umid_mean", "ws_mean"):
         if c not in d: d[c] = np.nan

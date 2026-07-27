@@ -68,6 +68,7 @@
         <a href="#risco">Risco hidro-climático</a>
         <a href="#previsao">Previsão WRF por bacia</a>
         <a href="#agora">Página “Agora”</a>
+        <a href="#resolucao">Resolução temporal</a>
         <a href="#arquivos">Arquivos &amp; processamento</a>
         <a href="#refs">Referências</a>
         <a href="#glos">Glossário</a>
@@ -84,8 +85,7 @@
         <li><b>Limpeza de sentinelas.</b> Remoção dos códigos de falha (<code>-100</code>, <code>NAN</code>, <code>-6999</code>, etc.); carimbos de tempo anteriores a 2010 são descartados.</li>
         <li><b>CQ de faixa física.</b> Valores fora de limites físicos plausíveis são removidos (tabela abaixo).</li>
         <li><b>CQ de chuva (código em polegadas).</b> Os pluviógrafos são de báscula <b>em polegadas</b> (resolução de báscula 0,254 mm = 0,01 in). Seu código de falha aparece como um valor <b>exato em polegadas</b> no campo de chuva: <code>254,0 mm = 10,00 in</code> — <b>1.092 ocorrências</b> na rede (o 99,9º <i>e</i> o 99,99º percentis são ambos exatamente 254,0: assinatura de sentinela, não de chuva real) — e <code>228,6 mm = 9,00 in</code> (6×). Estes são <b>sinalizados e removidos</b>; <b>25,4 e 50,8 mm</b> (1 e 2 in) são <b>mantidos</b> por serem totais plausíveis. Somam-se um <b>teto físico</b> (150 mm h⁻¹ / 350 mm dia⁻¹ — os dados têm uma lacuna vazia entre valores de tempestade críveis, ≤ ~115 mm h⁻¹, e uma prateleira de instrumento, ≥ ~229 mm h⁻¹) e a marcação de <b>“despejos de acúmulo”</b> (valor grande na hora seguinte a uma lacuna de dados > 2 h = chuva de várias horas relatada num só balde). Pontos marcados viram <b>ausentes (NaN), não zero</b>; nada é apagado em silêncio — cada ponto removido é listado em <code>data/processed/rain_qc_flags.csv</code> (o arquivo bruto de origem segue como trilha de auditoria). Regra aplicada a <b>toda a rede</b> por <code>rain_qc.py</code> (1.236 pontos, ~0,14 %).</li>
-        <li><b>CQ de direção do vento (cata-vento travado / calmaria).</b> Na <b>rosa dos ventos</b> (página Agora): <b>calmarias</b> (velocidade &lt; 0,5 m s⁻¹) não recebem direção — um cata-vento não resolve direção a velocidade quase nula — e são contadas à parte (percentual de calmaria). Estações cujo cata-vento fica <b>travado exatamente em 0°</b> em parcela implausível das horas <i>com vento</i> (&gt; 25 %) são <b>excluídas</b> da rosa: um sítio realmente dominado por norte se espalha em torno de N, não crava 0,000°. Além disso, as <b>leituras individuais exatamente em 0,000°</b> são descartadas <b>mesmo nas estações mantidas</b> (o mesmo sentinela pode aparecer em parte das horas de uma estação de resto boa). Isso remove o falso pico de “Norte” que um sensor travado/ausente fabricava — aplicado igualmente à rosa da página Agora, às rosas mensais da página Estação e ao cálculo de direção predominante da página Cidade.</li>
-        <li><b>Direção predominante do vento (resultante vetorial de Grange).</b> A direção predominante mostrada na página <b>Cidade</b> (item 6, e nas rosas mensais da página <b>Estação</b>) <b>não</b> é a média aritmética dos graus — isso seria incorreto por causa da descontinuidade 0°/360°. Usa-se a <b>resultante vetorial</b> [Grange, S. K. (2014), <i>Technical note: Averaging wind speeds and directions</i>, University of Auckland; método do pacote R <code>openair</code>]: cada observação horária vira um vetor <code>u = −vel·sen θ</code>, <code>v = −vel·cos θ</code> (θ = direção meteorológica, de onde o vento vem); os vetores são promediados e a direção resultante é <code>atan2(ū, v̄) + 180°</code>. A combinação entre estações é feita com <b>peso igual por estação</b> (cada estação entra com o seu próprio vetor médio) para que um registro litorâneo mais longo não domine o valor municipal. A cor das faixas indica a <b>predominância</b> = % das horas no octante (±22,5°) da resultante (é uma frequência, não uma grandeza de Grange). Mesmos filtros de calmaria e cata-vento travado acima. Resultado físico coerente: verão de <b>L/ESE</b> (brisa marítima da Baía da Babitonga); outono–inverno (abr–jul, pico mai–jun) girando para <b>S/SO</b> (ar polar pós-frontal).</li>
+        <li><b>CQ de direção do vento (cata-vento travado / calmaria).</b> Na <b>rosa dos ventos</b> (página Agora): <b>calmarias</b> (velocidade &lt; 0,5 m s⁻¹) não recebem direção — um cata-vento não resolve direção a velocidade quase nula — e são contadas à parte (percentual de calmaria). Estações cujo cata-vento fica <b>travado exatamente em 0°</b> em parcela implausível das horas <i>com vento</i> (&gt; 25 %) são <b>excluídas</b> da rosa: um sítio realmente dominado por norte se espalha em torno de N, não crava 0,000°. Isso remove o falso pico de “Norte” que um sensor travado/ausente fabricava.</li>
         <li><b>Deduplicação.</b> Um registro por carimbo de tempo, preferindo a linha nativa mais completa.</li>
         <li><b>Médias diárias.</b> <code>temp</code>, <code>umidade</code>, <code>vento</code>, <code>pressão</code> e <code>radiação</code> diárias = média aritmética das horas do dia; guarda-se <code>n_horas</code> para poder descartar dias parciais. Extremos e totais (Tmax, Tmin, chuva) são os nativos do registrador.</li>
       </ul>
@@ -110,7 +110,7 @@
         <li><b>Chuva da cidade</b> = <b>média espacial</b> de todos os sítios válidos no dia, exigindo ≥ 3 sítios; totais mensais exigem ≥ 20 dias válidos.</li>
       </ul>
       <h3>O que significa</h3>
-      <p>Os anos completos batem com <b>~2.100–2.170 mm</b>, coerentes com a referência de longo prazo de <b>~2.130 mm/ano</b> para Joinville (média de 42 postos; De&nbsp;Mello, 2020). As classes de intensidade usadas nos alertas — os <b>“limiares”</b> — classificam a chuva pela <b>taxa horária</b>: <b>leve</b> &lt; 2,5; <b>moderada</b> 2,5–10; <b>forte</b> 10–50; <b>violenta</b> ≥ 50 mm h⁻¹ (o alerta acende a partir de <b>forte</b>). São os limiares de uso corrente em meteorologia — a própria <b>OMM</b> (<b>Organização Meteorológica Mundial</b>, a agência da ONU para meteorologia; em inglês <i>WMO</i>) registra que <b>não há uma definição internacional única</b>, então eles são apresentados como convenção operacional, não como padrão fechado.</p>
+      <p>Os anos completos batem com <b>~2.100–2.170 mm</b>, coerentes com a referência de longo prazo de <b>~2.130 mm/ano</b> para Joinville (média de 42 postos; De&nbsp;Mello, 2020). As classes de intensidade usadas nos alertas (leve &lt; 2,5; moderada 2,5–10; forte 10–50; violenta ≥ 50 mm h⁻¹) são os limiares de uso corrente em meteorologia — a própria OMM registra que <b>não há uma definição internacional única</b>, então eles são apresentados como convenção operacional, não como padrão fechado.</p>
     </div>
 
     <!-- 2 -->
@@ -181,7 +181,7 @@
         <li><b>“Agora”</b> = a observação <b>horária mais recente por estação e por variável</b> (a cobertura difere entre variáveis; uma estação pode ter vento novo e temperatura antiga).</li>
         <li><b>“Online”</b> = leitura a ≤ 8 dias da observação mais nova da rede (os dados chegam ~semanalmente).</li>
         <li><b>Agregados da rede</b> = média aritmética apenas das estações online. <b>Chuva 24 h</b> = soma das 24 h que terminam na última leitura de chuva.</li>
-        <li><b>Rosa dos ventos</b> = 16 setores × 5 classes de velocidade, frequência (%) das horas dos últimos 12 meses.</li>
+        <li><b>Rosa dos ventos</b> = 16 setores × 5 classes de velocidade, frequência (%) dos registros de <b>5 min</b> dos últimos 12 meses. A rosa das <b>últimas 24 h</b> usa o feed horário ao vivo (o arquivo de 5 min não é em tempo real).</li>
         <li><b>Alerta</b> = orientado a dados, com as classes de intensidade de chuva citadas acima; limiares de temperatura marcados como provisórios até calibração local.</li>
       </ul>
     </div>
@@ -201,6 +201,31 @@
         <div class="ttl">Escopo e limitações</div>
         <p>É a <b>saída direta do modelo</b> (sem correção de viés / pós-processamento estatístico) — um modelo de 7 km resolve a chuva de forma aproximada, sobretudo em eventos convectivos. A cobertura depende da disponibilidade e retenção dos dados do CPTEC. Começamos por um <b>estudo de caso</b> reproduzível; a atualização automática da rodada mais recente é o passo seguinte.</p>
       </div>
+    </div>
+
+    <!-- resolução temporal -->
+    <div class="card doc sec" id="resolucao">
+      <div class="ct"><span>Resolução temporal — o que cada página usa</span><span class="tag">resolução</span></div>
+      <p>As estações registram a cada <b>~5 minutos</b> (o dado bruto). A partir dele são consolidadas séries <b>horária</b> e <b>diária</b>. Cada produto usa a resolução mais fina adequada ao que mostra. Os <b>produtos de vento sensíveis à direção</b> — rosas dos ventos e direção predominante — usam o registro de <b>5 min</b> (~12× mais amostras que o horário), o que evita mascarar o ciclo sazonal (brisa marítima no verão × ar polar no outono-inverno).</p>
+      <table class="tbl">
+        <tr><th>Página</th><th>Variável / produto</th><th>Resolução</th><th>Observação</th></tr>
+        <tr><td><b>Estação</b></td><td>Rosa dos ventos (por estação, mês/ano)</td><td class="mono">5 min</td><td>16 setores × 5 classes; frequência sobre as amostras de ~5 min, com CQ de calmaria e anemômetro travado.</td></tr>
+        <tr><td><b>Estação</b></td><td>Velocidade média do vento (mapa, climatologia mensal)</td><td class="mono">diária</td><td>média das horas do dia; ~idêntica à média dos 5 min.</td></tr>
+        <tr><td><b>Estação</b></td><td>Recordes/médias de Tmax e Tmin; mapa de calor de chuva</td><td class="mono">diária</td><td>extremos e totais nativos do registrador (chuva ≥ 15 dias/mês, após CQ).</td></tr>
+        <tr><td><b>Estação</b></td><td>Download “Baixar dados”</td><td class="mono">diária · horária · 5 min</td><td>o usuário escolhe; 5 min é o registro bruto (arquivos grandes).</td></tr>
+        <tr><td><b>Cidade</b></td><td>Direção predominante do vento (resultante)</td><td class="mono">5 min</td><td>resultante vetorial (Grange 2014; openair), peso igual por estação.</td></tr>
+        <tr><td><b>Cidade</b></td><td>Velocidade média do vento (mensal e climatologia)</td><td class="mono">5 min</td><td>5 min → média diária por estação → média da rede → mensal (mesma base da rosa).</td></tr>
+        <tr><td><b>Cidade</b></td><td>Dias mais ventosos (rajada)</td><td class="mono">diária</td><td>mediana da rajada máxima diária das estações (≥ 3 estações).</td></tr>
+        <tr><td><b>Cidade</b></td><td>Temperatura e umidade (mensal, anual, climatologia)</td><td class="mono">diária</td><td>média da rede meteorológica.</td></tr>
+        <tr><td><b>Cidade</b></td><td>Chuva (mensal, anual)</td><td class="mono">diária</td><td>rede de pluviômetros da Defesa Civil + estações, após CQ.</td></tr>
+        <tr><td><b>Temperatura × Chuva × Vento</b></td><td>Vento (climatologia mensal)</td><td class="mono">5 min</td><td>mesma série da página Cidade.</td></tr>
+        <tr><td><b>Temperatura × Chuva × Vento</b></td><td>Temperatura e chuva (climatologia mensal)</td><td class="mono">diária</td><td>—</td></tr>
+        <tr><td><b>Agora</b></td><td>Leituras “agora” (temperatura, umidade, vento, chuva)</td><td class="mono">horária</td><td>última observação por variável/estação; o arquivo de 5 min é histórico, não em tempo real.</td></tr>
+        <tr><td><b>Agora</b></td><td>Rosa dos ventos (últimos 12 meses)</td><td class="mono">5 min</td><td>mesma CQ/binagem; se o 5 min estiver ausente/curto na janela, recai para o horário.</td></tr>
+        <tr><td><b>Agora</b></td><td>Rosa das últimas 24 h</td><td class="mono">horária</td><td>feed ao vivo — o arquivo de 5 min não é atualizado em tempo real.</td></tr>
+        <tr><td><b>Previsão</b></td><td>WRF: chuva, temperatura, vento</td><td class="mono">horária</td><td>saída do modelo (grade ~7 km); chuva de-acumulada, vento u,v → velocidade/direção.</td></tr>
+      </table>
+      <p class="hnote">O registro de 5 min fica versionado em <code>site/data/stations/fivemin/&lt;estação&gt;/&lt;estação&gt;_&lt;ano&gt;.csv.gz</code> (um arquivo por ano, comprimido, para caber no limite de tamanho do GitHub e ser lido/descomprimido sob demanda). Quando uma estação não possui 5 min, o cálculo recai automaticamente para a série horária.</p>
     </div>
 
     <!-- arquivos & processamento -->

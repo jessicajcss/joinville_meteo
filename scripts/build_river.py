@@ -33,10 +33,13 @@ Writes:
   site/data/river/<code>.json     columnar QC'd daily series (loaded on demand)
 """
 from __future__ import annotations
-import calendar, glob, json, os, subprocess
+import calendar, glob, json, os, subprocess, sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import masters
 
 ROOT = Path(__file__).resolve().parent.parent
 DAILY = ROOT / "data" / "daily"
@@ -129,11 +132,8 @@ def diurnal_profile(code: str, bounds):
     oscillation, so a gauge that becomes tidal only in recent years (e.g. flotflux,
     whose gauge started resolving the tide ~2021) is still detected.
     Returns {full, by_year, hm, tidal_amp} or None."""
-    hf = HOURLY / f"{code}.parquet"
-    if not hf.exists():
-        return None
-    h = pd.read_parquet(hf)
-    if "date" not in h.columns:
+    h = masters.read(HOURLY, code)
+    if h is None or "date" not in h.columns:
         return None
     lv = h["level"] if ("level" in h.columns and h["level"].notna().any()) \
         else (h.get("level_max") + h.get("level_min")) / 2 if "level_max" in h.columns else None
@@ -195,14 +195,12 @@ def rnd(v, n=1):
 fluvial = []
 hm_anom_mags, med_anom_mags, est_anom_mags = [], [], []   # fixed anomaly limits (rivers vs estuary)
 
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
+for code, d in masters.iter_masters(DAILY):
     if code not in REG.index:
         continue
-    d = pd.read_parquet(f)
     if "level_max" not in d.columns or not d["level_max"].notna().any():
         continue
-    d["date"] = pd.to_datetime(d["date"]); d = d.sort_values("date").reset_index(drop=True)
+    d = d.sort_values("date").reset_index(drop=True)
     for c in ("temp_mean", "temp_max", "temp_min", "prec"):
         if c not in d.columns:
             d[c] = np.nan
@@ -291,14 +289,12 @@ if ch.exists():
 MIN_YEARS_PANEL = 5
 rain_panels = []
 year_station_count = {}   # year -> number of stations reporting >=10 months
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
+for code, d in masters.iter_masters(DAILY):
     if code not in REG.index:
         continue
-    d = pd.read_parquet(f)
     if "prec" not in d.columns or not d["prec"].notna().any():
         continue
-    d["date"] = pd.to_datetime(d["date"]); d["y"] = d["date"].dt.year; d["mo"] = d["date"].dt.month
+    d["y"] = d["date"].dt.year; d["mo"] = d["date"].dt.month
     clim, years = [], set()
     by_year = {}                                  # year -> [12 monthly totals]
     by_year_cov = {}                              # year -> [12 coverage % (valid days / days in month)]

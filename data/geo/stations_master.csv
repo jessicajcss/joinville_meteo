@@ -1,0 +1,14 @@
+code,name,type,lat,lon,elevation,utm_x,utm_y,resolution
+ceasa,Ceasa,meteorologica,-26.253778,-48.911056,24.0,708633.1,7094526.67,5min
+aguasdejoi,Cia Águas de Joinville (Bucarein),hidrometeorologica,-26.321806,-48.838056,4.0,715800.32,7086871.11,5min
+cubatao,Cubatão,hidrometeorologica,-26.194917,-48.911417,25.0,708700.52,7101049.14,5min
+flotflux,Cachoeira Área Central,hidrometeorologica,-26.275333,-48.849194,4.0,714772.34,7092038.43,5min
+iateclube,Joinville Iate Club,hidrometeorologica,-26.2925,-48.780167,2.0,721635.86,7090019.16,5min
+itaum,Itaum,meteorologica,-26.345139,-48.816083,60.0,717950.55,7084248.63,5min
+rodovia,Rodovia do Arroz,meteorologica,-26.373806,-48.952417,11.0,704289.75,7081294.93,5min
+divobras,Unidade de Obras,hidrologica,-26.309341,-48.823654,,717261.96,7088228.41,
+guanabara,Guanabara,hidrologica,-26.319924,-48.822193,,717388.08,7087053.37,
+jardimparaiso,Paraíso,hidrologica,-26.219231,-48.819354,,717859.64,7098205.09,
+jativoca,Jativoca,hidrometeorologica,-26.369419,-48.887263,,710801.25,7081677.54,
+aeroporto,Aeroporto SBJV,aeroporto,-26.214806,-48.7975,6.0,,,1h
+udesc,UDESC (CCT),meteorologica,-26.255151829918283,-48.855263545204416,,714205.09,7094285.14,1min

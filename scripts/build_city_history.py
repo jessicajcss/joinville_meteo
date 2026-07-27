@@ -16,10 +16,13 @@ City aggregation (documented, strictly from the data):
   * Climatology = the long-term mean for each calendar month across all years.
 """
 from __future__ import annotations
-import glob, json, os
+import glob, json, os, sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import masters
 
 ROOT = Path(__file__).resolve().parent.parent
 DAILY = ROOT / "data" / "daily"
@@ -27,10 +30,7 @@ OUT = ROOT / "site" / "data"
 MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
 rows = []
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
-    d = pd.read_parquet(f)
-    d["date"] = pd.to_datetime(d["date"])
+for code, d in masters.iter_masters(DAILY):
     tmean = d["temp_mean"] if "temp_mean" in d else pd.Series(np.nan, index=d.index)
     if "temp_max" in d and "temp_min" in d:
         tmean = tmean.fillna((d["temp_max"] + d["temp_min"]) / 2)
@@ -75,8 +75,7 @@ STORY["rainy_days_mean"] = round(float(np.mean(_rd))) if _rd else None
 # stations and applying physical bounds before ranking. Reported as the hottest
 # and coldest days on record for the network.
 tx_rows = []
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"])
+for _code, d in masters.iter_masters(DAILY):
     tx_rows.append(pd.DataFrame({
         "date": d["date"],
         "tmax": d["temp_max"] if "temp_max" in d else np.nan,
@@ -126,8 +125,7 @@ def _station_wind(code):
     return (d if len(d) else None), src
 
 raw_wind = {}    # code -> (DataFrame[date,wd,ws], src)
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    code = os.path.basename(f)[:-8]
+for code in masters.codes(DAILY):
     dw, src = _station_wind(code)
     if dw is not None:
         raw_wind[code] = (dw, src)
@@ -150,8 +148,7 @@ city_wind = mw.mean().where(mw.count() >= 10)                    # monthly city-
 
 # windiest days (robust city daily peak gust) — from the daily master's gust_max
 gx_rows = []
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"])
+for _code, d in masters.iter_masters(DAILY):
     gx_rows.append(pd.DataFrame({"date": d["date"],
                                  "gust": d["gust_max"] if "gust_max" in d else np.nan}))
 gxx = pd.concat(gx_rows, ignore_index=True)
@@ -288,8 +285,7 @@ def clim_annual_mean(s):
     return clim, [{"year": int(t.year), "value": round(float(v), 1)} for t, v in yr.items()]
 
 vrows = []
-for f in sorted(glob.glob(str(DAILY / "*.parquet"))):
-    d = pd.read_parquet(f); d["date"] = pd.to_datetime(d["date"])
+for _code, d in masters.iter_masters(DAILY):
     for c in ["temp_mean", "umid_mean", "solar_mean", "ws_mean"]:
         if c not in d: d[c] = np.nan
     vrows.append(d[["date", "temp_mean", "umid_mean", "solar_mean", "ws_mean"]])

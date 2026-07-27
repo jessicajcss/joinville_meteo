@@ -47,7 +47,7 @@
         <div class="card kma" id="kma"></div>
         <div class="card state" style="margin-top:16px" id="estado"></div>
         <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div><div class="capt" id="rosenote"></div></div>
-        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut">agora</span></div><div class="rowlist" id="rows"></div></div>
+        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut" id="rowsupd">agora</span></div><div class="rowlist" id="rows"></div></div>
       </div>
     </div>
     <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
@@ -188,9 +188,9 @@ async function init(){
   const feels=N.feels!=null?`Sensação ${THERMO_SM} ${N.feels}°C`:'';
   const prec=N.precip_now?`${N.precip_now}`:'—';
   document.getElementById('now2').innerHTML=`
-    <div class="now2-top"><span class="lbl">Condições agora <span class="mut">· média da rede</span></span>
-      <div class="upd-stack"><span class="upd">↻ Atualizado ${upd}</span>
-        <div class="datep2"><div class="d">${d}</div><small>${['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'][new Date(y,mo-1,d).getDay()]}<br>${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][mo-1]} ${y}</small></div></div></div>
+    <div class="now2-top"><div><span class="lbl">Condições agora <span class="mut">· média da rede</span></span>
+      <div class="upd" style="margin-top:3px">↻ Atualizado ${upd}</div></div>
+      <div class="datep2"><div class="d">${d}</div><small>${['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'][new Date(y,mo-1,d).getDay()]}<br>${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][mo-1]} ${y}</small></div></div>
     <div class="now2-main">${THERMO}<span class="tnum">${N.temp_mean!=null?Math.round(N.temp_mean):'—'}<span class="u">°C</span></span><span class="feels">${feels}</span></div>
     <div class="now2-cmp">${N.condition||''}. ${N.n_online} de ${N.n_total} estações reportando.</div>
     <div class="now2-stats">
@@ -198,6 +198,7 @@ async function init(){
       <div class="st"><span class="k">${PRECIP} Precip. por hora</span><span class="v">${prec} mm</span></div>
       <div class="st"><span class="k">${SUNUP} Nascer do sol</span><span class="v">${sr}</span></div>
       <div class="st"><span class="k">${SUNDN} Pôr do sol</span><span class="v">${ss}</span></div></div>`;
+  {const ru=document.getElementById('rowsupd'); if(ru) ru.textContent='↻ Atualizado '+upd;}
   // Severe-weather alert — 3 states, judged against the viewer's real clock:
   //   live + calm  → "Em tempo real · sem alertas"   (green)
   //   live + severe→ "Alerta ativo"                   (red)

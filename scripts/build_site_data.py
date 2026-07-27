@@ -28,6 +28,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import fivemin
+import masters
 
 ROOT = Path(__file__).resolve().parent.parent
 HOURLY = ROOT / "data" / "hourly"
@@ -48,21 +49,17 @@ RAIN_CLASSES = [("leve", 0.0, 2.5), ("moderada", 2.5, 10.0),
                 ("forte", 10.0, 50.0), ("violenta", 50.0, math.inf)]
 
 reg = pd.read_csv(GEO / "stations_master.csv")
-# keep only stations that have a master file (exclude e.g. jativoca/aeroporto w/o hourly parquet here)
-have = {os.path.basename(f)[:-8] for f in glob.glob(str(HOURLY / "*.parquet"))}
+# keep only stations that have a master file (parquet locally, csv in a fresh CI checkout)
+have = set(masters.codes(HOURLY))
 
 def load_hourly(code):
-    f = HOURLY / f"{code}.parquet"
-    if not f.exists(): return None
-    d = pd.read_parquet(f)
-    d["date"] = pd.to_datetime(d["date"])
+    d = masters.read(HOURLY, code)
+    if d is None: return None
     return d.sort_values("date")
 
 def load_daily(code):
-    f = DAILY / f"{code}.parquet"
-    if not f.exists(): return None
-    d = pd.read_parquet(f)
-    d["date"] = pd.to_datetime(d["date"])
+    d = masters.read(DAILY, code)
+    if d is None: return None
     return d.sort_values("date")
 
 # ---- pass 1: latest observation time per station (across core vars) ----

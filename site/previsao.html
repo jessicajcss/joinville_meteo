@@ -140,9 +140,16 @@
       <div class="capt" id="hcapt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
     </div>
 
-    <!-- 4b · mapas regionais por hora — seguem o menu-mestre lá em cima -->
+    <!-- 4b · mapas regionais por hora — menu próprio, logo acima dos painéis -->
     <div class="card" style="margin-top:16px" id="reghourcard" hidden>
       <div class="ct">Mapas regionais por hora <span class="mut" id="rgNow"></span></div>
+      <div class="pick" style="align-items:flex-end;margin-top:8px">
+        <div class="fg"><label>Instante dos mapas</label><select id="rgSel"></select></div>
+        <button class="rgb" id="rgPrev" title="hora anterior">‹</button>
+        <input type="range" id="rgSl" min="0" max="0" value="0" style="flex:1;min-width:140px;accent-color:var(--blue)">
+        <button class="rgb" id="rgNext" title="próxima hora">›</button>
+        <button class="rgb" id="rgPlay" style="width:auto;padding:0 12px">▶ animar</button>
+      </div>
       <img class="regfig" id="rgImg" alt="Mapas regionais WRF por hora — chuva, temperatura e vento">
       <div class="capt" id="rgCap"></div>
     </div>
@@ -201,21 +208,38 @@ const VARS={
 
 let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', CURHOUR=0, PROJ, PROJB, BCOL={};
 let RH=null;
-// ---- per-hour regional maps: follow the master instant (no own menu) ----
+// ---- per-hour regional maps: OWN menu here, kept in sync with the master instant ----
+function rgShortT(vt){return vt.slice(5,16).replace('-','/');}
+function fillRgMenu(){
+  const sel=document.getElementById('rgSel'); if(!sel||!RH||!RH.hours) return;
+  if(sel.options.length===RH.hours.length) return;                 // build once
+  sel.innerHTML=RH.hours.map((h,k)=>`<option value="${k}">+${h.lead_h} h · ${rgShortT(h.valid_time)}</option>`).join('');
+  const sl=document.getElementById('rgSl'); if(sl) sl.max=String(Math.max(0,RH.hours.length-1));
+}
+function rgCurrentK(){                                              // which regional-hour matches the page instant
+  if(!RH||!RH.hours||!RH.hours.length) return -1;
+  if(CURVIEW!=='accum'){ const vt=RUN.valid_times[CURVIEW]; const k=RH.hours.findIndex(h=>h.valid_time===vt); if(k>=0) return k; }
+  return 0;                                                        // 'accum' / outside window → first regional hour
+}
 function syncRegImg(){
   const card=document.getElementById('reghourcard');
   if(!RH||!RH.hours||!RH.hours.length){ if(card) card.hidden=true; return; }
-  card.hidden=false;
-  const hrs=RH.hours, ver=encodeURIComponent((RH.run_time||'x').replace(/[^0-9]/g,''));
-  const shortT=vt=>vt.slice(5,16).replace('-','/');
-  let k=-1;
-  if(CURVIEW!=='accum'){ const vt=RUN.valid_times[CURVIEW]; k=hrs.findIndex(h=>h.valid_time===vt); }
-  const acc=(k<0);                          // 'accum' or an hour outside the regional window → show first
-  if(k<0) k=0;
-  const h=hrs[k];
+  card.hidden=false; fillRgMenu();
+  const ver=encodeURIComponent((RH.run_time||'x').replace(/[^0-9]/g,''));
+  const k=rgCurrentK(), h=RH.hours[k];
+  const acc=(CURVIEW==='accum')||(RUN.valid_times[CURVIEW]!==h.valid_time);
   document.getElementById('rgImg').src='data/'+h.file+'?v='+ver;
-  document.getElementById('rgNow').innerHTML=`+${h.lead_h} h · ${shortT(h.valid_time)}`+(acc?' (mais próxima do instante)':'');
-  const cap=document.getElementById('rgCap'); if(cap) cap.innerHTML=`Chuva, temperatura (2 m) e vento (10 m) sobre todo o domínio do modelo — <b>segue o menu no topo</b>. Mesmos mapas da figura estática abaixo, na hora escolhida.`;
+  document.getElementById('rgNow').innerHTML=`+${h.lead_h} h · ${rgShortT(h.valid_time)}`+(acc?' (mais próxima do instante)':'');
+  const sel=document.getElementById('rgSel'); if(sel) sel.value=String(k);
+  const sl=document.getElementById('rgSl'); if(sl) sl.value=String(k);
+  const cap=document.getElementById('rgCap'); if(cap) cap.innerHTML=`Chuva, temperatura (2 m) e vento (10 m) sobre todo o domínio do modelo, na <b>hora escolhida no menu acima</b> — os mesmos mapas (b, d, f) da figura estática abaixo. O menu também move o restante da página.`;
+}
+function rgGoto(k){                                                 // menu → set the whole-page instant to a regional hour
+  if(!RH||!RH.hours||!RH.hours.length) return;
+  k=Math.max(0,Math.min(RH.hours.length-1,k));
+  const vi=RUN.valid_times.indexOf(RH.hours[k].valid_time);
+  if(vi>=0){ setView(String(vi)); const ss=document.getElementById('selStep'); if(ss) ss.value=String(vi); }
+  else { applyInstant(); }
 }
 
 function mkproj(bb,W,padFrac){padFrac=padFrac==null?0.06:padFrac;
@@ -302,7 +326,7 @@ function drawBars(){const vn=CURVAR, M=VARS[vn], acc=(CURVIEW==='accum');
     const dir=(vn==='wind'&&b.wind)?` <span style="color:var(--mut)">${b.wind.dir_deg}°</span>`:'';
     const col=BCOL[b.name]||M.color;
     return `<div class="brow"><span class="nm" title="${b.name}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${col};margin-right:6px;vertical-align:middle"></span>${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${col}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${unit}${dir}</i></span></div>`;}).join('');
-  document.getElementById('totsub').textContent=M.label+' · '+(acc?'total da rodada':('+'+RUN.lead_h[CURVIEW]+' h'));
+  document.getElementById('totsub').textContent=M.label+' · '+(acc?'total da rodada':('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW]));
   const wl=acc?'somando todas as horas da rodada':('no instante +'+RUN.lead_h[CURVIEW]+' h ('+RUN.valid_times[CURVIEW]+')');
   const cap={rain: (acc?'Total previsto por bacia = chuva somada de todas as horas':'Taxa de chuva prevista por bacia '+wl)+' = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, em CRS métrico — UTM 22S / SIRGAS 2000).',
     temp:'Temperatura prevista por bacia '+wl+' (média espacial ponderada por área).',
@@ -353,8 +377,9 @@ function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn],
   document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(valOf(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${M.bunit}</i></span></div>`).join('');
   const q=document.getElementById('bairroSearch').value.toLowerCase();
   if(q)filterBairros(q);
-  const whenLbl=(vn==='rain'&&view==='accum')?'acumulado':('+'+RUN.lead_h[view]+' h');
-  document.getElementById('bairrosub').textContent=M.label+' · '+whenLbl+' por bairro';
+  const isAcc=(vn==='rain'&&view==='accum');
+  const whenLbl=isAcc?'acumulado':('+'+RUN.lead_h[view]+' h');
+  document.getElementById('bairrosub').textContent=M.label+' · '+whenLbl+' por bairro'+(isAcc?'':' · '+RUN.valid_times[view]);
   document.getElementById('bairrocapt').textContent=((vn==='rain'&&view==='accum')
     ? 'Chuva acumulada da rodada por bairro (43 bairros).'
     : M.label+' prevista por bairro em '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h).')
@@ -513,6 +538,16 @@ async function init(){
   document.getElementById('tNext').onclick=()=>stepH(1);
   document.getElementById('tPlay').onclick=function(){ if(window._tt){clearInterval(window._tt);window._tt=null;this.textContent='▶ animar';}
     else{this.textContent='⏸ pausar';const self=this;window._tt=setInterval(()=>{const f0=FUT[0],fN=FUT[FUT.length-1];let h=(CURVIEW==='accum')?f0:CURVIEW;h=h>=fN?f0:h+1;CURVIEW=h;CURHOUR=h;document.getElementById('selStep').value=String(h);sl.value=String(h);applyInstant();},1000);} };
+  // dedicated menu for the per-hour regional maps (drives the same page instant)
+  document.getElementById('rgSel').onchange=function(){rgGoto(+this.value);};
+  const rgsl=document.getElementById('rgSl'); if(rgsl) rgsl.oninput=function(){rgGoto(+this.value);};
+  document.getElementById('rgPrev').onclick=()=>rgGoto(rgCurrentK()-1);
+  document.getElementById('rgNext').onclick=()=>rgGoto(rgCurrentK()+1);
+  document.getElementById('rgPlay').onclick=function(){
+    if(window._rgt){clearInterval(window._rgt);window._rgt=null;this.textContent='▶ animar';return;}
+    this.textContent='⏸ pausar';
+    window._rgt=setInterval(()=>{if(!RH||!RH.hours){return;}let k=rgCurrentK();k=(k>=RH.hours.length-1)?0:k+1;rgGoto(k);},1000);
+  };
   document.getElementById('bairroSearch').oninput=function(){filterBairros(this.value.toLowerCase());};
   downloads();
   setVar((RUN.has&&RUN.has.rain)?'rain':order[0][0]);                        // builds options + first full render (map,bars,bairros,alert,regional)
