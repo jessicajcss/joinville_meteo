@@ -12,6 +12,15 @@
 .bl-inner.bl-sel .bl-c{outline:2.5px solid var(--blue);outline-offset:1px;box-shadow:0 3px 10px rgba(64,120,242,.35)}
 #rose .rose-empty{padding:26px 6px;color:#a0a1a7;font-size:12.5px;text-align:center;line-height:1.5}
 .wrcard #rosenote{align-self:flex-start;margin-top:6px}
+.ccinvite{display:block;text-decoration:none;margin-top:16px;background:linear-gradient(135deg,#eef5ff 0%,#eefaf1 100%);border:1px solid #d8e6fb;transition:box-shadow .16s ease,transform .16s ease}
+.ccinvite:hover{box-shadow:0 12px 28px rgba(64,120,242,.16);transform:translateY(-2px)}
+.ccinvite .ccrow{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.ccinvite .ccemoji{font-size:40px;line-height:1}
+.ccinvite .cchead{font-size:17.5px;font-weight:800;color:var(--ink);line-height:1.2}
+.ccinvite .ccsub{font-size:13.5px;color:#4a5158;line-height:1.55;margin-top:4px}
+.ccinvite .ccbtn{background:var(--blue);color:#fff;font-weight:800;font-size:14px;padding:12px 20px;border-radius:12px;white-space:nowrap;box-shadow:0 4px 12px rgba(64,120,242,.28);transition:filter .15s}
+.ccinvite:hover .ccbtn{filter:brightness(1.06)}
+@media(max-width:560px){.ccinvite .ccbtn{width:100%;text-align:center}.ccinvite .ccrow>div:nth-child(2){min-width:100%}}
 </style>
 </head>
 <body>
@@ -33,7 +42,7 @@
         <div class="card mapcard">
           <div class="ct">Rede de estações — Joinville <span class="mut">base orográfica (OpenTopoMap)</span></div>
           <div id="map"></div>
-          <div class="tog" id="tog"><span data-m="temp">Temperatura</span><span data-m="rain">Chuva</span><span data-m="wind" class="on">Vento</span></div>
+          <div class="tog" id="tog"><span data-m="temp">Temperatura</span><span data-m="umid">Umidade</span><span data-m="rain">Chuva</span><span data-m="wind" class="on">Vento</span></div>
           <div class="mapleg" id="mapleg"></div>
           <div class="leg"><i style="background:#fff;border:1px solid #ccc"></i>online (leitura recente)<i style="background:#e6e6e6;border:1px solid #d5d5d5"></i>última leitura (defasada)</div>
         </div>
@@ -47,9 +56,19 @@
         <div class="card kma" id="kma"></div>
         <div class="card state" style="margin-top:16px" id="estado"></div>
         <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div><div class="capt" id="rosenote"></div></div>
-        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut" id="rowsupd">agora</span></div><div class="rowlist" id="rows"></div></div>
+        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut" id="rowsupd">agora</span></div><div class="capt" style="margin:2px 0 9px">Cada valor é a <b>última leitura</b> daquela estação — pode ser <b>da última hora</b>, não necessariamente deste minuto.</div><div class="rowlist" id="rows"></div></div>
       </div>
     </div>
+    <a class="card ccinvite" href="ciencia_cidada.html" aria-label="Participar da Ciência Cidadã">
+      <div class="ccrow">
+        <div class="ccemoji">🌧️</div>
+        <div style="flex:1;min-width:240px">
+          <div class="cchead">Está chovendo aí? <span style="color:var(--blue)">Você é o sensor.</span></div>
+          <div class="ccsub">Em <b>menos de 1 minuto</b>, conte se está chovendo (ou não) no seu bairro. A gente compara com o que a <b>Previsão</b> do modelo disse para você — e cada resposta ajuda a <b>validar e melhorar</b> a previsão e os alertas de Joinville.</div>
+        </div>
+        <div class="ccbtn">Participar da Ciência Cidadã →</div>
+      </div>
+    </a>
     <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
     Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · Programa de Pós-Graduação em Engenharia Civil (PPGEC) · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
     <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
@@ -138,7 +157,7 @@ function sparkSVG(w24){
 // ---------- balloon HTML per mode ----------
 function balloonHTML(s,mode,selected){
   // freshness is PER VARIABLE: a station can be online via wind yet have a stale temperature
-  const v = mode==='wind'?s.wind:(mode==='rain'?s.rain:s.temp);
+  const v = mode==='wind'?s.wind:(mode==='rain'?s.rain:(mode==='umid'?s.umid:s.temp));
   if(!v) return null;
   const fresh=!!v.fresh, cls=(fresh?'fresh':'stale')+(selected?' bl-sel':'');
   const dt=fresh?'':`<span class="bl-dt">${fmtDate(v.t)}</span>`;
@@ -146,10 +165,11 @@ function balloonHTML(s,mode,selected){
   if(mode==='wind'){ const dir=(v.wd==null?0:v.wd);
     inner=`<span class="warr" style="transform:rotate(${(dir+180)%360}deg)">${arrowSVG(fresh?'#4078f2':'#9a9a9a')}</span><span class="bl-vl">${v.ws.toFixed(1)}<i>m/s</i></span>`; }
   else if(mode==='rain'){ inner=`${GLYPH.rain}<span class="bl-vl">${v.v}<i>mm</i></span>`; }
+  else if(mode==='umid'){ inner=`${DROP}<span class="bl-vl">${Math.round(v.v)}<i>%</i></span>`; }
   else { inner=`${GLYPH[iconFor(s)]}<span class="bl-vl">${Math.round(v.v)}<i>°C</i></span>`; }
   return `<div class="bl-inner ${cls}"><div class="bl-c"><span class="bl-nm">${s.name.split(' ')[0]}</span>${inner}${dt}</div><span class="pt"></span></div>`;
 }
-const MAPLEG={temp:'Temperatura · °C',rain:'Chuva 24 h · mm',wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s`};
+const MAPLEG={temp:'Temperatura · °C',umid:'Umidade · %',rain:'Chuva 24 h · mm',wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s`};
 
 // ---------- interactive wind rose (last 24 h; network default, per-station on map click) ----------
 let ROSE_SEL=null;                         // null = network average; else a station code

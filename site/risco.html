@@ -75,7 +75,7 @@
       <div class="ct">Linha do tempo dos desastres <span class="mut">eventos por ano · cor = tipo</span></div>
       <div id="timeline"></div>
       <div class="leg2" id="tlleg"></div>
-      <a class="tolink" href="cidade_tempchuvavento.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:14px">Ver climatologia · Temperatura × Chuva × Vento (heatmaps) →</a>
+      <a class="tolink" href="cidade_tempchuva.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:14px">Ver climatologia · Temperatura × Chuva (heatmaps) →</a>
     </div>
     <div class="hnote" style="margin:14px 4px 0">Fonte: Relatório de Histórico de Ocorrências de Desastres em Joinville. Secretaria de Proteção Civil e Segurança Pública — SEPROT, Unidade de Proteção e Defesa Civil — SEPROT.UPC (Prefeitura de Joinville). <span id="lastupd"></span><br>
     Um evento pode atingir vários bairros; a contagem do mapa soma o valor da métrica escolhida para cada bairro no filtro selecionado. Situação: <b>Normalidade</b> (registro), <b>Emergência</b> (SE) e <b>Calamidade</b> (ECP) conforme reconhecimento oficial.</div>
@@ -133,7 +133,9 @@ async function init(){
   document.getElementById('fMetric').addEventListener('click',e=>{const m=e.target.getAttribute('data-m');if(!m)return;
     curMetric=m;[...document.querySelectorAll('#fMetric span')].forEach(x=>x.classList.toggle('on',x.getAttribute('data-m')===m));refresh();});
   // map
-  MAP=L.map('rmap',{zoomControl:true,scrollWheelZoom:false,attributionControl:false});
+  MAP=L.map('rmap',{zoomControl:true,scrollWheelZoom:false,attributionControl:true});
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,opacity:0.9,
+    attribution:'© <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · © OpenStreetMap'}).addTo(MAP);
   LAYER=L.geoJSON(GEO,{style:featStyle,onEachFeature:onFeat}).addTo(MAP);
   MAP.fitBounds(LAYER.getBounds(),{padding:[10,10]});
   timeline();
@@ -141,7 +143,7 @@ async function init(){
 }
 let COUNTS={},CMAX=1;
 function featStyle(f){const b=f.properties.Nome_Bairr, c=COUNTS[b]||0;
-  return {fillColor:c?RISK(c/CMAX):'#f3f4f6', weight:1, color:'#fff', fillOpacity:c?0.92:0.6};}
+  return {fillColor:c?RISK(c/CMAX):'#f3f4f6', weight:1, color:'#fff', fillOpacity:c?0.82:0.12};}
 function onFeat(f,layer){layer.on('mouseover',()=>layer.setStyle({weight:2.5,color:'#383a42'}));
   layer.on('mouseout',()=>LAYER.resetStyle(layer));
   layer.bindTooltip('',{className:'bt',sticky:true});
