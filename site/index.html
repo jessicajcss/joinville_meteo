@@ -169,7 +169,14 @@ function balloonHTML(s,mode,selected){
   else { inner=`${GLYPH[iconFor(s)]}<span class="bl-vl">${Math.round(v.v)}<i>°C</i></span>`; }
   return `<div class="bl-inner ${cls}"><div class="bl-c"><span class="bl-nm">${s.name.split(' ')[0]}</span>${inner}${dt}</div><span class="pt"></span></div>`;
 }
-const MAPLEG={temp:'Temperatura · °C',umid:'Umidade · %',rain:'Chuva 24 h · mm',wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s`};
+const LGB_H='<span class="lgb">última leitura horária (não 5 min)</span>';
+const LGB_R='<span class="lgb">total acumulado · últimas 24 h</span>';
+const MAPLEG={
+  temp:`Temperatura · °C${LGB_H}`,
+  umid:`Umidade · %${LGB_H}`,
+  rain:`Chuva · mm${LGB_R}`,
+  wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s${LGB_H}`
+};
 
 // ---------- interactive wind rose (last 24 h; network default, per-station on map click) ----------
 let ROSE_SEL=null;                         // null = network average; else a station code
