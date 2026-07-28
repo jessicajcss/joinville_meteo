@@ -33,8 +33,18 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-COLS = ["run_time", "valid_time", "lead_h", "i", "j", "lat", "lon",
+COLS = ["run_time_utc", "valid_time_local", "lead_h", "i", "j", "lat", "lon",
         "rain_mm_h", "temp_degC", "u10_ms", "v10_ms", "wind_ms", "wind_dir_deg"]
+
+
+def _norm(r):
+    """Accept a pre-rename archive row (run_time / valid_time) and map it to the
+    tz-explicit names (run_time_utc = model cycle in UTC; valid_time_local = UTC-3)."""
+    if "run_time" in r and "run_time_utc" not in r:
+        r["run_time_utc"] = r.pop("run_time")
+    if "valid_time" in r and "valid_time_local" not in r:
+        r["valid_time_local"] = r.pop("valid_time")
+    return r
 
 
 def wdir_from_uv(u, v):
@@ -56,7 +66,7 @@ def rows_from_forecast(doc):
                 uu = u[t][i][j] if u else None
                 vv = v[t][i][j] if v else None
                 yield {
-                    "run_time": run, "valid_time": vt[t], "lead_h": lead[t],
+                    "run_time_utc": run, "valid_time_local": vt[t], "lead_h": lead[t],
                     "i": i, "j": j, "lat": round(float(lat[i]), 4), "lon": round(float(lon[j]), 4),
                     "rain_mm_h": (round(float(rain[t][i][j]), 2) if rain else ""),
                     "temp_degC": (round(float(temp[t][i][j]), 1) if temp else ""),
@@ -78,30 +88,33 @@ def main():
         return
     doc = json.loads(fc.read_text(encoding="utf-8"))
 
-    # existing keys (run_time, valid_time, i, j) so re-runs never duplicate
-    seen = set()
-    n_existing = 0
+    # load existing rows (tolerating the old column names), dedup by
+    # (run_time_utc, valid_time_local, i, j) so re-runs never duplicate
+    existing = []; seen = set(); old_header = False
     if out.exists():
         with out.open(newline="", encoding="utf-8") as fh:
-            for r in csv.DictReader(fh):
-                seen.add((r["run_time"], r["valid_time"], r["i"], r["j"]))
-                n_existing += 1
+            rd = csv.DictReader(fh)
+            old_header = bool(rd.fieldnames) and "valid_time_local" not in rd.fieldnames
+            for r in rd:
+                r = _norm(r)
+                key = (r["run_time_utc"], r["valid_time_local"], r["i"], r["j"])
+                if key in seen:
+                    continue
+                seen.add(key); existing.append(r)
 
     new = [r for r in rows_from_forecast(doc)
-           if (r["run_time"], r["valid_time"], str(r["i"]), str(r["j"])) not in seen]
-    if not new:
-        print(f"[archive] run {doc.get('run_time')} already archived ({n_existing} rows) — no change")
+           if (r["run_time_utc"], r["valid_time_local"], str(r["i"]), str(r["j"])) not in seen]
+    if not new and not old_header:
+        print(f"[archive] run {doc.get('run_time')} already archived ({len(existing)} rows) — no change")
         return
 
-    write_header = not out.exists()
+    # rewrite the whole file so a pre-rename archive migrates its header in one pass
     out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("a", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=COLS)
-        if write_header:
-            w.writeheader()
-        w.writerows(new)
-    print(f"[archive] appended {len(new)} rows for run {doc.get('run_time')} "
-          f"→ {out} (total {n_existing + len(new)} rows)")
+    with out.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=COLS, extrasaction="ignore")
+        w.writeheader(); w.writerows(existing); w.writerows(new)
+    note = " (migrated header to tz-explicit names)" if old_header else ""
+    print(f"[archive] wrote {len(existing) + len(new)} rows for run {doc.get('run_time')} → {out}{note}")
 
 
 if __name__ == "__main__":

@@ -177,11 +177,35 @@ def aggregate(polys_wgs, name_col, id_col, cells_win, fields, dt, T, ncells, vt,
     return json_list, recs, gj
 
 
+def write_unit_geojson(gj, json_list, vt, lead, run_time, window, source, dt, path):
+    """Write a basin/bairro GeoJSON that keeps the window aggregates AND carries the full
+    hour-by-hour series per feature. Series are arrays aligned to `valid_times_local`
+    (local, UTC-3) and `lead_h`; `run_time_utc` is the model cycle in UTC. Built from the
+    GeoDataFrame's own GeoJSON so geometry/attributes are untouched and the arrays are
+    injected as clean JSON (geopandas.to_file can't emit list-valued fields reliably)."""
+    gdict = json.loads(gj.to_json())
+    by_name = {d["name"]: d for d in json_list}
+    lead = [int(x) for x in lead]
+    for feat in gdict.get("features", []):
+        pr = feat["properties"]; d = by_name.get(pr.get("name"))
+        pr["run_time_utc"] = run_time; pr["window_local"] = window; pr["source"] = source
+        pr["valid_times_local"] = list(vt); pr["lead_h"] = lead
+        if d:
+            s = d["rain"]["series"]
+            pr["precip_mm_h"] = s
+            pr["accum_mm"] = [round(sum(s[:k + 1]) * dt, 3) for k in range(len(s))]
+            if "temp" in d: pr["t2m_degC"] = d["temp"]["series"]
+            if "wind" in d: pr["wspd_ms"] = d["wind"]["series"]
+    Path(path).write_text(json.dumps(gdict, ensure_ascii=False), encoding="utf-8")
+
+
 def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt=None):
-    """Reproduce the 6-panel wrf_joinville_sanity scientific figure (matplotlib PNG),
-    over the full WRF domain, for the Previsão page. Regenerated every run by the pipeline.
-    `overlays` = list of {rings,color,lw,alpha} faint administrative borders (state, city)
-    drawn on the three map panels (b,d,f). Times shown are LOCAL (UTC-3, already applied to vt)."""
+    """Static figure for the Previsão page: the three domain-wide time series stacked —
+    (a) hourly precip, (b) 2-m temperature, (c) 10-m wind speed — box mean/max over the
+    model domain across a 24-h window from the update forward. The per-hour MAPS are not
+    repeated here; they live in the interactive hour-menu panel above this figure.
+    `overlays`/`tgt` are accepted for call compatibility (tgt sets the window start).
+    Times are LOCAL (UTC-3, already applied to vt)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -196,60 +220,30 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
         step = max(1, nx // 8)
         a.set_xticks(xx[::step]); a.set_xticklabels([xr[i] for i in xx[::step]], rotation=45, ha="right")
     have_t = temp is not None; have_w = u is not None
-    xlim = (float(np.min(lon)), float(np.max(lon)))
-    ylim = (float(np.min(lat)), float(np.max(lat)))
-    mean_lat = 0.5 * (ylim[0] + ylim[1])
-    geo_aspect = 1.0 / np.cos(np.deg2rad(mean_lat))   # equirectangular: 1° lat vs 1° lon·cos(lat)
-    overlays = overlays or []
 
-    def deco(a):
-        """faint SC/Joinville borders on a map panel, clipped to the WRF box,
-        with a true geographic aspect so shapes (and Joinville) are not flattened."""
-        for ov in overlays:
-            for lon_r, lat_r in ov["rings"]:
-                a.plot(lon_r, lat_r, color=ov["color"], lw=ov["lw"], alpha=ov["alpha"], zorder=6)
-        a.set_xlim(*xlim); a.set_ylim(*ylim)
-        a.set_aspect(geo_aspect, adjustable="box")
-
-    fig, ax = plt.subplots(3, 2, figsize=(13, 13))
-    # (a) precip series
-    ax[0, 0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
-    ax[0, 0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
-    ax[0, 0].set_title("(a) hourly precip · próximas 24 h"); ax[0, 0].set_ylabel("mm h$^{-1}$")
-    ax[0, 0].legend(); _xt(ax[0, 0])
-    # (b) precip map
-    vmax = float(np.nanpercentile(rain, 99)) or 1
-    im = ax[0, 1].pcolormesh(lon, lat, rain[tgt], vmin=0, vmax=vmax, cmap="viridis", shading="auto")
-    deco(ax[0, 1])
-    ax[0, 1].set_title(f"(b) precip @ {lbl[tgt]}"); plt.colorbar(im, ax=ax[0, 1])
+    fig, ax = plt.subplots(3, 1, figsize=(10, 11))
+    # (a) precip series (box mean/max over the whole domain) — maps now live in the hour-menu panel above
+    ax[0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
+    ax[0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
+    ax[0].set_title("(a) hourly precip · próximas 24 h"); ax[0].set_ylabel("mm h$^{-1}$")
+    ax[0].legend(); _xt(ax[0])
+    # (b) temperature series
     if have_t:
-        ax[1, 0].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="box mean")
-        ax[1, 0].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
-        ax[1, 0].set_title("(c) 2-m temperature · próximas 24 h"); ax[1, 0].set_ylabel("°C")
-        ax[1, 0].legend(); _xt(ax[1, 0])
-        im2 = ax[1, 1].pcolormesh(lon, lat, temp[tgt], cmap="RdYlBu_r", shading="auto")
-        deco(ax[1, 1])
-        ax[1, 1].set_title(f"(d) 2-m T @ {lbl[tgt]}"); plt.colorbar(im2, ax=ax[1, 1])
+        ax[1].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="box mean")
+        ax[1].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
+        ax[1].set_title("(b) 2-m temperature · próximas 24 h"); ax[1].set_ylabel("°C")
+        ax[1].legend(); _xt(ax[1])
     else:
-        for a in (ax[1, 0], ax[1, 1]): a.text(.5, .5, "no t2m", ha="center"); a.axis("off")
+        ax[1].text(.5, .5, "no t2m", ha="center"); ax[1].axis("off")
+    # (c) wind-speed series
     if have_w:
         sp = np.hypot(u, v)
-        ax[2, 0].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
-        ax[2, 0].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="box max")
-        ax[2, 0].set_title("(e) 10-m wind speed · próximas 24 h"); ax[2, 0].set_ylabel("m s$^{-1}$")
-        ax[2, 0].legend(); _xt(ax[2, 0])
-        im3 = ax[2, 1].pcolormesh(lon, lat, sp[tgt], cmap="YlGnBu", vmin=0, shading="auto")
-        s = max(1, sp.shape[2] // 12)
-        ax[2, 1].quiver(lon[::s], lat[::s], u[tgt, ::s, ::s], v[tgt, ::s, ::s], scale=200, width=0.003)
-        deco(ax[2, 1])
-        ax[2, 1].set_title(f"(f) 10-m wind @ {lbl[tgt]}"); plt.colorbar(im3, ax=ax[2, 1])
+        ax[2].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
+        ax[2].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="box max")
+        ax[2].set_title("(c) 10-m wind speed · próximas 24 h"); ax[2].set_ylabel("m s$^{-1}$")
+        ax[2].legend(); _xt(ax[2])
     else:
-        for a in (ax[2, 0], ax[2, 1]): a.text(.5, .5, "no wind", ha="center"); a.axis("off")
-    if overlays:
-        # single caption for the border overlay, bottom-left of the precip map
-        ax[0, 1].text(0.015, 0.02, "contornos: SC · Joinville", transform=ax[0, 1].transAxes,
-                      fontsize=8, color="#222", ha="left", va="bottom",
-                      bbox=dict(facecolor="white", alpha=0.65, edgecolor="none", pad=1.5))
+        ax[2].text(.5, .5, "no wind", ha="center"); ax[2].axis("off")
     run_lbl = (f"rodada {run_time} UTC · " if run_time else "")
     fig.suptitle(f"CPTEC/INPE WRF AMS 7 km — Joinville domain · {run_lbl}horários locais (UTC−3)",
                  y=1.005, fontsize=13, fontweight="bold")
@@ -284,21 +278,24 @@ def regional_hourly_maps(lat, lon, fields, vt, lead_h, out_dir, overlays=None, r
     tvmax = float(np.nanmax(temp[ia])) if have_t else 1.0
     svmax = float(np.nanpercentile(sp[ia], 99)) if have_w else 1.0
 
-    def deco(a):
+    def deco(a, color=None):
+        # `color` overrides the border colour (e.g. white on the dark precip map so the
+        # SC/Joinville outlines stay visible against viridis); default = each overlay's own.
         for ov in overlays:
+            c = color or ov["color"]
             for lo_r, la_r in ov["rings"]:
-                a.plot(lo_r, la_r, color=ov["color"], lw=ov["lw"], alpha=ov["alpha"], zorder=6)
+                a.plot(lo_r, la_r, color=c, lw=ov["lw"], alpha=ov["alpha"], zorder=6)
         a.set_xlim(*xlim); a.set_ylim(*ylim); a.set_aspect(geo_aspect, adjustable="box")
 
     manifest = []
     for k, i in enumerate(idx):
         fig, ax = plt.subplots(1, 3, figsize=(15, 5.2))
         im = ax[0].pcolormesh(lon, lat, rain[i], vmin=0, vmax=rvmax, cmap="viridis", shading="auto")
-        deco(ax[0]); ax[0].set_title(f"(b) chuva · +{int(lead_h[i])} h · {lbl[i]}")
+        deco(ax[0], color="white"); ax[0].set_title(f"(a) chuva · +{int(lead_h[i])} h · {lbl[i]}")
         plt.colorbar(im, ax=ax[0], label="mm h$^{-1}$", fraction=0.046, pad=0.04)
         if have_t:
             im2 = ax[1].pcolormesh(lon, lat, temp[i], vmin=tvmin, vmax=tvmax, cmap="RdYlBu_r", shading="auto")
-            deco(ax[1]); ax[1].set_title(f"(d) temperatura 2 m · +{int(lead_h[i])} h")
+            deco(ax[1]); ax[1].set_title(f"(b) temperatura 2 m · +{int(lead_h[i])} h")
             plt.colorbar(im2, ax=ax[1], label="°C", fraction=0.046, pad=0.04)
         else:
             ax[1].text(.5, .5, "sem t2m", ha="center"); ax[1].axis("off")
@@ -306,7 +303,7 @@ def regional_hourly_maps(lat, lon, fields, vt, lead_h, out_dir, overlays=None, r
             im3 = ax[2].pcolormesh(lon, lat, sp[i], vmin=0, vmax=svmax, cmap="YlGnBu", shading="auto")
             s = max(1, sp.shape[2] // 12)
             ax[2].quiver(lon[::s], lat[::s], u[i, ::s, ::s], v[i, ::s, ::s], scale=200, width=0.003)
-            deco(ax[2]); ax[2].set_title(f"(f) vento 10 m · +{int(lead_h[i])} h")
+            deco(ax[2]); ax[2].set_title(f"(c) vento 10 m · +{int(lead_h[i])} h")
             plt.colorbar(im3, ax=ax[2], label="m s$^{-1}$", fraction=0.046, pad=0.04)
         else:
             ax[2].text(.5, .5, "sem vento", ha="center"); ax[2].axis("off")
@@ -346,8 +343,12 @@ def grid_block(lat, lon, fields, T):
     return block
 
 
-def write_grid_geojson(lat, lon, fields, dt, T, out):
-    """WRF cells (full box) as a fishnet GeoJSON with per-cell forecast summary."""
+def write_grid_geojson(lat, lon, fields, dt, T, out, vt=None, lead=None, run_time="", window="", source=""):
+    """WRF cells (full box) as a fishnet GeoJSON with per-cell forecast summary AND the full
+    hour-by-hour series per cell (precip_mm_h, t2m_degC, wspd_ms). The shared time axis
+    (valid_times_local in UTC-3, lead_h, run_time_utc in UTC) is a top-level member of the
+    FeatureCollection — not repeated across the thousands of cells — so the series indices
+    align to it. The window aggregates (rain_total_mm, temp_*_degC, wind_*) are kept too."""
     rain = fields["rain"]; temp = fields["temp"]; u = fields["u"]; v = fields["v"]
     accum = rain.sum(axis=0) * dt
     feats = []
@@ -358,21 +359,29 @@ def write_grid_geojson(lat, lon, fields, dt, T, out):
         for j in range(len(lon)):
             x0, x1 = sorted((r3(lon_e[j]), r3(lon_e[j + 1])))
             props = {"i": i, "j": j, "lat": round(float(lat[i]), 4), "lon": round(float(lon[j]), 4),
-                     "rain_total_mm": round(float(accum[i, j]), 2)}
+                     "rain_total_mm": round(float(accum[i, j]), 2),
+                     "precip_mm_h": [round(float(rain[t, i, j]), 3) for t in range(T)]}
             if temp is not None:
                 props["temp_mean_degC"] = round(float(temp[:, i, j].mean()), 1)
                 props["temp_min_degC"] = round(float(temp[:, i, j].min()), 1)
                 props["temp_max_degC"] = round(float(temp[:, i, j].max()), 1)
+                props["t2m_degC"] = [round(float(temp[t, i, j]), 1) for t in range(T)]
             if u is not None:
                 sp = np.hypot(u[:, i, j], v[:, i, j])
                 props["wind_mean_ms"] = round(float(sp.mean()), 2)
                 props["wind_dir_deg"] = round(wdir_from_uv(u[:, i, j].mean(), v[:, i, j].mean()))
+                props["wspd_ms"] = [round(float(x), 2) for x in sp]
             feats.append({"type": "Feature",
                           "geometry": {"type": "Polygon",
                                        "coordinates": [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]},
                           "properties": props})
     fc = {"type": "FeatureCollection", "name": "wrf_grid",
           "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+          "run_time_utc": run_time, "window_local": window, "source": source,
+          "valid_times_local": (list(vt) if vt else None),
+          "lead_h": ([int(x) for x in lead] if lead is not None else None),
+          "note": "Séries por célula alinhadas a valid_times_local (hora local, UTC-3): "
+                  "precip_mm_h (mm/h), t2m_degC, wspd_ms. run_time_utc é a rodada em UTC.",
           "features": feats}
     out.write_text(json.dumps(fc, ensure_ascii=False), encoding="utf-8")
     return len(feats)
@@ -452,13 +461,14 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     # --- write CSVs + GeoJSONs ---
     def order(df):
         return df.sort_values("rain_total_mm", ascending=False)
-    bdf = order(pd.DataFrame(basins_recs)); bdf["run_time"] = run_time; bdf["window"] = f"{vt[0]} .. {vt[-1]}"; bdf["source"] = source
+    window = f"{vt[0]} .. {vt[-1]}"
+    bdf = order(pd.DataFrame(basins_recs)); bdf["run_time_utc"] = run_time; bdf["window_local"] = window; bdf["source"] = source
     bdf.to_csv(outdir / "wrf_basins.csv", index=False)
-    basins_gj.to_file(outdir / "wrf_basins.geojson", driver="GeoJSON")
+    write_unit_geojson(basins_gj, basins_json, vt, fh, run_time, window, source, dt, outdir / "wrf_basins.geojson")
     if bairros_recs is not None:
-        rdf = order(pd.DataFrame(bairros_recs)); rdf["run_time"] = run_time; rdf["window"] = f"{vt[0]} .. {vt[-1]}"; rdf["source"] = source
+        rdf = order(pd.DataFrame(bairros_recs)); rdf["run_time_utc"] = run_time; rdf["window_local"] = window; rdf["source"] = source
         rdf.to_csv(outdir / "wrf_bairros.csv", index=False)
-        bairros_gj.to_file(outdir / "wrf_bairros.geojson", driver="GeoJSON")
+        write_unit_geojson(bairros_gj, bairros_json, vt, fh, run_time, window, source, dt, outdir / "wrf_bairros.geojson")
 
     # tidy per-basin hourly
     rows = []
@@ -466,14 +476,15 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
         acc = 0.0
         for t in range(T):
             acc += b["rain"]["series"][t] * dt
-            row = {"basin": b["name"], "id": b["id"], "valid_time": vt[t], "lead_h": int(fh[t]),
+            row = {"basin": b["name"], "id": b["id"], "valid_time_local": vt[t], "lead_h": int(fh[t]),
                    "precip_mm_h": b["rain"]["series"][t], "accum_mm": round(acc, 3)}
             if "temp" in b: row["t2m_degC"] = b["temp"]["series"][t]
             if "wind" in b: row["wspd_ms"] = b["wind"]["series"][t]
             rows.append(row)
     pd.DataFrame(rows).to_csv(outdir / "wrf_basins_hourly.csv", index=False)
 
-    ncell = write_grid_geojson(lat_full, lon_full, fields_full, dt, T, outdir / "wrf_grid.geojson")
+    ncell = write_grid_geojson(lat_full, lon_full, fields_full, dt, T, outdir / "wrf_grid.geojson",
+                               vt=vt, lead=fh, run_time=run_time, window=window, source=source)
 
     # --- faint admin borders for the regional figure (real IBGE-derived outlines) ---
     overlays = []

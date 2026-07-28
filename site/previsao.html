@@ -130,6 +130,7 @@
     <div class="card" style="margin-top:16px">
       <div class="ct">Baixar dados da previsão</div>
       <div class="dlrow" id="dlrow"></div>
+      <div class="capt" style="margin-top:8px">Datas nos arquivos: <b>valid_time_local</b> e <b>window_local</b> em <b>hora local</b> de Joinville (UTC−3); <b>run_time_utc</b> é a rodada do modelo em <b>UTC</b> (00Z/12Z);  <b>lead_h</b> = horas após a rodada. Os GeoJSON (bacias, bairros e grade) trazem a <b>série hora a hora</b> por feição — na grade, o eixo de tempo (valid_times_local, lead_h) fica no nível da coleção, para não repetir em milhares de células.</div>
     </div>
 
     <!-- 4 · evolução horária -->
@@ -154,11 +155,11 @@
       <div class="capt" id="rgCap"></div>
     </div>
 
-    <!-- 5 · figura regional (6 painéis, estilo científico) -->
+    <!-- 5 · figura regional (3 séries temporais) -->
     <div class="card" style="margin-top:16px">
-      <div class="ct">Mapa regional — domínio do modelo <span class="mut">6 painéis · CPTEC-WRF 7 km</span></div>
-      <img class="regfig" id="regfig" src="data/wrf_regional.png" alt="WRF Joinville — 6 painéis: chuva, temperatura e vento (séries + mapas)">
-      <div class="capt">Painel científico de 6 quadros sobre <b>todo o domínio do modelo</b>, gerado automaticamente a cada rodada do WRF (GitHub Action): <b>(a,c,e)</b> séries das próximas horas; <b>(b,d,f)</b> mapas na <b>próxima hora prevista</b> (chuva, temperatura a 2 m e vento a 10 m com setas). Observe a chuva realçada sobre a Serra do Mar (oeste) e o contraste térmico costa–interior — interpretados no texto abaixo. Contornos cinza tênues: divisa de <b>Santa Catarina</b> e limite de <b>Joinville</b> (IBGE). Horários dos mapas em <b>hora local (UTC−3)</b>; a rodada no título é rotulada em UTC.</div>
+      <div class="ct">Séries regionais — domínio do modelo <span class="mut">3 séries · CPTEC-WRF 7 km</span></div>
+      <img class="regfig" id="regfig" src="data/wrf_regional.png" alt="WRF Joinville — 3 séries: chuva, temperatura e vento (média/máx no domínio)">
+      <div class="capt">Três séries temporais sobre <b>todo o domínio do modelo</b> (média e máximo por caixa), geradas a cada rodada do WRF (GitHub Action): <b>(a)</b> chuva, <b>(b)</b> temperatura a 2 m e <b>(c)</b> vento a 10 m, nas próximas 24 h. Os <b>mapas por hora</b> (chuva/temperatura/vento sobre o domínio) estão no <b>painel interativo acima</b>, com menu de hora. Horários em <b>hora local (UTC−3)</b>; a rodada no título é rotulada em UTC.</div>
     </div>
 
     <!-- 6 · texto explicativo -->
@@ -303,8 +304,8 @@ function drawMap(){
   let outl=''; if(BAI) outl+=`<path d="${polyPathsFC(pr,BAI)}" fill="none" stroke="#4a5763" stroke-width="0.5" opacity="0.5"/>`;
   // each basin outlined in ITS bar colour (below) — the coloured bars are the legend, so no on-map text labels
   (BAS.features||[]).forEach(f=>{const nm=f.properties.basin||f.properties.Nomes;const col=BCOL[nm]||'#12233a';
-    outl+=`<path d="${polyPathF(pr,f)}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" opacity="0.45"><title>${nm}</title></path>`;});
-  if(LIM) outl+=`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="2" stroke-linejoin="round" opacity="0.85"/>`;
+    outl+=`<path d="${polyPathF(pr,f)}" fill="none" stroke="${col}" stroke-width="3.4" stroke-linejoin="round" opacity="0.95"><title>${nm}</title></path>`;});
+  // municipal limit intentionally NOT drawn on this map (basins are the focus here)
   const cb=colorbar(M.ramp,lo,hi,M.unit,W+18,10,H-20);
   const topo=`<defs><clipPath id="mclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#mclip)">${topoTiles(pr)}</g>`;
   document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" data-home="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${topo}<g opacity="0.7">${g.s}</g>${arrows}${outl}${cb}</svg>`;
@@ -321,8 +322,11 @@ function drawBars(){const vn=CURVAR, M=VARS[vn], acc=(CURVIEW==='accum');
   const valOf=b=> acc ? M.bval(b) : (M.series(b) ? M.series(b)[CURVIEW] : M.bval(b));
   const unit = acc ? M.bunit : (vn==='rain' ? 'mm/h' : M.bunit);
   const bs=(RUN.basins||[]).slice().filter(b=>b[vn]).sort((a,b)=>valOf(b)-valOf(a));
-  const vals=bs.map(valOf), mx=Math.max(...vals,0.001), mn=Math.min(...vals,0), base=vn==='temp'?mn-1:0, span=(mx-base)||1;
-  document.getElementById('bars').innerHTML=bs.map((b,i)=>{const val=valOf(b), w=Math.max(3,(val-base)/span*100);
+  // Bars track the DISPLAYED (rounded) value, so sub-precision rain (e.g. 0.004 mm/h → "0.00")
+  // can't fill a bar. When every basin rounds to the same value (all 0.00), bars stay minimal.
+  const rnd=v=>vn==='rain'?Math.round(v*100)/100:v;
+  const vals=bs.map(b=>rnd(valOf(b))), mx=Math.max(...vals,0), mn=Math.min(...vals,0), base=vn==='temp'?mn-1:0, span=(mx-base);
+  document.getElementById('bars').innerHTML=bs.map((b,i)=>{const val=valOf(b), rv=rnd(val), w=span>0?Math.max(3,(rv-base)/span*100):3;
     const dir=(vn==='wind'&&b.wind)?` <span style="color:var(--mut)">${b.wind.dir_deg}°</span>`:'';
     const col=BCOL[b.name]||M.color;
     return `<div class="brow"><span class="nm" title="${b.name}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${col};margin-right:6px;vertical-align:middle"></span>${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${col}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${unit}${dir}</i></span></div>`;}).join('');
