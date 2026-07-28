@@ -364,6 +364,11 @@ snap = {
     "generated_at": pd.Timestamp.now("UTC").isoformat(),
     "reference_now": ref_now.isoformat(),
     "fresh_days": FRESH_DAYS,
+    # Time basis of the per-station "now" values (temp/umid/wind balloons): they are the
+    # last valid reading from the HOURLY master, so "hourly". The front-end legend reads
+    # this field, so if the live feed ever delivers 5-min "now" values (and this build is
+    # updated to source them), set "5min" here and the map label switches automatically.
+    "now_resolution": "hourly",
     "network": {
         "n_total": len(stations),
         "n_online": n_online,
