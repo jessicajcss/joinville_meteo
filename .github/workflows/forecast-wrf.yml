@@ -61,7 +61,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/data/wrf_forecast.json site/data/wrf_basins.csv site/data/wrf_basins.geojson \
                   site/data/wrf_basins_hourly.csv site/data/wrf_bairros.csv site/data/wrf_bairros.geojson \
-                  site/data/wrf_grid.geojson site/data/wrf_regional.png site/data/wrf_grid_archive.csv 2>/dev/null || true
+                  site/data/wrf_grid.geojson site/data/wrf_regional.png site/data/wrf_grid_archive.csv \
+                  site/data/wrf_reg_*.png site/data/wrf_regional_hours.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "no forecast changes to commit"
           else
