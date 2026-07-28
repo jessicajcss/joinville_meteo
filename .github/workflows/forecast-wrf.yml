@@ -46,9 +46,10 @@ jobs:
 
       - name: Accumulate the run into the cumulative grid archive
         run: |
-          # append THIS run's native-resolution per-cell hourly values to one growing CSV
-          # (idempotent: a run already archived adds nothing). Persists the model history that
-          # the overwritten wrf_forecast.json / wrf_grid.geojson do not keep.
+          # append THIS run's native-resolution per-cell hourly values to the YEAR-CHUNKED archive
+          # under site/data/wrf_archive/ (grade_YYYY.csv + .gz + index.json; idempotent — a run
+          # already archived adds nothing, and only the current year's file changes). Persists the
+          # model history that the overwritten wrf_forecast.json / wrf_grid.geojson do not keep.
           if [ -f site/data/wrf_forecast.json ]; then
             python scripts/archive_wrf_grid.py
           else
@@ -62,7 +63,8 @@ jobs:
           git add site/data/wrf_forecast.json site/data/wrf_basins.csv site/data/wrf_basins.geojson \
                   site/data/wrf_basins_hourly.csv site/data/wrf_bairros.csv site/data/wrf_bairros.geojson \
                   site/data/wrf_grid.geojson site/data/wrf_regional.png site/data/wrf_grid_archive.csv \
-                  site/data/wrf_reg_*.png site/data/wrf_regional_hours.json 2>/dev/null || true
+                  site/data/wrf_reg_*.png site/data/wrf_regional_hours.json \
+                  site/data/wrf_archive/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "no forecast changes to commit"
           else

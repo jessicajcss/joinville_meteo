@@ -1,0 +1,34 @@
+{
+ "columns": [
+  "run_time_utc",
+  "valid_time_local",
+  "lead_h",
+  "i",
+  "j",
+  "lat",
+  "lon",
+  "rain_mm_h",
+  "temp_degC",
+  "u10_ms",
+  "v10_ms",
+  "wind_ms",
+  "wind_dir_deg"
+ ],
+ "legacy_migrated": true,
+ "years": [
+  {
+   "year": "2026",
+   "csv": "grade_2026.csv",
+   "gz": "grade_2026.csv.gz",
+   "rows": 900,
+   "first": "2026-07-26 04:00",
+   "last": "2026-07-26 12:00",
+   "bytes_csv": 79075,
+   "bytes_gz": 10417
+  }
+ ],
+ "total_rows": 900,
+ "unit_note": "rain_mm_h mm/h; temp_degC °C; u10/v10/wind_ms m/s; wind_dir_deg deg (from).",
+ "tz_note": "valid_time_local = Joinville local (UTC-3); run_time_utc = model cycle in UTC.",
+ "generated_at": "2026-07-28T18:01:36Z"
+}

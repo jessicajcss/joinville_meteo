@@ -1,0 +1,52 @@
+name: Data snapshot release
+
+# Manual: cut a citable snapshot of the dataset. Bundles the year-chunked WRF grid archive,
+# the station master series (daily / hourly / 5-min) and the registries into one zip and
+# publishes it as a GitHub Release. If the Zenodo–GitHub integration is enabled for this repo
+# (see DATA_ARCHIVE.md), each published release is automatically archived by Zenodo with a
+# citable DOI. Uses only the built-in GITHUB_TOKEN — no secrets to configure.
+
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "Short note shown in the release body"
+        required: false
+        default: "Scheduled data snapshot"
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bundle the data archive
+        id: bundle
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          mkdir -p _snapshot/stations
+          cp -r site/data/wrf_archive            _snapshot/           2>/dev/null || true
+          cp    site/data/wrf_grid_archive.csv   _snapshot/           2>/dev/null || true
+          cp -r site/data/stations/daily         _snapshot/stations/  2>/dev/null || true
+          cp -r site/data/stations/hourly        _snapshot/stations/  2>/dev/null || true
+          cp -r site/data/stations/fivemin       _snapshot/stations/  2>/dev/null || true
+          cp data/geo/stations_master.csv data/geo/gauges_master.csv _snapshot/ 2>/dev/null || true
+          cp DATA_ARCHIVE.md                     _snapshot/           2>/dev/null || true
+          BUNDLE="joinville_meteo_data_${STAMP}.zip"
+          ( cd _snapshot && zip -r -q "../${BUNDLE}" . )
+          ls -lh "${BUNDLE}"
+          echo "stamp=${STAMP}"   >> "$GITHUB_OUTPUT"
+          echo "bundle=${BUNDLE}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="data-${{ steps.bundle.outputs.stamp }}"
+          gh release create "$TAG" "${{ steps.bundle.outputs.bundle }}" \
+              --title "Data snapshot ${{ steps.bundle.outputs.stamp }}" \
+              --notes "${{ github.event.inputs.note }}" \
+          || gh release upload "$TAG" "${{ steps.bundle.outputs.bundle }}" --clobber

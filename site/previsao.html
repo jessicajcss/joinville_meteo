@@ -21,6 +21,7 @@
 .dl{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:11px;padding:8px 14px;font-size:12.5px;font-weight:700;text-decoration:none}
 .dl.alt{background:#eef3fd;color:var(--blue);border:1px solid #dbe6fb}
 .dl:hover{filter:brightness(.97)}
+.ghsel{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:5px 9px;margin-left:4px;cursor:pointer}
 .bwrap{display:flex;flex-direction:column;gap:7px;margin-top:10px}
 .brow{display:flex;align-items:center;gap:10px;font-size:12.5px}
 .brow .nm{width:200px;flex:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -130,6 +131,15 @@
     <div class="card" style="margin-top:16px">
       <div class="ct">Baixar dados da previsão</div>
       <div class="dlrow" id="dlrow"></div>
+      <div id="gradehist" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <div style="font-weight:700;font-size:13px;margin-bottom:7px">Arquivo histórico da grade <span class="mut" id="ghStat" style="font-weight:500"></span></div>
+        <div class="ghctl" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <label style="font-size:12px;color:var(--mut)">Ano <select id="ghYear" class="ghsel"></select></label>
+          <label style="font-size:12px;color:var(--mut)">Formato <select id="ghFmt" class="ghsel"><option value="csv">CSV</option><option value="gz">CSV compactado (.gz)</option></select></label>
+          <button class="dl" id="ghDl" type="button">⬇ Baixar</button>
+        </div>
+        <div class="capt" id="ghNote" style="margin-top:7px"></div>
+      </div>
       <div class="capt" style="margin-top:8px">Datas nos arquivos: <b>valid_time_local</b> e <b>window_local</b> em <b>hora local</b> de Joinville (UTC−3); <b>run_time_utc</b> é a rodada do modelo em <b>UTC</b> (00Z/12Z);  <b>lead_h</b> = horas após a rodada. Os GeoJSON (bacias, bairros e grade) trazem a <b>série hora a hora</b> por feição — na grade, o eixo de tempo (valid_times_local, lead_h) fica no nível da coleção, para não repetir em milhares de células.</div>
     </div>
 
@@ -473,9 +483,44 @@ function downloads(){document.getElementById('dlrow').innerHTML=
   +'<a class="dl" href="data/wrf_bairros.csv" download>⬇ Bairros (CSV)</a>'
   +'<a class="dl alt" href="data/wrf_basins_hourly.csv" download>⬇ Série horária (CSV)</a>'
   +'<a class="dl alt" href="data/wrf_grid.geojson" download>⬇ Grade WRF (GeoJSON)</a>'
-  +'<a class="dl alt" href="data/wrf_grid_archive.csv" download>⬇ Arquivo histórico da grade (CSV, acumulado)</a>'
   +'<a class="dl alt" href="data/wrf_basins.geojson" download>⬇ Bacias (GeoJSON)</a>'
   +'<a class="dl alt" href="data/wrf_bairros.geojson" download>⬇ Bairros (GeoJSON)</a>';}
+// Historical grade archive — chunked by year (index.json manifest). The user picks a year (or all)
+// and a format; single years link straight to the stored file, "all" is concatenated client-side.
+// Falls back to the legacy single wrf_grid_archive.csv if the manifest isn't published yet.
+async function gzipText(txt){ if(typeof CompressionStream==='undefined') return null;
+  const st=new Blob([txt]).stream().pipeThrough(new CompressionStream('gzip')); return await new Response(st).blob(); }
+function saveBlob(blob,name){ const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u); }
+async function loadGradeHist(){
+  const box=document.getElementById('gradehist'); if(!box) return;
+  let idx=null; try{ idx=await fetch('data/wrf_archive/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():null); }catch(e){}
+  const note=document.getElementById('ghNote'), stat=document.getElementById('ghStat');
+  if(!idx||!idx.years||!idx.years.length){                       // manifest not published yet → legacy file
+    box.querySelector('.ghctl').innerHTML='<a class="dl alt" href="data/wrf_grid_archive.csv" download>⬇ Arquivo histórico da grade (CSV)</a>';
+    if(note) note.textContent='Arquivo único acumulado (o índice por ano ainda não foi gerado nesta versão).'; return;
+  }
+  const N=n=>Number(n).toLocaleString('pt-BR');
+  const ysel=document.getElementById('ghYear'), fsel=document.getElementById('ghFmt');
+  ysel.innerHTML=`<option value="__all__">Todos os anos (${N(idx.total_rows)} linhas)</option>`
+    +idx.years.map(e=>`<option value="${e.year}">${e.year} — ${N(e.rows)} linhas</option>`).join('');
+  if(stat) stat.textContent=`· ${idx.years.length} ano(s) · ${N(idx.total_rows)} linhas no total`;
+  const upd=()=>{ const y=ysel.value, gz=fsel.value==='gz', e=idx.years.find(x=>String(x.year)===y);
+    let t; if(y==='__all__') t=`Junta todos os anos num só arquivo (${N(idx.total_rows)} linhas).`;
+    else t=`Ano ${y}: ${N(e.rows)} linhas (${e.first} → ${e.last}), ${gz?`~${Math.round(e.bytes_gz/1024)} KB (.gz)`:`~${Math.round(e.bytes_csv/1024)} KB (CSV)`}.`;
+    if(note) note.innerHTML=t+' Colunas em <b>hora local</b> (UTC−3); rodada em UTC. Cada ano fechado é imutável.'; };
+  ysel.onchange=upd; fsel.onchange=upd; upd();
+  document.getElementById('ghDl').onclick=async()=>{
+    const y=ysel.value, gz=fsel.value==='gz';
+    const pick = y==='__all__' ? idx.years.slice() : [idx.years.find(x=>String(x.year)===y)];
+    if(pick.length===1){ const e=pick[0], f='data/wrf_archive/'+(gz?e.gz:e.csv);   // single file → direct
+      const a=document.createElement('a'); a.href=f; a.download=(gz?e.gz:e.csv); document.body.appendChild(a); a.click(); a.remove(); return; }
+    let out=''; for(let n=0;n<pick.length;n++){ const t=await fetch('data/wrf_archive/'+pick[n].csv).then(r=>r.text());
+      out += n===0 ? t : t.slice(t.indexOf('\n')+1); }                            // keep header once
+    if(gz){ const b=await gzipText(out); if(b){ saveBlob(b,'wrf_grid_archive_todos.csv.gz'); return; } }
+    saveBlob(new Blob([out],{type:'text/csv'}),'wrf_grid_archive_todos.csv');
+  };
+}
 
 // ---- 0. forecast rain-risk alert (OMM intensity thresholds applied to the WRF forecast) ----
 function renderForecastAlert(){
@@ -557,7 +602,7 @@ async function init(){
     window._rgt=setInterval(()=>{if(!RH||!RH.hours){return;}let k=rgCurrentK();k=(k>=RH.hours.length-1)?0:k+1;rgGoto(k);},1000);
   };
   document.getElementById('bairroSearch').oninput=function(){filterBairros(this.value.toLowerCase());};
-  downloads();
+  downloads(); loadGradeHist();
   setVar((RUN.has&&RUN.has.rain)?'rain':order[0][0]);                        // builds options + first full render (map,bars,bairros,alert,regional)
   setupZoom('wmap'); setupZoom('bairromap'); wireZoom();                     // pan/zoom on both forecast maps
 }
