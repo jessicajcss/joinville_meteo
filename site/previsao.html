@@ -432,7 +432,11 @@ function setupZoom(id){const cont=document.getElementById(id);if(!cont)return;
 function wireZoom(){document.querySelectorAll('.zc').forEach(zc=>{const id=zc.parentElement.querySelector('div[id]').id;
   zc.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{const z=btn.dataset.z;if(z==='in')zoomAt(id,0.8);else if(z==='out')zoomAt(id,1.25);else resetZoom(id);});});}
 
-// ---- forecast window: show only the future hours (now → next run), never the past ----
+// ---- forecast window: show only the future hours (now → next run), never the past — the
+// interactive menu is operational (opens at the current hour). The baked regional figure/maps
+// use a fixed local-midnight anchor instead (build_wrf_basins.py), since a static image can't
+// track the live clock; when the menu instant is outside that day-window the regional panel
+// shows its nearest frame, labelled "(mais próxima do instante)". ----
 let FUT=[];
 function computeFuture(){
   if(!RUN||!RUN.lead_h) return [];

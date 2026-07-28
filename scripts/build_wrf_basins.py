@@ -202,7 +202,8 @@ def write_unit_geojson(gj, json_list, vt, lead, run_time, window, source, dt, pa
 def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt=None):
     """Static figure for the Previsão page: the three domain-wide time series stacked —
     (a) hourly precip, (b) 2-m temperature, (c) 10-m wind speed — box mean/max over the
-    model domain across a 24-h window from the update forward. The per-hour MAPS are not
+    model domain across a 24-h window starting at the first LOCAL midnight (00:00, i.e. +3 h
+    for a 00Z run). The per-hour MAPS are not
     repeated here; they live in the interactive hour-menu panel above this figure.
     `overlays`/`tgt` are accepted for call compatibility (tgt sets the window start).
     Times are LOCAL (UTC-3, already applied to vt)."""
@@ -224,13 +225,13 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
     # (a) precip series (box mean/max over the whole domain) — maps now live in the hour-menu panel above
     ax[0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
     ax[0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
-    ax[0].set_title("(a) hourly precip · próximas 24 h"); ax[0].set_ylabel("mm h$^{-1}$")  # maps now in the interactive hour-menu panel above
+    ax[0].set_title("(a) hourly precip · 24 h desde 00:00 local"); ax[0].set_ylabel("mm h$^{-1}$")  # maps now in the interactive hour-menu panel above
     ax[0].legend(); _xt(ax[0])
     # (b) temperature series
     if have_t:
         ax[1].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="box mean")
         ax[1].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
-        ax[1].set_title("(b) 2-m temperature · próximas 24 h"); ax[1].set_ylabel("°C")
+        ax[1].set_title("(b) 2-m temperature · 24 h desde 00:00 local"); ax[1].set_ylabel("°C")
         ax[1].legend(); _xt(ax[1])
     else:
         ax[1].text(.5, .5, "no t2m", ha="center"); ax[1].axis("off")
@@ -239,7 +240,7 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
         sp = np.hypot(u, v)
         ax[2].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
         ax[2].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="box max")
-        ax[2].set_title("(c) 10-m wind speed · próximas 24 h"); ax[2].set_ylabel("m s$^{-1}$")
+        ax[2].set_title("(c) 10-m wind speed · 24 h desde 00:00 local"); ax[2].set_ylabel("m s$^{-1}$")
         ax[2].legend(); _xt(ax[2])
     else:
         ax[2].text(.5, .5, "no wind", ha="center"); ax[2].axis("off")
@@ -403,14 +404,14 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
         vt = [f"+{int(h)}h" for h in fh]
     dt = float(np.median(np.diff(fh))) if len(fh) > 1 else 1.0
     T = len(fh)
-    # regional maps (b,d,f): show the NEXT forecast hour from generation time — a true forecast
-    # snapshot, not the middle of the run. Falls back to mid-run if valid_time is unavailable.
-    tgt_next = None; future = None
-    if "valid_time" in ds:
-        vt_utc = ds["valid_time"].values.astype("datetime64[s]")
-        now_utc = np.datetime64(datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0), "s")
-        future = np.where(vt_utc >= now_utc)[0]
-        tgt_next = int(future[0]) if future.size else int(T - 1)
+    # All time panels (baked regional figure/maps AND the live page menu) open at the SAME
+    # deterministic instant: the first LOCAL midnight (00:00) on/after the run start — for a
+    # 00Z run that is +3 h. A fixed anchor (not the wall clock) means the static images never
+    # drift from the interactive menu, which uses the identical rule. Falls back to the run
+    # start if no exact midnight step exists (e.g. non-hourly grids).
+    _midnight = [i for i, t in enumerate(vt) if t[11:16] == "00:00"]
+    tgt_next = _midnight[0] if _midnight else 0
+    future = np.arange(tgt_next, T)          # local midnight → end of run (maps capped at 24 h)
 
     def full(name):
         return np.nan_to_num(ds[name].values.astype(float), nan=0.0) if name in ds else None
