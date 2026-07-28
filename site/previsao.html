@@ -127,22 +127,6 @@
       </div>
     </div>
 
-    <!-- downloads -->
-    <div class="card" style="margin-top:16px">
-      <div class="ct">Baixar dados da previsão</div>
-      <div class="dlrow" id="dlrow"></div>
-      <div id="gradehist" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
-        <div style="font-weight:700;font-size:13px;margin-bottom:7px">Arquivo histórico da grade <span class="mut" id="ghStat" style="font-weight:500"></span></div>
-        <div class="ghctl" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-          <label style="font-size:12px;color:var(--mut)">Ano <select id="ghYear" class="ghsel"></select></label>
-          <label style="font-size:12px;color:var(--mut)">Formato <select id="ghFmt" class="ghsel"><option value="csv">CSV</option><option value="gz">CSV compactado (.gz)</option></select></label>
-          <button class="dl" id="ghDl" type="button">⬇ Baixar</button>
-        </div>
-        <div class="capt" id="ghNote" style="margin-top:7px"></div>
-      </div>
-      <div class="capt" style="margin-top:8px">Datas nos arquivos: <b>valid_time_local</b> e <b>window_local</b> em <b>hora local</b> de Joinville (UTC−3); <b>run_time_utc</b> é a rodada do modelo em <b>UTC</b> (00Z/12Z);  <b>lead_h</b> = horas após a rodada. Os GeoJSON (bacias, bairros e grade) trazem a <b>série hora a hora</b> por feição — na grade, o eixo de tempo (valid_times_local, lead_h) fica no nível da coleção, para não repetir em milhares de células.</div>
-    </div>
-
     <!-- 4 · evolução horária -->
     <div class="card" style="margin-top:16px">
       <div class="ct">Evolução horária por bacia <span class="mut" id="hsub"></span></div>
@@ -180,6 +164,22 @@
       <p><b>Vento.</b> O vento a 10 m responde ao gradiente de pressão de grande escala e é <b>canalizado e desviado pelo relevo</b>; brisas marítima e terrestre modulam o ciclo diário junto à costa. As setas indicam a direção <i>para onde</i> o vento sopra; a cor, a velocidade.</p>
       <p><b>Escala e leitura.</b> O WRF do CPTEC tem resolução de <b>~7 km</b>: cada “retalho” do mapa é a média do modelo naquela célula. Isso resolve bem os padrões regionais (serra × costa), mas é mais grosseiro que um bairro — por isso vários bairros dentro de uma mesma célula recebem o mesmo valor previsto. É a <b>saída direta do modelo</b>, sem correção de viés; use-a como orientação de padrão e tendência, confirmada pelas estações observadas nas demais páginas.</p>
       <p><b>O que é “OMM” e quais são os “limiares”.</b> <b>OMM</b> = <b>Organização Meteorológica Mundial</b> — a agência das Nações Unidas para meteorologia, clima e água (em inglês, <i>WMO</i>). Os <b>limiares</b> citados no alerta são as classes de <b>intensidade de chuva</b>, definidas pela <b>taxa horária</b> (mm por hora) segundo a convenção meteorológica de precipitação: <b>leve</b> &lt; 2,5 mm/h · <b>moderada</b> 2,5–10 mm/h · <b>forte</b> 10–50 mm/h · <b>violenta</b> ≥ 50 mm/h. O alerta de risco acende a partir de <b>forte</b> (≥ 10 mm/h). São <i>taxas instantâneas</i> (o quanto choveria numa hora naquele ritmo), não o total acumulado do dia — a mesma escala detalhada na página <a href="sobre.html">Sobre</a>.</p>
+    </div>
+
+    <!-- downloads -->
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Baixar dados da previsão</div>
+      <div class="dlrow" id="dlrow"></div>
+      <div id="gradehist" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <div style="font-weight:700;font-size:13px;margin-bottom:7px">Arquivo histórico da grade <span class="mut" id="ghStat" style="font-weight:500"></span></div>
+        <div class="ghctl" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <label style="font-size:12px;color:var(--mut)">Ano <select id="ghYear" class="ghsel"></select></label>
+          <label style="font-size:12px;color:var(--mut)">Formato <select id="ghFmt" class="ghsel"><option value="csv">CSV</option><option value="gz">CSV compactado (.gz)</option></select></label>
+          <button class="dl" id="ghDl" type="button">⬇ Baixar</button>
+        </div>
+        <div class="capt" id="ghNote" style="margin-top:7px"></div>
+      </div>
+      <div class="capt" style="margin-top:8px">Datas nos arquivos: <b>valid_time_local</b> e <b>window_local</b> em <b>hora local</b> de Joinville (UTC−3); <b>run_time_utc</b> é a rodada do modelo em <b>UTC</b> (00Z/12Z);  <b>lead_h</b> = horas após a rodada. Os GeoJSON (bacias, bairros e grade) trazem a <b>série hora a hora</b> por feição — na grade, o eixo de tempo (valid_times_local, lead_h) fica no nível da coleção, para não repetir em milhares de células.</div>
     </div>
 
     <div class="foot">Modelo: <b>CPTEC/INPE WRF AMS 7 km</b> · agregação por bacia/bairro: LaCiA · metodologia na página <a href="sobre.html">Sobre</a><br>
