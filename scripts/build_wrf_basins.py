@@ -211,10 +211,9 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
     import matplotlib.pyplot as plt
     rain = fields["rain"]; temp = fields["temp"]; u = fields["u"]; v = fields["v"]
     T = rain.shape[0]
-    tgt = (T // 2) if tgt is None else max(0, min(int(tgt), T - 1))   # maps (b,d,f): next forecast hour
+    tgt = (T // 2) if tgt is None else max(0, min(int(tgt), T - 1))   # window start = next forecast hour
     lbl = [s[5:16] for s in vt]                       # 'MM-DD HH:MM' (local)
-    # series panels (a,c,e) show only a 24-h window from the update forward (legible x-axis);
-    # the maps (b,d,f) keep the single next-hour snapshot at `tgt`.
+    # the three series show a 24-h window from the update forward (legible x-axis).
     s0 = tgt; s1 = min(T, s0 + 24); nx = s1 - s0; xx = list(range(nx)); xr = lbl[s0:s1]
     def _xt(a):
         step = max(1, nx // 8)
@@ -225,7 +224,7 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
     # (a) precip series (box mean/max over the whole domain) — maps now live in the hour-menu panel above
     ax[0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
     ax[0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
-    ax[0].set_title("(a) hourly precip · próximas 24 h"); ax[0].set_ylabel("mm h$^{-1}$")
+    ax[0].set_title("(a) hourly precip · próximas 24 h"); ax[0].set_ylabel("mm h$^{-1}$")  # maps now in the interactive hour-menu panel above
     ax[0].legend(); _xt(ax[0])
     # (b) temperature series
     if have_t:
@@ -498,7 +497,8 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     if lim is not None:
         overlays.append({"rings": boundary_rings(lim), "color": "#111418", "lw": 1.1, "alpha": 0.6})
 
-    # --- regional 6-panel scientific figure (PNG, auto-updated by the pipeline) ---
+    # --- regional figure: 3 stacked domain-wide series (PNG, auto-updated by the pipeline;
+    #     per-hour maps live in the interactive hour-menu panel, not here) ---
     try:
         regional_figure(lat_full, lon_full, fields_full, vt, outdir / "wrf_regional.png",
                         overlays=overlays, run_time=run_time, tgt=tgt_next)
