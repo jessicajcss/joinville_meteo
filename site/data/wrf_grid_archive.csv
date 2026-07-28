@@ -1,4 +1,4 @@
-run_time,valid_time,lead_h,i,j,lat,lon,rain_mm_h,temp_degC,u10_ms,v10_ms,wind_ms,wind_dir_deg
+run_time_utc,valid_time_local,lead_h,i,j,lat,lon,rain_mm_h,temp_degC,u10_ms,v10_ms,wind_ms,wind_dir_deg
 2026-07-26 00:00:00,2026-07-26 04:00,7,0,0,-26.6114,-49.234,0.0,14.2,0.7,-1.7,1.8,338
 2026-07-26 00:00:00,2026-07-26 04:00,7,0,1,-26.6114,-49.164,0.0,13.9,0.6,-1.1,1.2,331
 2026-07-26 00:00:00,2026-07-26 04:00,7,0,2,-26.6114,-49.094,0.0,13.5,0.7,-0.5,0.8,306

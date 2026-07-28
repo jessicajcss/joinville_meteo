@@ -1,4 +1,4 @@
-id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,run_time,window,source
+id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,run_time_utc,window_local,source
 7,Bacia Hidrográfica do Itapocuzinho,390.36,100.0,0.521,0.158,23.0,15.5,31.6,4.07,7.17,318,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km
 6,Bacia Hidrográfica do Piraí,578.87,100.0,0.367,0.147,22.2,14.7,33.5,1.78,4.24,334,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km
 1,Bacia Hidrográfica do Cubatão (sub-bacia),489.72,100.0,0.308,0.103,22.7,16.2,30.7,4.79,7.98,316,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km

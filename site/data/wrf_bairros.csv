@@ -1,4 +1,4 @@
-id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,run_time,window,source
+id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,run_time_utc,window_local,source
 40,Dona Francisca,1.11,100.0,0.591,0.384,23.7,16.1,32.7,4.28,8.54,321,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km
 39,Vila Nova,14.18,100.0,0.451,0.338,23.7,15.7,34.5,2.38,7.28,347,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km
 8,Pirabeiraba,6.09,100.0,0.388,0.296,23.5,15.6,33.9,3.22,8.06,331,2026-07-27 00:00:00,2026-07-26 22:00 .. 2026-07-29 21:00,CPTEC/INPE WRF AMS 7km

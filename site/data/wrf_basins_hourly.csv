@@ -1,4 +1,4 @@
-basin,id,valid_time,lead_h,precip_mm_h,accum_mm,t2m_degC,wspd_ms
+basin,id,valid_time_local,lead_h,precip_mm_h,accum_mm,t2m_degC,wspd_ms
 Bacia Hidrográfica do Palmital,2,2026-07-26 22:00,1,0.0,0.0,16.5,1.79
 Bacia Hidrográfica do Palmital,2,2026-07-26 23:00,2,0.0,0.0,16.62,1.8
 Bacia Hidrográfica do Palmital,2,2026-07-27 00:00,3,0.0,0.0,16.29,0.79
