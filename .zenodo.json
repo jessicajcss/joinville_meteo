@@ -3,7 +3,7 @@
   "description": "Long-term, quality-controlled hydrometeorological record for Joinville (Santa Catarina, Brazil): the consolidated station master series (5-minute, hourly and daily) from the SEPROT / Defesa Civil de Joinville network, and a year-chunked archive of the CPTEC/INPE WRF (AMS, 7 km) forecast over the Joinville window (per grid cell, hourly: rainfall, 2 m temperature and 10 m wind). These files feed the live dashboard at https://jessicajcss.github.io/joinville_meteo/ . Times are Joinville local (UTC-3); model run cycles are labelled in UTC. Schema, units and quality-control rules are documented in DATA_ARCHIVE.md and on the dashboard's 'Sobre' page.",
   "upload_type": "dataset",
   "access_right": "open",
-  "license": "CC-BY-4.0",
+  "license": "cc-by-4.0",
   "keywords": [
     "Joinville", "Santa Catarina", "Brazil", "hydrometeorology", "precipitation",
     "WRF", "CPTEC/INPE", "numerical weather prediction", "meteorological stations",
@@ -11,17 +11,9 @@
   ],
   "creators": [
     {
-      "name": "Dos Santos-Silva, Jéssica C.",
-      "affiliation": "Universidade do Estado de Santa Catarina (UDESC) — LaCiA / PPGEC",
-      "orcid": "0000-0001-9456-4234"
+      "name": "Dos Santos-Silva, J. C.",
+      "affiliation": "Universidade do Estado de Santa Catarina (UDESC) - LaCiA / PPGEC"
     }
   ],
-  "related_identifiers": [
-    {
-      "identifier": "https://jessicajcss.github.io/joinville_meteo/",
-      "relation": "isDocumentedBy",
-      "resource_type": "other"
-    }
-  ],
-  "notes": "Source observations: SEPROT / Defesa Civil de Joinville. WRF forecast from CPTEC/INPE (AMS 7 km), dataserver_modelos/wrf/, under Brazil's federal open scientific-data policy. Suggested INPE citation: 'Dados de previsão/simulação numérica do modelo WRF fornecidos pelo Instituto Nacional de Pesquisas Espaciais (INPE), através do Sistema de Transferência de Dados da Coordenação-Geral de Infraestrutura e Dados / Divisão de Operações (CGIP/COIDS/CPTEC), acessado em [Data de Acesso] via https://dataserver.cptec.inpe.br/.' Confirm the license below is compatible with the source-data terms before publishing."
+  "notes": "Source observations: SEPROT / Defesa Civil de Joinville. WRF forecast from CPTEC/INPE (AMS 7 km), dataserver_modelos/wrf/, under Brazil's federal open scientific-data policy. Suggested INPE citation: 'Dados de previsao/simulacao numerica do modelo WRF fornecidos pelo Instituto Nacional de Pesquisas Espaciais (INPE), atraves do Sistema de Transferencia de Dados da Coordenacao-Geral de Infraestrutura e Dados / Divisao de Operacoes (CGIP/COIDS/CPTEC), acessado em [Data de Acesso] via https://dataserver.cptec.inpe.br/.' Confirm the license is compatible with the source-data terms before publishing."
 }

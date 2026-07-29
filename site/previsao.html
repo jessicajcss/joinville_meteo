@@ -404,16 +404,18 @@ function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEac
 function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=>b[vn]); if(!bs.length)return;
   // only the first 24 h from the run start (maps, slider, downloads and archive stay full 72 h)
   const nAll=RUN.lead_h.length, n=Math.max(2,Math.min(nAll,(RUN.lead_h.filter(h=>h<=24).length)||Math.min(24,nAll)));
-  const W=1000,H=250,PL=48,PR=12,PT=12,PB=30,plotW=W-PL-PR,plotH=H-PT-PB;
+  const W=1000,H=250,PL=48,PR=12,PT=12,PB=42,plotW=W-PL-PR,plotH=H-PT-PB;
   const all=bs.flatMap(b=>M.series(b).slice(0,n)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
   const x=i=>PL+(n>1?i/(n-1):0.5)*plotW, y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH, adec=hi<1?2:(hi<10?1:0);
   let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4}" font-size="12" fill="#8a8f98" text-anchor="end">${t.toFixed(adec)}</text>`;});
   const step=Math.max(1,Math.ceil(n/8));
-  for(let i=0;i<n;i++){if(i%step===0)ax+=`<text x="${x(i).toFixed(1)}" y="${H-10}" font-size="11" fill="#8a8f98" text-anchor="middle">+${RUN.lead_h[i]}h</text>`;}
+  for(let i=0;i<n;i++){if(i%step===0){const lt=(RUN.valid_times[i]||'').slice(11,16);
+    ax+=`<text x="${x(i).toFixed(1)}" y="${H-24}" font-size="11.5" font-weight="600" fill="#5a616b" text-anchor="middle">${lt}</text>`
+       +`<text x="${x(i).toFixed(1)}" y="${H-9}" font-size="9.5" fill="#a0a1a7" text-anchor="middle">+${RUN.lead_h[i]}h</text>`;}}
   let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).slice(0,n).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
   document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
-  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h';
+  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h · hora local (UTC−3)';
   document.getElementById('hcapt').textContent='Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.'+runFtr();
 }
 // ---- SVG pan/zoom for the two forecast maps (buttons + wheel + drag; survives re-render) ----

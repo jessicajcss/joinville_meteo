@@ -80,15 +80,27 @@ standard, free option is **Zenodo**, which integrates with GitHub Releases and m
 1. Sign in at <https://zenodo.org> with your GitHub account.
 2. Go to Zenodo → *GitHub* settings (<https://zenodo.org/account/settings/github/>) and flip the toggle
    **ON** for this repository. (Zenodo installs a webhook; nothing to paste into the repo.)
-3. The repository already contains **`.zenodo.json`** — edit it to fill in your full name and ORCID, and
-   confirm the `license` is compatible with the source-data terms (the observations come from SEPROT /
-   Defesa Civil; the WRF forecast from CPTEC/INPE — check before choosing CC-BY-4.0).
+3. The repository already contains **`.zenodo.json`**. Before publishing, edit it so:
+   - **`creators[].name`** is your real name in `Sobrenome, Nome` order (replace the `EDITE AQUI…` placeholder).
+   - **`license`** is a **lowercase SPDX id** — `cc-by-4.0`, **not** `CC-BY-4.0` (uppercase is rejected). Confirm
+     the license is compatible with the source-data terms (observations from SEPROT / Defesa Civil; WRF from
+     CPTEC/INPE) before choosing it.
+   - Add **`"orcid": "0000-0000-0000-0000"`** to your creator entry **only if** you have a valid ORCID. An
+     empty `"orcid": ""` is invalid and makes Zenodo reject the release — so omit the field if you have none.
 4. Cut a release. Either use the GitHub UI (Releases → *Draft a new release* → tag e.g. `data-2026-07-28`),
    or run the **"Data snapshot release"** workflow (Actions → *Data snapshot release* → *Run workflow*),
    which bundles the archive + station masters into a zip and publishes a dated release.
 
 Each published release is then archived by Zenodo with its own DOI, plus a concept-DOI that always points
 at the latest version. Cite the concept-DOI in papers.
+
+**If a release shows "Failed" in Zenodo:** the GitHub release itself is fine — Zenodo's archiving step
+rejected the metadata. Open the **Zenodo panel on GitHub → Errors tab** to see the exact message
+(`Extra metadata load failed` = a bad `.zenodo.json`, usually the license case or an empty `orcid`). Fix
+`.zenodo.json`, commit and push, then **create a *new* release** (or delete and re-create the failed one) —
+editing metadata alone does not re-trigger Zenodo; only a newly published release does. Note Zenodo archives
+the repository's source snapshot at the tag (which already includes `site/data/…`), not the release's zip
+asset, so the data is captured either way.
 
 > Alternatives to Zenodo: your university/institutional repository, or PANGAEA (geoscience-focused). The
 > principle is the same — immutable, versioned, externally-hosted snapshots.
