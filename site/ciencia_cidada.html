@@ -35,6 +35,14 @@
 .contact a{color:var(--blue);font-weight:600}
 .mini{font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.5}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4078f2">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Joinville Meteo">
 </head>
 <body>
 <div class="app">
@@ -112,7 +120,7 @@
 
     <div class="foot">Ciência Cidadã · <b>Joinville Meteo</b> · a previsão mostrada é a saída direta do modelo <b>CPTEC/INPE WRF (7 km)</b> — use como orientação.<br>
     Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
-    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><a href="https://www.udesc.br/cct/lacia" target="_blank" rel="noopener"><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></a></div>
     <div class="ribbon" id="ribbon">Ciência Cidadã — sua observação melhora a previsão</div>
   </div>
 </div>
@@ -236,5 +244,6 @@ async function init(){
 }
 init();
 </script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 </body>
 </html>

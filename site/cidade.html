@@ -26,6 +26,14 @@
 .tolink:hover{filter:brightness(.96)}
 .dlegend{font-size:11.5px;color:#6b7178;line-height:1.55;margin-top:9px;padding:9px 12px;background:#f6f8f7;border-left:3px solid var(--green,#238b45);border-radius:6px;max-width:900px}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4078f2">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Joinville Meteo">
 </head>
 <body>
 <div class="app">
@@ -48,7 +56,7 @@
     <div class="card vsec"><div class="hnote" id="note"></div></div>
     <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
     Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
-    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><a href="https://www.udesc.br/cct/lacia" target="_blank" rel="noopener"><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></a></div>
     <div class="ribbon" id="ribbon"></div>
   </div>
 </div>
@@ -187,5 +195,6 @@ async function init(){
 }
 init();
 </script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 </body>
 </html>
