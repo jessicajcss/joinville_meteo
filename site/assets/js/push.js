@@ -1,8 +1,8 @@
 // Joinville Meteo — Web Push client.
 // After deploying the Cloudflare Worker, set WORKER_URL and VAPID_PUBLIC_KEY below.
 (function () {
-  var WORKER_URL = 'https://joinville-push.YOUR-SUBDOMAIN.workers.dev'; // <-- your Worker URL
-  var VAPID_PUBLIC_KEY = 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY';          // <-- your VAPID public key
+  var WORKER_URL = 'https://joinville-push.joinville-meteo-stations.workers.dev'; // <-- your Worker URL
+  var VAPID_PUBLIC_KEY = 'BLYqC6l64pt5XVjaj00Ovjiw05Zl_b5pfJnxN-bzx5hJP8E61ZmqAJ87JgkAiYX4NyzKiOXArltd-CcGymrVq5Q';          // <-- your VAPID public key
 
   var supported = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
   var unconfigured = VAPID_PUBLIC_KEY.indexOf('REPLACE') === 0 || WORKER_URL.indexOf('YOUR-SUBDOMAIN') !== -1;

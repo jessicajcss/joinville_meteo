@@ -9,10 +9,10 @@ compatibility_date = "2025-01-01"
 # then paste the printed id below.
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS"
-id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+id = "99c7cf69e79440d68fcf41e835a0ff3c"
 
 [vars]
-VAPID_PUBLIC_KEY = "PASTE_YOUR_VAPID_PUBLIC_KEY"          # same value goes in site/assets/js/push.js
+VAPID_PUBLIC_KEY = "BLYqC6l64pt5XVjaj00Ovjiw05Zl_b5pfJnxN-bzx5hJP8E61ZmqAJ87JgkAiYX4NyzKiOXArltd-CcGymrVq5Q"          # same value goes in site/assets/js/push.js
 VAPID_SUBJECT    = "mailto:jessica.jcss@gmail.com"
 SITE_BASE_URL    = "https://jessicajcss.github.io/joinville_meteo/"
 ALLOWED_ORIGIN   = "https://jessicajcss.github.io"
