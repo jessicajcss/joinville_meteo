@@ -1,0 +1,19 @@
+{
+  "name": "joinville-push",
+  "version": "1.0.0",
+  "description": "Web Push server (Cloudflare Worker) for the Joinville Meteo dashboard",
+  "scripts": {
+    "test": "node test_webpush.mjs && node test_alerts.mjs && node test_worker.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "http_ece": "^1.2.1",
+    "web-push": "^3.6.7",
+    "jose": "^6.2.5"
+  }
+}

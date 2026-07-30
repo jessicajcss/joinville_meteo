@@ -416,7 +416,7 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     # start if no exact midnight step exists (e.g. non-hourly grids).
     _midnight = [i for i, t in enumerate(vt) if t[11:16] == "00:00"]
     tgt_next = _midnight[0] if _midnight else 0
-    future = np.arange(tgt_next, T)          # local midnight → end of run (maps capped at 24 h)
+    future = np.arange(tgt_next, T)          # local midnight → end of run (per-hour maps run to +32 h)
 
     def full(name):
         return np.nan_to_num(ds[name].values.astype(float), nan=0.0) if name in ds else None
@@ -517,8 +517,9 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     n_reg_hours = 0
     try:
         fut = future.tolist() if (isinstance(future, np.ndarray) and future.size) else list(range(T))
+        fut = [i for i in fut if int(fh[i]) <= 32]     # per-hour regional maps run to +32 h (next WRF cycle)
         n_reg_hours = regional_hourly_maps(lat_full, lon_full, fields_full, vt, fh, outdir,
-                                           overlays=overlays, run_time=run_time, idx=fut, maxh=24)
+                                           overlays=overlays, run_time=run_time, idx=fut, maxh=48)
     except Exception as e:
         print(f"[wrf] hourly regional maps skipped: {e}")
 

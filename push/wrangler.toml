@@ -1,0 +1,26 @@
+# Cloudflare Worker config for the Joinville Meteo push server.
+# Deploy:  npm i -g wrangler  →  wrangler login  →  wrangler deploy
+name = "joinville-push"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# KV namespace holding the push subscriptions + last-alert state.
+# Create it once with:  wrangler kv namespace create SUBSCRIPTIONS
+# then paste the printed id below.
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+
+[vars]
+VAPID_PUBLIC_KEY = "PASTE_YOUR_VAPID_PUBLIC_KEY"          # same value goes in site/assets/js/push.js
+VAPID_SUBJECT    = "mailto:jessica.jcss@gmail.com"
+SITE_BASE_URL    = "https://jessicajcss.github.io/joinville_meteo/"
+ALLOWED_ORIGIN   = "https://jessicajcss.github.io"
+
+# Secrets are NOT stored here — set them with wrangler:
+#   wrangler secret put VAPID_PRIVATE_KEY     (your VAPID private key, base64url)
+#   wrangler secret put SEND_SECRET           (any long random string; also used to call /test)
+
+# Check for new alerts hourly (the data updates daily/weekly, so this is ample).
+[triggers]
+crons = ["0 * * * *"]
