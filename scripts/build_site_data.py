@@ -328,27 +328,73 @@ def rain_class(mmph):
         if lo <= mmph < hi: return name
     return "leve"
 
+# advisory levels: higher-is-worse (heat, wind, rain) and lower-is-worse (cold)
+def _lvl_ge(v, warn, alert):
+    return "alert" if v >= alert else ("warn" if v >= warn else "ok")
+
+def _lvl_le(v, warn, alert):
+    return "alert" if v <= alert else ("warn" if v <= warn else "ok")
+
+def heat_index_c(t_c, rh):
+    """NWS heat index (apparent temperature, °C) from air temp (°C) and RH (%).
+    Rothfusz regression (NOAA/NWS); collapses to ~air temp in cool/dry air. Ref: NWS Technical
+    Attachment SR 90-23 (Rothfusz 1990)."""
+    if t_c is None or rh is None:
+        return None
+    T = t_c * 9.0 / 5.0 + 32.0                                   # Rothfusz is defined in °F
+    HI = 0.5 * (T + 61.0 + (T - 68.0) * 1.2 + rh * 0.094)        # simple formula
+    if HI >= 80.0:
+        HI = (-42.379 + 2.04901523 * T + 10.14333127 * rh - 0.22475541 * T * rh
+              - 0.00683783 * T * T - 0.05481717 * rh * rh + 0.00122874 * T * T * rh
+              + 0.00085282 * T * rh * rh - 0.00000199 * T * T * rh * rh)
+        if rh < 13 and 80 <= T <= 112:
+            HI -= ((13 - rh) / 4.0) * ((17 - abs(T - 95.0)) / 17.0) ** 0.5
+        elif rh > 85 and 80 <= T <= 87:
+            HI += ((rh - 85.0) / 10.0) * ((87.0 - T) / 5.0)
+    return round((HI - 32.0) * 5.0 / 9.0, 1)
+
+_RANK = {"ok": 0, "warn": 1, "alert": 2}
+
 def alert_state():
-    # rainfall: worst current hourly intensity among online stations
+    # rainfall: worst current hourly intensity among online stations (OMM classes)
     rates = [(s["rain_rate"]["v"], s["name"]) for s in stations
              if s.get("rain_rate") and is_fresh(s["rain_rate"]["t"])]
     rain = None
     if rates:
         v, who = max(rates)
-        cls = rain_class(v)
-        rain = {"value_mmph": v, "station": who, "class": cls,
-                "active": v >= 10.0}   # "forte"+ => active advisory
-    # temperature: online extremes
-    temps = [s["temp"]["v"] for s in stations if s["temp"] and s["temp"]["fresh"]]
+        rain = {"value_mmph": v, "station": who, "class": rain_class(v),
+                "level": _lvl_ge(v, 2.5, 10.0), "active": v >= 10.0}
+    # temperature (dry-bulb): online extremes -> heat / cold-frost bands
+    tvals = [(s["temp"]["v"], s["name"]) for s in stations if s["temp"] and s["temp"]["fresh"]]
     temp = None
-    if temps:
-        tmin, tmax = min(temps), max(temps)
+    if tvals:
+        tmax, who_hot = max(tvals); tmin, who_cold = min(tvals)
+        heat_level = _lvl_ge(tmax, 32.0, 36.0); cold_level = _lvl_le(tmin, 5.0, 3.0)
+        level = heat_level if _RANK[heat_level] >= _RANK[cold_level] else cold_level
         temp = {"min": round(tmin, 1), "max": round(tmax, 1),
-                # advisory bands are placeholders pending the project's local
-                # thresholds; flagged so the UI can show them as provisional.
-                "heat_active": tmax >= 35.0, "cold_active": tmin <= 5.0}
-    active = bool((rain and rain["active"]) or (temp and (temp["heat_active"] or temp["cold_active"])))
-    return {"active": active, "rain": rain, "temp": temp,
+                "heat_level": heat_level, "cold_level": cold_level, "level": level,
+                "hot_station": who_hot, "cold_station": who_cold,
+                "heat_active": tmax >= 36.0, "cold_active": tmin <= 3.0}
+    # wind: worst current sustained 10 m speed among online stations (Beaufort 6 / 8)
+    winds = [(s["wind"]["ws"], s["name"]) for s in stations
+             if s.get("wind") and s["wind"].get("fresh") and s["wind"].get("ws") is not None]
+    wind = None
+    if winds:
+        v, who = max(winds)
+        wind = {"value_ms": round(v, 1), "station": who, "level": _lvl_ge(v, 10.8, 17.2)}
+    # heat index (temperature x humidity): worst apparent temperature among online stations
+    apps = []
+    for s in stations:
+        if s["temp"] and s["temp"]["fresh"] and s.get("umid") and s["umid"]["fresh"]:
+            hi = heat_index_c(s["temp"]["v"], s["umid"]["v"])
+            if hi is not None:
+                apps.append((hi, s["name"]))
+    heat = None
+    if apps:
+        v, who = max(apps)
+        heat = {"app_c": v, "station": who, "level": _lvl_ge(v, 32.0, 41.0)}   # NWS extreme caution / danger
+    active = any(h and h.get("level") == "alert" for h in (rain, temp, wind, heat))
+    return {"active": active, "rain": rain, "temp": temp, "wind": wind, "heat": heat,
             "rain_classes": [{"name": n, "min_mmph": lo, "max_mmph": (None if hi == math.inf else hi)}
                              for n, lo, hi in RAIN_CLASSES]}
 

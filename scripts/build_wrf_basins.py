@@ -128,6 +128,7 @@ def aggregate(polys_wgs, name_col, id_col, cells_win, fields, dt, T, ncells, vt,
     u_s = wmean(fields["u"], W, rowsum, T, ncells) if fields["u"] is not None else None
     v_s = wmean(fields["v"], W, rowsum, T, ncells) if fields["v"] is not None else None
     spd_s = np.hypot(u_s, v_s) if u_s is not None else None
+    humid_s = wmean(fields["humid"], W, rowsum, T, ncells) if fields.get("humid") is not None else None
 
     raw_names = polys_wgs[name_col].astype(str).tolist()
     names = [n.title() for n in raw_names] if titlecase else raw_names
@@ -164,6 +165,10 @@ def aggregate(polys_wgs, name_col, id_col, cells_win, fields, dt, T, ncells, vt,
                          "series": [round(float(spd_s[t, b]), 2) for t in range(T)]}
             rec.update(wind_mean_ms=d["wind"]["mean_ms"], wind_max_ms=d["wind"]["max_ms"], wind_dir_deg=d["wind"]["dir_deg"])
             wmean_c.append(d["wind"]["mean_ms"]); wmax_c.append(d["wind"]["max_ms"]); wdir_c.append(d["wind"]["dir_deg"])
+        if humid_s is not None:
+            d["humid"] = {"mean": round(float(humid_s[:, b].mean()), 1),
+                          "series": [round(float(humid_s[t, b]), 1) for t in range(T)]}
+            rec.update(rh2_mean_pct=d["humid"]["mean"])
         json_list.append(d); recs.append(rec)
 
     gj = polys_wgs.reset_index(drop=True).copy()
@@ -416,7 +421,7 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     def full(name):
         return np.nan_to_num(ds[name].values.astype(float), nan=0.0) if name in ds else None
     fields_full = {"rain": full("precip_mm_h"), "temp": full("t2m_degC"),
-                   "u": full("u10_ms"), "v": full("v10_ms")}
+                   "u": full("u10_ms"), "v": full("v10_ms"), "humid": full("rh2_pct")}
 
     outdir.mkdir(parents=True, exist_ok=True)
     basins = read_polys(basins_path)
@@ -456,7 +461,7 @@ def build(nc_path, basins_path, bairros_path, limite_path, outdir):
     run_time = str(ds.attrs.get("run_time", "")) or (vt[0] if vt else "")
     source = str(ds.attrs.get("source", "CPTEC/INPE WRF AMS 7km"))
     gen = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    has = {"rain": True, "temp": fields_full["temp"] is not None, "wind": fields_full["u"] is not None}
+    has = {"rain": True, "temp": fields_full["temp"] is not None, "wind": fields_full["u"] is not None, "humid": fields_full["humid"] is not None}
 
     # --- write CSVs + GeoJSONs ---
     def order(df):

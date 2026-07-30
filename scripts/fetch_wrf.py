@@ -64,7 +64,7 @@ def _norm(ds):
 def open_joinville(path):
     import cfgrib
     dss = cfgrib.open_datasets(str(path))
-    rain = temp = None; wind = {}; tp_attrs = None
+    rain = temp = humid = None; wind = {}; tp_attrs = None
     for d in dss:
         if rain is None and any(v in d.data_vars for v in RAIN_VARS):
             rain = _norm(d[[v for v in RAIN_VARS if v in d.data_vars]])
@@ -74,6 +74,12 @@ def open_joinville(path):
             elif "t" in d.data_vars and "heightAboveGround" in d["t"].coords \
                  and float(np.atleast_1d(d["t"].heightAboveGround.values)[0]) == 2.0:
                 temp = _norm(d[["t"]].rename({"t": "t2m"}))
+        if humid is None:                        # 2-m relative humidity (%), for the heat-index alert
+            if "r2" in d.data_vars: humid = _norm(d[["r2"]].rename({"r2": "rh2"}))
+            elif "2r" in d.data_vars: humid = _norm(d[["2r"]].rename({"2r": "rh2"}))
+            elif "r" in d.data_vars and "heightAboveGround" in d["r"].coords \
+                 and float(np.atleast_1d(d["r"].heightAboveGround.values)[0]) == 2.0:
+                humid = _norm(d[["r"]].rename({"r": "rh2"}))
         for canon, names in WIND.items():
             if canon in wind: continue
             for nm in names:
@@ -89,6 +95,8 @@ def open_joinville(path):
     parts = [rain[v].reset_coords(drop=True).rename(v) for v in rain.data_vars]
     if temp is not None:
         parts.append(temp["t2m"].reset_coords(drop=True).reindex_like(rain, method="nearest").rename("t2m"))
+    if humid is not None:
+        parts.append(humid["rh2"].reset_coords(drop=True).reindex_like(rain, method="nearest").rename("rh2"))
     for canon in ("u10", "v10"):
         if canon in wind:
             parts.append(wind[canon][canon].reset_coords(drop=True).reindex_like(rain, method="nearest").rename(canon))
@@ -168,13 +176,16 @@ def main():
         tK = wrf_h["t2m"]
         wrf_h["t2m_degC"] = (tK - 273.15) if float(np.nanmedian(tK.values)) > 100 else tK
         wrf_h["t2m_degC"].attrs.update(units="degC")
+    if "rh2" in wrf_h:
+        wrf_h["rh2_pct"] = wrf_h["rh2"].clip(min=0, max=100)
+        wrf_h["rh2_pct"].attrs.update(units="%")
     if "u10" in wrf_h and "v10" in wrf_h:
         u, v = wrf_h["u10"], wrf_h["v10"]
         wrf_h["u10_ms"] = u; wrf_h["v10_ms"] = v
         wrf_h["wspd10_ms"] = np.hypot(u, v)
         wrf_h["wdir10_deg"] = (270.0 - np.degrees(np.arctan2(v, u))) % 360.0
 
-    keep = [v for v in ["precip_mm_h", "t2m_degC", "wspd10_ms", "wdir10_deg", "u10_ms", "v10_ms"] if v in wrf_h]
+    keep = [v for v in ["precip_mm_h", "t2m_degC", "wspd10_ms", "wdir10_deg", "u10_ms", "v10_ms", "rh2_pct"] if v in wrf_h]
     out = Path(a.out); out.parent.mkdir(parents=True, exist_ok=True)
     ds_out = wrf_h[keep].copy()
     ds_out.attrs.update(source="CPTEC/INPE WRF AMS 7km", run_time=str(run_dt),

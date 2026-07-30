@@ -23,6 +23,12 @@ claude.ai Project **UDESC** → `claude/Joinville_dashboard_forecast_log.md`.)
 | D22 | Regional figure uses true geographic aspect (no flattening) | [Established] |
 | D23 | Wind-rose QC: exclude calm (<0.5 m/s, report calm %) + drop stuck-vane stations (>25 % at exactly 0°) | [Established] |
 | D24 | Whole-dashboard text/caption/table audit — every page matched to the data | [Established] |
+| D25 | Multi-hazard risk alert (Agora observed + Previsão forecast): rain (OMM), wind (Beaufort, WMO-No. 306), temperature (provisional bands), heat index | [Design choice] |
+| D26 | Heat index = NWS Rothfusz (1990) regression of Steadman (1979) apparent temperature; Atenção ≥ 32, Alerta ≥ 41 °C aparente | [Established] |
+| D27 | Added 2 m relative humidity to the WRF pipeline (fetch_wrf `rh2_pct` → build_wrf_basins `vars.humid`/`has.humid`), graceful if absent | [Design choice] |
+| D28 | "Acumulado" = next-24 h rain total (same window as the Evolução chart), not the whole run; hourly axes in local time | [Design choice] |
+| D29 | WRF grid archive chunked by year (immutable closed years) — avoids the 100 MB/file limit & git-history bloat | [Established] |
+| D30 | Long-term preservation + citable DOI via Zenodo per GitHub release (`.zenodo.json`, `snapshot-release.yml`); citation added to Sobre | [Design choice] |
 
 ## Key verified results
 

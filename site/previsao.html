@@ -85,6 +85,9 @@
 
     <div id="demo"></div>
 
+    <!-- 0 · alerta de risco de chuva (previsão) — fase de teste — largura total, acima dos mapas -->
+    <div class="card" id="fcalert" style="margin-top:16px;display:none"></div>
+
     <!-- MENU MESTRE · controla o instante de TODA a previsão (alerta, mapas, barras, bairros) -->
     <div class="card" id="tbar" style="margin-top:16px;display:none">
       <div class="ct">Instante da previsão <span class="mut">— um só controle para tudo nesta página</span></div>
@@ -98,9 +101,6 @@
       </div>
       <div class="capt" id="tbarcap" style="margin-top:8px"></div>
     </div>
-
-    <!-- 0 · alerta de risco de chuva (previsão) — fase de teste — largura total, acima dos mapas -->
-    <div class="card" id="fcalert" style="margin-top:16px;display:none"></div>
 
     <!-- 1+2+3 · [mapa + por bacia]  |  por bairro -->
     <div class="twocol">
@@ -183,7 +183,7 @@
     </div>
 
     <div class="foot">Modelo: <b>CPTEC/INPE WRF AMS 7 km</b> · agregação por bacia/bairro: LaCiA · metodologia na página <a href="sobre.html">Sobre</a><br>
-    Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville</div>
     <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
     <div class="ribbon" id="ribbon"></div>
   </div>
@@ -210,12 +210,23 @@ const STCOL=['#0072B2','#009E73','#D55E00','#CC79A7','#E69F00','#56B4E9','#8E63B
 
 const VARS={
   rain:{label:'Chuva', color:'#2166ac', ramp:RAINR, accum:true, unit:'mm', sUnit:'mm/h', bunit:'mm',
-        bval:b=>b.rain.total_mm, blabel:'total', series:b=>b.rain.series,
-        vlims:(V,view)=>[0, view==='accum'?V.accum_max:V.hourly_max], field:(V,view)=>view==='accum'?V.grid_accum:V.grid_hourly[view]},
+        bval:b=>accumSeries(b.rain.series), blabel:'total', series:b=>b.rain.series,
+        vlims:(V,view)=>[0, view==='accum'?maxGrid(accumGrid(V.grid_hourly)):V.hourly_max], field:(V,view)=>view==='accum'?accumGrid(V.grid_hourly):V.grid_hourly[view]},
   temp:{label:'Temperatura', color:'#d6604d', ramp:TEMPR, accum:false, unit:'°C', sUnit:'°C', bunit:'°C',
         bval:b=>b.temp.mean, blabel:'média', series:b=>b.temp.series, vlims:(V)=>[V.min, V.max], field:(V,view)=>V.grid_hourly[view]},
   wind:{label:'Vento', color:'#225ea8', ramp:WINDR, accum:false, unit:'m/s', sUnit:'m/s', bunit:'m/s',
         bval:b=>b.wind.mean_ms, blabel:'média', series:b=>b.wind.series, vlims:(V)=>[0, V.spd_max], field:(V,view)=>V.spd_hourly[view]}};
+
+// "Acumulado" = rain summed over the próximas 24 h from now (same window as the Evolução chart),
+// not the whole run. s0 = current operational instant (FUT[0]); s1 = s0 + 24 h.
+function accWin(){const nAll=(RUN&&RUN.lead_h)?RUN.lead_h.length:0, s0=(typeof FUT!=='undefined'&&FUT.length)?FUT[0]:0; return [s0, Math.min(nAll, s0+24)];}
+function dtH(){return (RUN&&RUN.dt_hours)?RUN.dt_hours:1;}
+function accumSeries(arr){if(!arr)return 0;const [s0,s1]=accWin(),dt=dtH();let s=0;for(let i=s0;i<s1;i++)s+=(arr[i]||0);return s*dt;}
+function accumGrid(grids){const [s0,s1]=accWin(),dt=dtH();if(!grids||!grids.length)return grids;
+  const ny=grids[0].length,nx=grids[0][0].length,out=Array.from({length:ny},()=>new Array(nx).fill(0));
+  for(let t=s0;t<s1;t++){const g=grids[t];if(!g)continue;for(let i=0;i<ny;i++)for(let j=0;j<nx;j++)out[i][j]+=(g[i][j]||0)*dt;}
+  return out;}
+function maxGrid(g){let m=0;for(const row of (g||[]))for(const v of row)if(v>m)m=v;return m;}
 
 let RUN, BAS, LIM, BAI, CURVAR='rain', CURVIEW='accum', CURHOUR=0, PROJ, PROJB, BCOL={};
 let RH=null;
@@ -320,10 +331,10 @@ function drawMap(){
   const topo=`<defs><clipPath id="mclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#mclip)">${topoTiles(pr)}</g>`;
   document.getElementById('wmap').innerHTML=`<svg viewBox="0 0 ${W+70} ${H+10}" data-home="0 0 ${W+70} ${H+10}" width="100%" style="max-height:560px">${topo}<g opacity="0.7">${g.s}</g>${arrows}${outl}${cb}</svg>`;
   applyZoom('wmap');
-  const when=(vn==='rain'&&view==='accum')?'acumulado da rodada':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
+  const when=(vn==='rain'&&view==='accum')?'acumulado (próximas 24 h)':('válido '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h)');
   document.getElementById('mapsub').textContent=M.label+' · '+when;
   document.getElementById('mapcapt').innerHTML=(vn==='rain'&&view==='accum'
-    ? '<b>Acumulado</b> = chuva total prevista na rodada (mm), somando todas as horas, por célula da grade WRF de 7 km. Escolha uma hora em “Instante” para ver a taxa horária (mm/h) — em chuva fraca cada hora fica perto de 0, mas o acumulado soma esses pinguinhos. '
+    ? '<b>Acumulado</b> = chuva total prevista nas próximas 24 h (mm), somando as horas, por célula da grade WRF de 7 km. Escolha uma hora em “Instante” para ver a taxa horária (mm/h) — em chuva fraca cada hora fica perto de 0, mas o acumulado soma esses pinguinhos. '
     : M.label+' prevista para '+RUN.valid_times[view]+' (taxa da hora). ')
     +(vn==='wind'?'Velocidade (cor) e direção (setas apontam para onde o vento sopra). ':'')+'Bacias contornadas na cor da barra correspondente (abaixo). Horários em hora local de Joinville (UTC−3); a rodada é rotulada em UTC (00Z/12Z). Relevo: OpenTopoMap (CC-BY-SA).'+runFtr();
 }
@@ -340,9 +351,9 @@ function drawBars(){const vn=CURVAR, M=VARS[vn], acc=(CURVIEW==='accum');
     const dir=(vn==='wind'&&b.wind)?` <span style="color:var(--mut)">${b.wind.dir_deg}°</span>`:'';
     const col=BCOL[b.name]||M.color;
     return `<div class="brow"><span class="nm" title="${b.name}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${col};margin-right:6px;vertical-align:middle"></span>${short(b.name)}</span><span class="bar"><span style="width:${w}%;background:${col}"></span></span><span class="v" style="color:${M.color}">${fmt(val,vn)}<i> ${unit}${dir}</i></span></div>`;}).join('');
-  document.getElementById('totsub').textContent=M.label+' · '+(acc?'total da rodada':('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW]));
-  const wl=acc?'somando todas as horas da rodada':('no instante +'+RUN.lead_h[CURVIEW]+' h ('+RUN.valid_times[CURVIEW]+')');
-  const cap={rain: (acc?'Total previsto por bacia = chuva somada de todas as horas':'Taxa de chuva prevista por bacia '+wl)+' = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, em CRS métrico — UTM 22S / SIRGAS 2000).',
+  document.getElementById('totsub').textContent=M.label+' · '+(acc?'total · próximas 24 h':('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW]));
+  const wl=acc?'somando as próximas 24 h':('no instante +'+RUN.lead_h[CURVIEW]+' h ('+RUN.valid_times[CURVIEW]+')');
+  const cap={rain: (acc?'Total previsto por bacia = chuva somada nas próximas 24 h':'Taxa de chuva prevista por bacia '+wl)+' = média espacial ponderada pela área da grade WRF dentro de cada bacia (interseção exata célula ∩ polígono, em CRS métrico — UTM 22S / SIRGAS 2000).',
     temp:'Temperatura prevista por bacia '+wl+' (média espacial ponderada por área).',
     wind:'Vento previsto por bacia '+wl+': velocidade (m/s) e direção predominante, do vetor médio u,v ponderado por área.'};
   document.getElementById('barcapt').textContent=cap[vn]+runFtr();
@@ -365,7 +376,7 @@ function topoTiles(pr){const dlon=Math.max(1e-3,pr.lonmax-pr.lonmin);
   return img;}
 // per-bairro value at the selected instant (rain 'accum' → run total; otherwise the hourly series)
 function bairroValAt(b,vn,view){if(!b)return null;
-  if(vn==='rain')return (view==='accum'||view==null)?b.rain.total_mm:(b.rain.series?b.rain.series[view]:b.rain.total_mm);
+  if(vn==='rain')return (view==='accum'||view==null)?accumSeries(b.rain.series):(b.rain.series?b.rain.series[view]:b.rain.total_mm);
   if(vn==='temp')return (b.temp.series&&view!=='accum'&&view!=null)?b.temp.series[view]:b.temp.mean;
   return (b.wind.series&&view!=='accum'&&view!=null)?b.wind.series[view]:b.wind.mean_ms;}
 // meaningful color span per variable, so a near-uniform field (e.g. temp at 7 km) doesn't
@@ -378,41 +389,43 @@ function bairroRange(vn,vals){let lo=Math.min(...vals),hi=Math.max(...vals);
 function drawBairros(){if(!RUN.bairros||!BAI)return;const vn=CURVAR, M=VARS[vn], pr=PROJB, {W,H}=pr;
   const byName={}; RUN.bairros.forEach(b=>byName[b.name.toUpperCase()]=b);
   const view=CURVIEW, valOf=b=>bairroValAt(b,vn,view);
+  const bunit=(vn==='rain'&&view!=='accum'&&view!=null)?'mm/h':M.bunit;   // instant rain is a rate (mm/h), not accumulated mm
   const vals=RUN.bairros.map(valOf).filter(v=>v!=null), [lo,hi]=bairroRange(vn,vals), rng=(hi-lo)||1;
   let fills='';(BAI.features||[]).forEach(f=>{const key=(f.properties.Nome_Bairr||'').toUpperCase(),b=byName[key],v=b?valOf(b):null;
     const fill=v==null?'#eef1f5':M.ramp((v-lo)/rng);
-    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="0.7"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+M.bunit:'—'}</title></path>`;});
+    fills+=`<path d="${polyPathF(pr,f)}" fill="${fill}" stroke="#5b6673" stroke-width="0.7" stroke-linejoin="round" opacity="0.7"><title>${b?b.name:key}: ${v!=null?fmt(v,vn)+' '+bunit:'—'}</title></path>`;});
   const outl=LIM?`<path d="${polyPathsFC(pr,LIM)}" fill="none" stroke="#0b1b2b" stroke-width="1.6" opacity="0.9"/>`:'';
-  const cb=colorbar(M.ramp,lo,hi,M.unit,W+16,10,H-20);
+  const cb=colorbar(M.ramp,lo,hi,bunit,W+16,10,H-20);
   const topo=`<defs><clipPath id="bclip"><rect x="0" y="0" width="${W}" height="${H}"/></clipPath></defs><g clip-path="url(#bclip)">${topoTiles(pr)}</g>`;
   document.getElementById('bairromap').innerHTML=`<svg viewBox="0 0 ${W+66} ${H+8}" data-home="0 0 ${W+66} ${H+8}" width="100%" style="max-height:520px">${topo}${fills}${outl}${cb}</svg>`;
   applyZoom('bairromap');
   const sorted=RUN.bairros.slice().sort((a,b)=>valOf(b)-valOf(a));
-  document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(valOf(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${M.bunit}</i></span></div>`).join('');
+  document.getElementById('bairrolist').innerHTML=sorted.map(b=>`<div class="brow2" data-nm="${b.name.toLowerCase()}"><span class="nm">${b.name}</span><span class="v" style="color:${M.color}">${fmt(valOf(b),vn)} <i style="font-style:normal;font-weight:600;font-size:11px;color:var(--mut)">${bunit}</i></span></div>`).join('');
   const q=document.getElementById('bairroSearch').value.toLowerCase();
   if(q)filterBairros(q);
   const isAcc=(vn==='rain'&&view==='accum');
-  const whenLbl=isAcc?'acumulado':('+'+RUN.lead_h[view]+' h');
+  const whenLbl=isAcc?'acum. próximas 24 h':('+'+RUN.lead_h[view]+' h');
   document.getElementById('bairrosub').textContent=M.label+' · '+whenLbl+' por bairro'+(isAcc?'':' · '+RUN.valid_times[view]);
   document.getElementById('bairrocapt').textContent=((vn==='rain'&&view==='accum')
-    ? 'Chuva acumulada da rodada por bairro (43 bairros).'
+    ? 'Chuva acumulada nas próximas 24 h por bairro (43 bairros).'
     : M.label+' prevista por bairro em '+RUN.valid_times[view]+' (+'+RUN.lead_h[view]+' h).')
     +' Como o WRF tem células de ~7 km — maiores que um bairro — bairros na mesma célula recebem o mesmo valor; o mapa mostra o gradiente possível nessa resolução. Contorno: limite municipal. Relevo: OpenTopoMap (CC-BY-SA).'+runFtr();
 }
 function filterBairros(q){document.querySelectorAll('#bairrolist .brow2').forEach(r=>{r.style.display=r.dataset.nm.includes(q)?'':'none';});}
 // ---- 4. basin hourly ----
 function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=>b[vn]); if(!bs.length)return;
-  // only the first 24 h from the run start (maps, slider, downloads and archive stay full 72 h)
-  const nAll=RUN.lead_h.length, n=Math.max(2,Math.min(nAll,(RUN.lead_h.filter(h=>h<=24).length)||Math.min(24,nAll)));
+  // the next 24 h FROM NOW (same operational instant as the page menu); near the end of the run,
+  // show whatever remains (maps, slider, downloads and archive stay full 72 h).
+  const nAll=RUN.lead_h.length, s0=(typeof FUT!=='undefined'&&FUT.length)?FUT[0]:0, s1=Math.min(nAll,s0+24), n=Math.max(2,s1-s0);
   const W=1000,H=250,PL=48,PR=12,PT=12,PB=42,plotW=W-PL-PR,plotH=H-PT-PB;
-  const all=bs.flatMap(b=>M.series(b).slice(0,n)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
+  const all=bs.flatMap(b=>M.series(b).slice(s0,s1)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
   const x=i=>PL+(n>1?i/(n-1):0.5)*plotW, y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH, adec=hi<1?2:(hi<10?1:0);
   let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4}" font-size="12" fill="#8a8f98" text-anchor="end">${t.toFixed(adec)}</text>`;});
   const step=Math.max(1,Math.ceil(n/8));
-  for(let i=0;i<n;i++){if(i%step===0){const lt=(RUN.valid_times[i]||'').slice(11,16);
+  for(let i=0;i<n;i++){if(i%step===0){const lt=(RUN.valid_times[s0+i]||'').slice(11,16);
     ax+=`<text x="${x(i).toFixed(1)}" y="${H-24}" font-size="11.5" font-weight="600" fill="#5a616b" text-anchor="middle">${lt}</text>`
-       +`<text x="${x(i).toFixed(1)}" y="${H-9}" font-size="9.5" fill="#a0a1a7" text-anchor="middle">+${RUN.lead_h[i]}h</text>`;}}
-  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).slice(0,n).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
+       +`<text x="${x(i).toFixed(1)}" y="${H-9}" font-size="9.5" fill="#a0a1a7" text-anchor="middle">+${RUN.lead_h[s0+i]}h</text>`;}}
+  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).slice(s0,s1).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
   document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
   document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h · hora local (UTC−3)';
@@ -461,14 +474,14 @@ function computeFuture(){
 }
 
 // ---- controls / downloads ----
-function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado — soma de todas as horas</option>':'';
+function stepOptions(){const M=VARS[CURVAR]; let o=M.accum?'<option value="accum">Acumulado — próximas 24 h</option>':'';
   FUT.forEach(i=>o+=`<option value="${i}">+${RUN.lead_h[i]} h · ${RUN.valid_times[i]}</option>`);return o;}
 // ONE instant drives the whole page: map + basin bars + bairro map/list + alert + regional maps
 function applyInstant(){drawMap();drawBars();drawBairros();renderForecastAlert();syncRegImg();updTbarCap();}
 function redrawMaps(){applyInstant();}
 function redrawAll(){applyInstant();drawSeries();}
 function updTbarCap(){const M=VARS[CURVAR];const acc=(CURVIEW==='accum');
-  const whenL=acc?'acumulado da rodada':(RUN.valid_times[CURVIEW]+' (+'+RUN.lead_h[CURVIEW]+' h)');
+  const whenL=acc?'acumulado (próximas 24 h)':(RUN.valid_times[CURVIEW]+' (+'+RUN.lead_h[CURVIEW]+' h)');
   const el=document.getElementById('tbarcap'); if(el) el.innerHTML=`Mostrando <b>${M.label}</b> · <b>${whenL}</b> em toda a página (alerta, mapa, barras e bairros). Use o seletor/cursor ou “animar”. <b>Rodada WRF: ${(RUN.run_time||'—')} UTC</b> — “+X h” conta a partir dela.`;}
 function setVar(vn){CURVAR=vn;document.querySelectorAll('#segVar button').forEach(b=>b.classList.toggle('on',b.dataset.v===vn));
   const sel=document.getElementById('selStep');sel.innerHTML=stepOptions();
@@ -524,39 +537,63 @@ async function loadGradeHist(){
   };
 }
 
-// ---- 0. forecast rain-risk alert (OMM intensity thresholds applied to the WRF forecast) ----
+// NWS heat index (apparent temperature, °C) from air temp (°C) and RH (%). Rothfusz (1990).
+function hidx(tc,rh){ if(tc==null||rh==null)return null;
+  const T=tc*9/5+32; let HI=0.5*(T+61+(T-68)*1.2+rh*0.094);
+  if(HI>=80){ HI=-42.379+2.04901523*T+10.14333127*rh-0.22475541*T*rh-0.00683783*T*T-0.05481717*rh*rh+0.00122874*T*T*rh+0.00085282*T*rh*rh-0.00000199*T*T*rh*rh;
+    if(rh<13&&T>=80&&T<=112) HI-=((13-rh)/4)*Math.sqrt((17-Math.abs(T-95))/17);
+    else if(rh>85&&T>=80&&T<=87) HI+=((rh-85)/10)*((87-T)/5); }
+  return (HI-32)*5/9; }
+// ---- 0. forecast risk alert — rain (OMM), wind (Beaufort) and temperature (heat/cold-frost) ----
 function renderForecastAlert(){
-  const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has||!RUN.has.rain) return;
-  // worst predicted hourly rain rate anywhere in the city over the FUTURE window (peak, area-weighted per bairro)
+  const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has) return;
   const src=(RUN.bairros&&RUN.bairros.length)?RUN.bairros:(RUN.basins||[]);
   const useHour=(CURVIEW!=='accum' && typeof CURVIEW==='number');
-  let pk={v:0,name:''};
-  src.forEach(b=>{if(!b.rain||!b.rain.series)return;
-    if(useHour){const val=b.rain.series[CURVIEW]; if(val!=null&&val>pk.v)pk={v:val,name:b.name};}
-    else{FUT.forEach(i=>{const val=b.rain.series[i]; if(val!=null&&val>pk.v)pk={v:val,name:b.name};});}});
-  const v=pk.v;
-  const cls = v<2.5?'leve':(v<10?'moderada':(v<50?'forte':'violenta'));
-  const active = v>=10;                                   // "forte"+ => alerta ativo (limiar OMM)
-  const lvl = active?'alert':(v>=2.5?'warn':'ok');
-  const label = v<2.5?'Sem chuva significativa prevista'
-              : v<10?'Atenção — chuva moderada prevista'
-              : v<50?'Alerta — chuva forte prevista'
-              :      'Alerta — chuva muito forte prevista';
-  const inst = useHour ? ('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW].slice(11,16)) : 'próximas horas';
-  const when = (pk.v>0 && pk.name) ? (', em '+short(pk.name)) : '';
-  const icon = active ? '⚠️' : (lvl==='warn' ? '⚠️' : '✓');
+  const idxs=useHour?[CURVIEW]:((typeof FUT!=='undefined'&&FUT.length)?FUT:RUN.lead_h.map((_,i)=>i));
+  // worst value across the bairros over the selected instant (or the future window)
+  function worst(pick,mode){let best=null,name='';src.forEach(b=>{const arr=pick(b);if(!arr)return;
+    idxs.forEach(i=>{const val=arr[i];if(val==null)return;
+      if(best==null||(mode==='max'?val>best:val<best)){best=val;name=b.name;}});});return {v:best,name};}
+  const RANK={ok:0,warn:1,alert:2}; let worstLvl='ok'; const bump=l=>{if(RANK[l]>RANK[worstLvl])worstLvl=l;};
+  const haz=[];
+  if(RUN.has.rain){const r=worst(b=>b.rain&&b.rain.series,'max'),v=r.v||0;
+    const lvl=v>=10?'alert':(v>=2.5?'warn':'ok'),cls=v<2.5?'leve':(v<10?'moderada':(v<50?'forte':'violenta'));
+    bump(lvl);haz.push({icon:'🌧️',lvl,txt:`Chuva: ${cls} · pico ${v.toFixed(1)} mm/h${(r.name&&v>0)?' · '+short(r.name):''}`});}
+  if(RUN.has.wind){const w=worst(b=>b.wind&&b.wind.series,'max'),v=w.v||0;
+    const lvl=v>=17.2?'alert':(v>=10.8?'warn':'ok');
+    bump(lvl);haz.push({icon:'💨',lvl,txt:`Vento: pico ${v.toFixed(1)} m/s (${Math.round(v*3.6)} km/h)${(w.name&&v>0)?' · '+short(w.name):''}`});}
+  if(RUN.has.temp){const hot=worst(b=>b.temp&&b.temp.series,'max'),cold=worst(b=>b.temp&&b.temp.series,'min');
+    const hotLvl=(hot.v!=null&&hot.v>=36)?'alert':(hot.v!=null&&hot.v>=32?'warn':'ok');
+    const coldLvl=(cold.v!=null&&cold.v<=3)?'alert':(cold.v!=null&&cold.v<=5?'warn':'ok');
+    let lvl,txt;
+    if(RANK[coldLvl]>RANK[hotLvl]){lvl=coldLvl;txt=`Temperatura: frio/geada · mín ${Math.round(cold.v)}°C${coldLvl!=='ok'&&cold.name?' · '+short(cold.name):''}`;}
+    else{lvl=hotLvl;txt=`Temperatura: ${hotLvl==='ok'?'sem extremo':'calor'} · máx ${hot.v!=null?Math.round(hot.v):'—'}°C${hotLvl!=='ok'&&hot.name?' · '+short(hot.name):''}`;}
+    bump(lvl);haz.push({icon:'🌡️',lvl,txt});}
+  if(RUN.has.temp&&RUN.has.humid){let best=null,name='';
+    src.forEach(b=>{if(!b.temp||!b.temp.series||!b.humid||!b.humid.series)return;
+      idxs.forEach(i=>{const t=b.temp.series[i],rh=b.humid.series[i];if(t==null||rh==null)return;
+        const app=hidx(t,rh);if(app!=null&&(best==null||app>best)){best=app;name=b.name;}});});
+    if(best!=null){const lvl=best>=41?'alert':(best>=32?'warn':'ok');
+      bump(lvl);haz.push({icon:'🥵',lvl,txt:`Sensação: máx ${Math.round(best)}°C aparente${(lvl!=='ok'&&name)?' · '+short(name):''}`});}}
+  if(!haz.length){el.style.display='none';return;}
+  const inst=useHour?('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW].slice(11,16)):'próximas horas';
+  const active=worstLvl==='alert';
+  const headIcon=worstLvl==='ok'?'✓':'⚠️';
+  const headLabel=worstLvl==='alert'?'Alerta — condição severa prevista'
+                :worstLvl==='warn'?'Atenção — condição de risco prevista'
+                :'Sem risco significativo previsto';
   el.style.display='';
-  el.innerHTML=`<div class="ct fcct">Risco de chuva — ${useHour?('instante '+inst):'próximas horas'} <span class="testtag">Fase de teste</span><span class="fcsrc">previsão WRF · limiares OMM</span></div>
+  el.innerHTML=`<div class="ct fcct">Risco meteorológico — ${useHour?('instante '+inst):'próximas horas'} <span class="testtag">Fase de teste</span><span class="fcsrc">previsão WRF · OMM / Beaufort</span></div>
     <div class="fcgrid">
       <div class="kma">
-        <div class="fcstatus ${lvl}">
-          <span class="fcicon">${icon}</span>
-          <div><div class="fclabel">${label}</div><div class="fcstat ${active?'alert':'ok'}">${active?'alerta ativo':'sem alerta'}</div></div>
+        <div class="fcstatus ${worstLvl}">
+          <span class="fcicon">${headIcon}</span>
+          <div><div class="fclabel">${headLabel}</div><div class="fcstat ${active?'alert':'ok'}">${active?'alerta ativo':(worstLvl==='warn'?'atenção':'sem alerta')}</div></div>
         </div>
-        <div class="kb" style="margin-top:11px"><span class="chip ${lvl}">🌧️ Chuva prevista: ${cls} · pico ${v.toFixed(1)} mm/h${when}</span></div>
-        <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">níveis de aviso · limiares OMM</span></div>
+        <div class="kb" style="margin-top:11px;display:flex;flex-wrap:wrap;gap:6px">${haz.map(h=>`<span class="chip ${h.lvl}">${h.icon} ${h.txt}</span>`).join('')}</div>
+        <div class="klev"><span class="lv ok">Normal</span><span class="lv warn">Atenção</span><span class="lv alert">Alerta</span><span class="lvsub">níveis de aviso</span></div>
       </div>
-      <div class="capt fccapt">Maior taxa de chuva horária prevista em algum bairro ${useHour?('no instante selecionado ('+inst+')'):'na janela da rodada'} — segue o menu no topo. Classes OMM: leve &lt;2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥50 mm/h; o alerta acende a partir de <b>forte</b> (≥10 mm/h). <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés e sem calibração local); use apenas como orientação, não é aviso oficial de Defesa Civil.</div>
+      <div class="capt fccapt"><b>Limiares.</b> Chuva (taxa horária · OMM): moderada ≥ 2,5 · forte ≥ 10 · violenta ≥ 50 mm/h — alerta a partir de <b>forte</b>. Vento (sustentado a 10 m · Beaufort): forte ≥ 10,8 · ventania ≥ 17,2 m/s (rajadas reais são maiores). Temperatura (ar a 2 m): calor ≥ 32 / ≥ 36 °C · frio–geada ≤ 5 / ≤ 3 °C. Sensação (índice de calor · temp × umidade · NWS): cautela extrema ≥ 32 · perigo ≥ 41 °C aparente. Valor = <b>pior previsto entre os bairros</b> ${useHour?'no instante selecionado':'na janela'}. <b>⚠️ Recurso em fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés nem calibração local); orientação, não é aviso oficial de Defesa Civil.</div>
     </div>`;
 }
 

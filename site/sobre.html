@@ -70,6 +70,7 @@
         <a href="#agora">Página “Agora”</a>
         <a href="#resolucao">Resolução temporal</a>
         <a href="#arquivos">Arquivos &amp; processamento</a>
+        <a href="#alertas">Alertas de risco</a>
         <a href="#citar">Como citar</a>
         <a href="#refs">Referências</a>
         <a href="#glos">Glossário</a>
@@ -260,6 +261,19 @@
     </div>
 
     <!-- refs -->
+    <!-- risk alerts methodology -->
+    <div class="card doc sec" id="alertas">
+      <div class="ct"><span>Alertas de risco</span><span class="tag">fase de teste</span></div>
+      <p>Dois painéis de alerta, com os <b>mesmos limiares</b>: o da página <b>Agora</b> avalia as <b>observações</b> em tempo real (pior leitura entre as estações online); o da <b>Previsão</b> avalia a <b>saída do WRF</b> (pior valor entre os bairros no instante escolhido). Ambos usam três níveis — <span class="mut">Normal · Atenção · Alerta</span> — e são <b>orientação, não aviso oficial</b>.</p>
+      <ul>
+        <li><b>Chuva</b> — classes de intensidade da <b>OMM</b> (taxa horária): leve &lt; 2,5 · moderada 2,5–10 · forte 10–50 · violenta ≥ 50 mm h⁻¹; alerta a partir de <b>forte</b> (≥ 10 mm h⁻¹). Convenção operacional (a OMM não fixa definição internacional única) [8].</li>
+        <li><b>Vento</b> — escala de <b>Beaufort</b> (OMM, <i>Manual on Codes</i>, WMO-No. 306), vento <b>sustentado</b> a 10 m: força 6 “vento forte” ≥ 10,8 m/s (Atenção) · força 8 “ventania” ≥ 17,2 m/s (Alerta). Rajadas instantâneas são maiores que o vento sustentado [14].</li>
+        <li><b>Temperatura</b> (ar a 2 m) — bandas <b>operacionais provisórias</b>: calor Atenção ≥ 32 / Alerta ≥ 36 °C; frio–geada Atenção ≤ 5 / Alerta ≤ 3 °C (a geada forma-se próximo a 0 °C na superfície, então a banda de ar a 2 m antecipa o risco). Pendentes de critério local da Defesa Civil.</li>
+        <li><b>Sensação</b> (índice de calor) — <b>temperatura aparente</b> combinando temperatura e umidade, o risco real numa cidade úmida. Base científica: <b>Steadman (1979)</b>; implementação pela regressão do <b>NWS</b> (<b>Rothfusz, 1990</b>). Limiares do painel: Atenção ≥ 32 (cautela extrema) · Alerta ≥ 41 °C aparente (perigo) [15]. Na <b>Agora</b> vem das estações (temp × umidade); na <b>Previsão</b> exige a <b>umidade a 2 m</b> prevista pelo WRF — quando o campo não está disponível, o item simplesmente não aparece.</li>
+      </ul>
+      <p class="capt"><b>Fase de teste</b> — saída direta do WRF (~7 km, sem correção de viés nem calibração local) e leituras de estação sem homogeneização; use como orientação de padrão e tendência. <b>Não substitui</b> os avisos oficiais da Defesa Civil de Joinville / Defesa Civil de SC / INMET.</p>
+    </div>
+
     <!-- how to cite -->
     <div class="card doc sec" id="citar">
       <div class="ct"><span>Como citar</span><span class="tag">DOI</span></div>
@@ -299,6 +313,8 @@
         <div class="r"><b>[11] Controle de qualidade de dados (limites de erro grosseiro / plausibilidade física).</b> WMO (2018). <i>Guide to Instruments and Methods of Observation</i> (WMO-No. 8), Vol. I &amp; V — recomenda checagens de faixa física e de consistência, com <b>sinalização</b> (não exclusão silenciosa) dos valores suspeitos. Base do teto físico de chuva e da marcação (em vez de apagar) usada aqui.</div>
         <div class="r"><b>[12] Divisas administrativas (mapa regional).</b> Malhas municipais do <b>IBGE</b> (SC/PR/SP) via <i>tbrugz/geodata-br</i>, dissolvidas por UF; contorno tênue de contexto na figura do WRF.</div>
         <div class="r"><b>[13] Média de velocidade e direção do vento (resultante vetorial).</b> Grange, S. K. (2014). <i>Technical note: Averaging wind speeds and directions.</i> University of Auckland. Base do cálculo da direção predominante do vento (resultante das componentes médias de fluxo, <code>atan2(u_méd, v_méd)+180°</code>, convenção “de onde vem”), como implementado no pacote R <i>openair</i>; usada nas páginas Cidade e Temperatura×Chuva×Vento.</div>
+        <div class="r"><b>[14] Escala de vento de Beaufort.</b> Organização Meteorológica Mundial (OMM/WMO) — <i>Manual on Codes, Volume I.1</i> (WMO-No. 306), tabela de código da escala de Beaufort. Vento <b>sustentado</b> a 10 m: força 6 (“vento forte”) 10,8–13,8 m/s; força 8 (“ventania”) 17,2–20,7 m/s. Base dos limiares de vento do alerta (Atenção ≥ 10,8; Alerta ≥ 17,2 m/s); rajadas instantâneas são maiores.</div>
+        <div class="r"><b>[15] Índice de calor / temperatura aparente (temperatura × umidade).</b> Steadman, R. G. (1979). <i>The Assessment of Sultriness. Part I: A Temperature-Humidity Index Based on Human Physiology and Clothing Science.</i> Journal of Applied Meteorology, 18(7), 861–873. DOI 10.1175/1520-0450(1979)018&lt;0861:TAOSPI&gt;2.0.CO;2. Implementado pela regressão operacional do NWS: Rothfusz, L. P. (1990). <i>The Heat Index Equation.</i> NWS Southern Region Technical Attachment SR/SSD 90-23, Fort Worth, TX. Categorias do NWS (temperatura aparente): cautela 27–32 · cautela extrema 32–41 · perigo 41–54 · perigo extremo ≥ 54 °C.</div>
       </div>
     </div>
 
@@ -318,7 +334,7 @@
     </div>
 
     <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
-    Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="#">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
     <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></div>
     <div class="ribbon" id="ribbon"></div>
   </div>
