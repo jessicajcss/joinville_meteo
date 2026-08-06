@@ -1,8 +1,8 @@
 id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,rh2_mean_pct,run_time_utc,window_local,source
-2,Bacia Hidrográfica do Palmital,343.86,100.0,12.543,1.788,20.9,14.9,29.7,2.85,6.42,317,71.7,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-7,Bacia Hidrográfica do Itapocuzinho,390.36,100.0,9.872,1.365,20.0,13.9,28.2,3.26,8.04,313,71.0,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-1,Bacia Hidrográfica do Cubatão (sub-bacia),489.72,100.0,9.66,1.124,19.9,13.6,27.3,3.7,7.94,310,69.6,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-6,Bacia Hidrográfica do Piraí,578.87,100.0,8.28,1.244,20.7,15.0,29.4,2.11,4.87,329,74.1,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-3,Bacias independentes da vertente leste,135.57,100.0,6.504,2.68,20.0,15.7,27.6,2.25,8.57,80,82.0,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-4,Bacia Hidrográfica do Rio Cachoeira,74.11,100.0,6.076,1.335,21.4,15.9,29.7,2.02,5.92,43,70.4,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
-5,Bacia Hidrográfica da vertente sul,79.06,100.0,5.914,1.959,20.6,15.2,28.9,2.04,7.54,69,77.3,2026-08-05 00:00:00,2026-08-04 22:00 .. 2026-08-07 21:00,CPTEC/INPE WRF AMS 7km
+5,Bacia Hidrográfica da vertente sul,79.06,100.0,6.06,2.033,20.1,13.0,28.7,2.67,5.86,1,71.0,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+2,Bacia Hidrográfica do Palmital,343.86,100.0,5.84,1.34,19.8,11.8,28.9,3.36,5.96,325,68.0,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+4,Bacia Hidrográfica do Rio Cachoeira,74.11,100.0,5.754,1.461,20.6,13.6,30.1,2.66,5.68,359,65.1,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+3,Bacias independentes da vertente leste,135.57,100.0,5.532,1.987,19.8,13.4,26.2,2.88,6.0,13,75.5,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+6,Bacia Hidrográfica do Piraí,578.87,100.0,4.105,1.233,19.4,10.8,28.8,2.73,5.89,322,68.4,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+1,Bacia Hidrográfica do Cubatão (sub-bacia),489.72,100.0,3.844,0.62,18.5,10.4,26.1,4.48,8.28,313,66.6,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
+7,Bacia Hidrográfica do Itapocuzinho,390.36,100.0,1.962,0.447,18.5,9.6,27.0,3.84,7.14,312,66.1,2026-08-06 00:00:00,2026-08-05 22:00 .. 2026-08-08 21:00,CPTEC/INPE WRF AMS 7km
