@@ -192,7 +192,7 @@ function renderSections(){
         <div class="ds">${DESC[k]||''}</div></div></div>
       <div class="striplab">Média mensal <span>média do período ${yr}</span>${cbar(v.ramp,mLo,mHi,fmt,v.unit)}</div>
       ${monthlyStrip(v.clim,rmp,fmt,v.unit,slo,shi)}
-      <div class="striplab">Tendência anual <span>${v.annual[0].year}–${v.annual[v.annual.length-1].year}</span>${cbar(v.ramp,aLo,aHi,fmt,v.unit)}</div>
+      <div class="striplab">Tendência anual <span>${v.annual[0].year}–${v.annual[v.annual.length-1].year}</span>${single?'':cbar(v.ramp,aLo,aHi,fmt,v.unit)}</div>
       ${yearStrip(v.annual,rmp,fmt,v.unit,slo,shi)}
     </div>`;
   });
