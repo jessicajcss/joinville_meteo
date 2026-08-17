@@ -262,7 +262,7 @@ async function init(){
   SNAP=await fetch('data/snapshot.json').then(r=>r.json());
   const N=SNAP.network, ref=SNAP.reference_now;
   // rail
-  document.getElementById('rail').innerHTML=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']]
+  document.getElementById('rail').innerHTML=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Histórico Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']]
     .map(([k,l,href],i)=>`<a class="ri${i===0?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
   // conditions
   const y=+ref.slice(0,4),mo=+ref.slice(5,7),d=+ref.slice(8,10);

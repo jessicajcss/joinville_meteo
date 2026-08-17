@@ -67,6 +67,7 @@
         <div class="fg"><label>Métrica do mapa</label><div class="seg" id="fMetric"><span data-m="count" class="on">Nº de desastres</span><span data-m="desab">Desabrigados</span><span data-m="sev">Severidade</span></div></div>
         <div class="fg" style="flex:1"></div>
       </div>
+      <div class="capt" id="metricDef" style="margin:2px 0 0;line-height:1.55"></div>
       <div class="rgrid" style="margin-top:14px">
         <div>
           <div id="rmap"></div>
@@ -102,7 +103,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Histórico Estação','estacao.html'],['baixar','Baixar','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='risco'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 // "dangerous" heat palette — dark maroon (most severe/frequent) to light amber
@@ -120,6 +121,12 @@ const METRICS={
   count:{w:e=>1, lab:'desastres', fmt:v=>v},
   desab:{w:e=>e.desabrigados||0, lab:'desabrigados', fmt:v=>v.toLocaleString('pt-BR')},
   sev:{w:e=>({'Normalidade':1,'Emergência':2,'Calamidade':3}[e.situacao]||1), lab:'pontos de severidade', fmt:v=>v}
+};
+// short definition shown under the selector for the metric currently chosen
+const METRIC_DEF={
+  count:'<b>Nº de desastres</b>: quantos desastres registrados atingiram cada bairro, no filtro selecionado (um evento que atinge vários bairros é contado em cada um).',
+  desab:'<b>Desabrigados</b>: total de pessoas <b>desabrigadas</b> (que perderam a moradia e passaram a depender de abrigo), somado por bairro no filtro selecionado.',
+  sev:'<b>Severidade</b>: índice que <b>pondera cada desastre pela situação oficial reconhecida</b> — <b>Normalidade</b> = 1, <b>Emergência (SE)</b> = 2 e <b>Calamidade (ECP)</b> = 3 — e soma esses pesos por bairro. <b>Exemplo:</b> um bairro com 3 desastres (1 em Calamidade + 1 em Emergência + 1 em Normalidade) soma 3 + 2 + 1 = <b>6 pontos</b>; outro bairro com 4 desastres, todos em Normalidade, soma 4 × 1 = <b>4 pontos</b> — ou seja, é <b>menos severo apesar de ter mais ocorrências</b>. Assim o índice destaca os bairros com eventos de maior gravidade, e não apenas os mais numerosos (valor relativo em pontos, não uma grandeza física).'
 };
 function filtered(){return D.events.filter(e=>(curTipo==='(todos)'||e.tipo===curTipo)&&(curSitu==='(todas)'||e.situacao===curSitu)&&(curAno==='(todos)'||e.year===+curAno));}
 function bairroCounts(evs){const c={},w=METRICS[curMetric].w;evs.forEach(e=>e.bairros.forEach(b=>c[b]=(c[b]||0)+w(e)));return c;}
@@ -159,6 +166,7 @@ function onFeat(f,layer){layer.on('mouseover',()=>layer.setStyle({weight:2.5,col
 function refresh(){
   const evs=filtered(); COUNTS=bairroCounts(evs); CMAX=Math.max(1,...Object.values(COUNTS));
   const M=METRICS[curMetric];
+  {const md=document.getElementById('metricDef'); if(md) md.innerHTML=METRIC_DEF[curMetric]||'';}
   document.getElementById('mmax').textContent=M.fmt(CMAX)+' '+M.lab;
   if(LAYER){LAYER.eachLayer(l=>{l.setStyle(featStyle(l.feature));
     const c=COUNTS[l._bairro]||0; l.setTooltipContent(`${l.feature.properties.Nome_Bairr}: <b>${M.fmt(c)}</b> ${M.lab}`);});}
