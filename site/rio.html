@@ -76,11 +76,11 @@
 
     <!-- 1 · Gradiente de chuvas por estação meteorológica -->
     <div class="card">
-      <div class="ct">Gradiente de chuvas por estação meteorológica <span class="mut">climatologia mensal</span></div>
+      <div class="ct">Gradiente de chuvas por estação meteorológica <span class="mut">média mensal do período</span></div>
       <div class="rainwrap" id="rainwrap">
         <div class="rainmap" id="rainmap"><div id="pluvmap"></div><div class="maplab">Localização das estações — cor por estação</div></div>
       </div>
-      <div class="capt">Climatologia da precipitação mensal por estação (rede de estações meteorológicas e hidrometeorológicas). Cada gota ≈ 40 mm; painéis ordenados por acúmulo anual crescente — estação mais seca no canto inferior direito. Cursor sobre as colunas: total mensal e cobertura de registro (%).</div>
+      <div class="capt">Média mensal da precipitação por estação (rede de estações meteorológicas e hidrometeorológicas). Cada gota ≈ 40 mm; painéis ordenados por acúmulo anual crescente — estação mais seca no canto inferior direito. Cursor sobre as colunas: total mensal e cobertura de registro (%).</div>
     </div>
 
     <!-- 2 · precipitação mensal (estação/cidade + ano) -->
@@ -154,7 +154,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='rio'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
@@ -205,7 +205,7 @@ function dropCol(v,gmax,cx,geom,ramp,colW){
 // around-map cells (ascending total: driest bottom-right → wettest top-right)
 const AROUND_CELLS=[[4,4],[4,3],[4,2],[4,1],[3,1],[2,1],[1,1],[1,2],[1,3],[1,4]];
 function smallMultiples(panels){
-  if(!panels||!panels.length)return '<div style="color:#a0a1a7;padding:10px">Sem climatologia de chuva por estação.</div>';
+  if(!panels||!panels.length)return '<div style="color:#a0a1a7;padding:10px">Sem média mensal de chuva por estação.</div>';
   const gmax=Math.max(...panels.flatMap(p=>p.clim.filter(v=>v!=null)),1),geom=dropGeom(gmax),W=12*13;
   const asc=panels.slice().sort((a,b)=>a.annual-b.annual);
   return asc.map((p,idx)=>{const c=STCOL[p.ci%STCOL.length],ramp=stationRamp(c);
@@ -507,7 +507,7 @@ async function init(){
 function renderAllRain(year){
   const r=rainMonthUmbrellas(RV.rain_panels||[],String(year));
   document.getElementById('monthgrid').innerHTML=r.html;
-  document.getElementById('ryearlab').textContent=(year==='all'?'climatologia (todos os anos)':year);
+  document.getElementById('ryearlab').textContent=(year==='all'?'média do período (todos os anos)':year);
 }
 function cityByYear(year){const out=[];for(let m=0;m<12;m++){let v=[];(RV.rain_panels||[]).forEach(p=>{const x=(p.by_year&&p.by_year[year])?p.by_year[year][m]:null;if(x!=null)v.push(x);});out.push(v.length?v.reduce((a,b)=>a+b,0)/v.length:null);}return out;}
 function renderBar(stVal,year){
@@ -515,7 +515,7 @@ function renderBar(stVal,year){
   if(stVal==='city'){name='média da cidade';clim=(year==='all')?RV.city_rain_clim:cityByYear(year);}
   else{const p=(RV.rain_panels||[])[+stVal];name=p?p.name:'';clim=p?((year==='all')?p.clim:((p.by_year&&p.by_year[year])?p.by_year[year]:new Array(12).fill(null))):[];}
   document.getElementById('rainbars').innerHTML=rainBars(clim||[]);
-  document.getElementById('rbsub').textContent=name+(year==='all'?' · climatologia':' · '+year);
+  document.getElementById('rbsub').textContent=name+(year==='all'?' · média do período':' · '+year);
 }
 // tide is an INFLUENCE on the river water level here, not the subject; estuary handled by datum_note
 function tideNote(s){
@@ -571,7 +571,7 @@ async function renderHeatmap(stVal,year){
   const drv=s.estuary?'A estrutura vertical (por hora) reflete a maré do estuário, que domina o nível nesta estação.'
     :(s.tidal?'A estrutura vertical (por hora) revela a influência da maré no nível da água (baixo curso da cidade de baía).'
              :'Variação horária (vertical) fraca; o padrão por coluna reflete a sazonalidade das chuvas.');
-  document.getElementById('hcapt').textContent='Nível da água (cota) por hora do dia (linhas) × mês (colunas). A cor vai da mínima ('+lo.toFixed(2)+' m) à máxima ('+hi.toFixed(2)+' m) da própria estação; os valores são cota em relação ao zero da régua'+(year==='all'?' (climatologia horária).':' ('+year+').')+' '+drv;
+  document.getElementById('hcapt').textContent='Nível da água (cota) por hora do dia (linhas) × mês (colunas). A cor vai da mínima ('+lo.toFixed(2)+' m) à máxima ('+hi.toFixed(2)+' m) da própria estação; os valores são cota em relação ao zero da régua'+(year==='all'?' (média do período · horária).':' ('+year+').')+' '+drv;
   document.getElementById('qcHour').textContent='Escala de cor da mínima à máxima desta estação (valores = cota em relação ao zero da régua)'+(!hm?' · sem registro horário para esta seleção':'')+(s.datum_note?' · '+s.datum_note:'');
 }
 async function renderDaily(stVal,year){

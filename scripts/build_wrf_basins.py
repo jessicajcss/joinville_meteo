@@ -228,29 +228,29 @@ def regional_figure(lat, lon, fields, vt, out, overlays=None, run_time=None, tgt
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 11))
     # (a) precip series (box mean/max over the whole domain) — maps now live in the hour-menu panel above
-    ax[0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="box mean")
-    ax[0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="box max")
-    ax[0].set_title("(a) hourly precip · 24 h desde 00:00 local"); ax[0].set_ylabel("mm h$^{-1}$")  # maps now in the interactive hour-menu panel above
+    ax[0].plot(xx, rain[s0:s1].mean((1, 2)), "o-", label="média do domínio")
+    ax[0].plot(xx, rain[s0:s1].max((1, 2)), "s--", label="máx. do domínio")
+    ax[0].set_title("(a) chuva horária · 24 h desde 00:00 local"); ax[0].set_ylabel("mm h$^{-1}$")  # maps now in the interactive hour-menu panel above
     ax[0].legend(); _xt(ax[0])
     # (b) temperature series
     if have_t:
-        ax[1].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="box mean")
-        ax[1].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="min-max")
-        ax[1].set_title("(b) 2-m temperature · 24 h desde 00:00 local"); ax[1].set_ylabel("°C")
+        ax[1].plot(xx, temp[s0:s1].mean((1, 2)), "o-", color="#c0392b", label="média do domínio")
+        ax[1].fill_between(xx, temp[s0:s1].min((1, 2)), temp[s0:s1].max((1, 2)), color="#c0392b", alpha=0.15, label="mín.–máx.")
+        ax[1].set_title("(b) temperatura a 2 m · 24 h desde 00:00 local"); ax[1].set_ylabel("°C")
         ax[1].legend(); _xt(ax[1])
     else:
-        ax[1].text(.5, .5, "no t2m", ha="center"); ax[1].axis("off")
+        ax[1].text(.5, .5, "sem t2m", ha="center"); ax[1].axis("off")
     # (c) wind-speed series
     if have_w:
         sp = np.hypot(u, v)
-        ax[2].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="box mean")
-        ax[2].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="box max")
-        ax[2].set_title("(c) 10-m wind speed · 24 h desde 00:00 local"); ax[2].set_ylabel("m s$^{-1}$")
+        ax[2].plot(xx, sp[s0:s1].mean((1, 2)), "o-", color="#2c7fb8", label="média do domínio")
+        ax[2].plot(xx, sp[s0:s1].max((1, 2)), "s--", color="#2c7fb8", label="máx. do domínio")
+        ax[2].set_title("(c) vento a 10 m · 24 h desde 00:00 local"); ax[2].set_ylabel("m s$^{-1}$")
         ax[2].legend(); _xt(ax[2])
     else:
-        ax[2].text(.5, .5, "no wind", ha="center"); ax[2].axis("off")
+        ax[2].text(.5, .5, "sem vento", ha="center"); ax[2].axis("off")
     run_lbl = (f"rodada {run_time} UTC · " if run_time else "")
-    fig.suptitle(f"CPTEC/INPE WRF AMS 7 km — Joinville domain · {run_lbl}horários locais (UTC−3)",
+    fig.suptitle(f"CPTEC/INPE WRF AMS 7 km — domínio de Joinville · {run_lbl}horários locais (UTC−3)",
                  y=1.005, fontsize=13, fontweight="bold")
     plt.tight_layout()
     plt.savefig(str(out), dpi=110, bbox_inches="tight")

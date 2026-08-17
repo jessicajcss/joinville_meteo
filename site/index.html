@@ -50,25 +50,29 @@
         <div class="card mapcard">
           <div class="ct">Rede de estações — Joinville <span class="mut">base orográfica (OpenTopoMap)</span></div>
           <div id="map"></div>
-          <div class="tog" id="tog"><span data-m="temp">Temperatura</span><span data-m="umid">Umidade</span><span data-m="rain">Chuva</span><span data-m="wind" class="on">Vento</span></div>
+          <div class="tog" id="tog"><span data-m="rain1h" class="on">Chuva · 1 h</span><span data-m="rain24h">Chuva · 24 h</span><span data-m="temp">Temperatura</span><span data-m="umid">Umidade</span><span data-m="wind">Vento</span></div>
           <div class="mapleg" id="mapleg"></div>
           <div class="leg"><i style="background:#fff;border:1px solid #ccc"></i>online (leitura recente)<i style="background:#e6e6e6;border:1px solid #d5d5d5"></i>última leitura (defasada)</div>
         </div>
         <div class="card" style="margin-top:16px">
-          <div class="ct">Temperatura diária — média da rede (últimos 20 dias)</div>
+          <div class="ct">Temperatura diária — média da rede (últimos 30 dias)</div>
           <div class="capt">cada barra vai da mínima à máxima do dia — leia os valores no eixo °C à esquerda; a cor acompanha a mesma escala de temperatura</div>
           <div class="dailyrow"><div class="chart" id="daily"></div><div class="vbar" id="vbar"></div></div>
+        </div>
+        <div class="card" style="margin-top:16px" id="draincard">
+          <div class="ct">Chuva diária — média da rede (últimos 30 dias)</div>
+          <div class="capt">cada barra é a <b>média das estações</b> do total de chuva do dia (mm) — leia os valores no eixo mm à esquerda; dias sem chuva aparecem sem barra</div>
+          <div class="dailyrow"><div class="chart" id="drain"></div></div>
         </div>
       </div>
       <div>
         <div class="card kma" id="kma"></div>
 <div class="card" id="pushcard" style="margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <button id="pushBtn" style="font-weight:700;font-size:14px;border-radius:22px;padding:10px 18px;border:0;background:var(--blue);color:#fff;cursor:pointer">🔔 Receber alertas de risco</button>
+  <button id="pushBtn" style="font-weight:700;font-size:14px;border-radius:22px;padding:10px 18px;border:0;background:var(--blue);color:#fff;cursor:pointer">🔔 Notificações</button>
   <span class="capt" id="pushNote" style="margin:0"></span>
 </div>
         <div class="card state" style="margin-top:16px" id="estado"></div>
         <div class="card wrcard" style="margin-top:16px"><div class="ct" style="align-self:flex-start">Rosa dos ventos <span class="mut" id="rosesub"></span></div><div id="rose"></div><div class="capt" id="rosenote"></div></div>
-        <div class="card" style="margin-top:16px"><div class="ct">Estações <span class="mut" id="rowsupd">agora</span></div><div class="capt" style="margin:2px 0 9px">Cada valor é a <b>última leitura</b> daquela estação — pode ser <b>da última hora</b>, não necessariamente deste minuto.</div><div class="rowlist" id="rows"></div></div>
       </div>
     </div>
     <a class="card ccinvite" href="ciencia_cidada.html" aria-label="Participar da Ciência Cidadã">
@@ -155,8 +159,24 @@ function dailyChart(td){
   const sy=t=>PT+(axhi-t)/(axhi-axlo)*PLOTH;
   let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}°</text>`;}
   let bars='';td.forEach((r,i)=>{const cx=PL+i*bw+bw/2,yt=sy(r.mx),yb=sy(r.mn);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(yb-yt,3).toFixed(1)}" rx="5" fill="url(#tg)"/>`;});
-  let labs=td.map((r,i)=>i%2===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const lstep=Math.max(1,Math.ceil(td.length/10));
+  let labs=td.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
   const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><defs><linearGradient id="tg" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${PT}" y2="${PT+PLOTH}"><stop offset="0" stop-color="#d55e00"/><stop offset="0.4" stop-color="#e0e0a0"/><stop offset="0.7" stop-color="#8aa0e0"/><stop offset="1" stop-color="#4078f2"/></linearGradient></defs><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">°C</text>${grid}${bars}${labs}</svg>`;
+  return {svg,axlo,axhi};
+}
+// daily rain — network-mean daily total (mm), single-hue blue bars; 0-based axis
+function dailyRainChart(rd){
+  const vals=rd.map(x=>x.v==null?0:x.v);
+  const vmax=Math.max(...vals,1);
+  const step=vmax>40?20:(vmax>20?10:(vmax>8?5:(vmax>3?2:1)));
+  const axlo=0, axhi=Math.max(step,Math.ceil(vmax/step)*step);
+  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/rd.length;
+  const sy=v=>PT+(axhi-v)/(axhi-axlo)*PLOTH, y0=sy(0);
+  let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}</text>`;}
+  let bars='';rd.forEach((r,i)=>{const v=(r.v==null?0:r.v);if(v<=0)return;const cx=PL+i*bw+bw/2,yt=sy(v);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(y0-yt,2).toFixed(1)}" rx="3" fill="#4078f2"/>`;});
+  const lstep=Math.max(1,Math.ceil(rd.length/10));
+  let labs=rd.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">mm</text>${grid}${bars}${labs}</svg>`;
   return {svg,axlo,axhi};
 }
 function sparkSVG(w24){
@@ -168,16 +188,24 @@ function sparkSVG(w24){
 }
 
 // ---------- balloon HTML per mode ----------
+// rain accumulations: prefer the explicit 1 h / 24 h fields; fall back to the legacy
+// rain_rate (1 h) / rain (24 h) so the two layers work on older snapshots too.
+function rain1hOf(s){ if(s.rain_1h) return s.rain_1h;
+  if(s.rain_rate) return {v:s.rain_rate.v,t:s.rain_rate.t,fresh:(s.rain?!!s.rain.fresh:!!s.fresh)}; return null; }
+function rain24hOf(s){ return s.rain_24h || s.rain || null; }
 function balloonHTML(s,mode,selected){
   // freshness is PER VARIABLE: a station can be online via wind yet have a stale temperature
-  const v = mode==='wind'?s.wind:(mode==='rain'?s.rain:(mode==='umid'?s.umid:s.temp));
+  const v = mode==='wind'?s.wind
+          : mode==='rain1h'?rain1hOf(s)
+          : mode==='rain24h'?rain24hOf(s)
+          : mode==='umid'?s.umid : s.temp;
   if(!v) return null;
   const fresh=!!v.fresh, cls=(fresh?'fresh':'stale')+(selected?' bl-sel':'');
   const dt=fresh?'':`<span class="bl-dt">${fmtDate(v.t)}</span>`;
   let inner;
   if(mode==='wind'){ const dir=(v.wd==null?0:v.wd);
     inner=`<span class="warr" style="transform:rotate(${(dir+180)%360}deg)">${arrowSVG(fresh?'#4078f2':'#9a9a9a')}</span><span class="bl-vl">${v.ws.toFixed(1)}<i>m/s</i></span>`; }
-  else if(mode==='rain'){ inner=`${GLYPH.rain}<span class="bl-vl">${v.v}<i>mm</i></span>`; }
+  else if(mode==='rain1h'||mode==='rain24h'){ inner=`${GLYPH.rain}<span class="bl-vl">${v.v}<i>mm</i></span>`; }
   else if(mode==='umid'){ inner=`${DROP}<span class="bl-vl">${Math.round(v.v)}<i>%</i></span>`; }
   else { inner=`${GLYPH[iconFor(s)]}<span class="bl-vl">${Math.round(v.v)}<i>°C</i></span>`; }
   return `<div class="bl-inner ${cls}"><div class="bl-c"><span class="bl-nm">${s.name.split(' ')[0]}</span>${inner}${dt}</div><span class="pt"></span></div>`;
@@ -186,7 +214,8 @@ function balloonHTML(s,mode,selected){
 // so it stays honest if the live feed's resolution ever changes: today the now-values are the
 // last hourly reading → "última leitura horária"; if the feed later delivers 5-min now-values
 // (and build_site_data stamps now_resolution:"5min"), the label switches to "instantânea (5 min)".
-const LGB_R='<span class="lgb">total acumulado · últimas 24 h</span>';
+const LGB_R1='<span class="lgb">total da última hora</span>';
+const LGB_R24='<span class="lgb">total acumulado · últimas 24 h</span>';
 function nowBasisLGB(){
   const r=(typeof SNAP!=='undefined'&&SNAP&&SNAP.now_resolution)||'hourly';
   const t = r==='5min' ? 'última leitura instantânea (5 min)'
@@ -197,9 +226,10 @@ function nowBasisLGB(){
 function maplegHTML(mode){
   const B=nowBasisLGB();
   return ({
+    rain1h:`Chuva — acumulada 1 h · mm${LGB_R1}`,
+    rain24h:`Chuva — acumulada 24 h · mm${LGB_R24}`,
     temp:`Temperatura · °C${B}`,
     umid:`Umidade · %${B}`,
-    rain:`Chuva · mm${LGB_R}`,
     wind:`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 3V21M12 3 7 9M12 3 17 9" fill="none" stroke="#4078f2" stroke-width="2.4" stroke-linecap="round"/></svg>direção · nº = m/s${B}`
   })[mode];
 }
@@ -227,12 +257,12 @@ function renderRose(){
 }
 
 // ---------- main ----------
-let MAP, MARKERS, MODE='wind', SNAP;
+let MAP, MARKERS, MODE='rain1h', SNAP;
 async function init(){
   SNAP=await fetch('data/snapshot.json').then(r=>r.json());
   const N=SNAP.network, ref=SNAP.reference_now;
   // rail
-  document.getElementById('rail').innerHTML=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']]
+  document.getElementById('rail').innerHTML=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']]
     .map(([k,l,href],i)=>`<a class="ri${i===0?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
   // conditions
   const y=+ref.slice(0,4),mo=+ref.slice(5,7),d=+ref.slice(8,10);
@@ -251,7 +281,6 @@ async function init(){
       <div class="st"><span class="k">${PRECIP} Precip. por hora</span><span class="v">${prec} mm</span></div>
       <div class="st"><span class="k">${SUNUP} Nascer do sol</span><span class="v">${sr}</span></div>
       <div class="st"><span class="k">${SUNDN} Pôr do sol</span><span class="v">${ss}</span></div></div>`;
-  {const ru=document.getElementById('rowsupd'); if(ru) ru.textContent='↻ Atualizado '+upd;}
   // Severe-weather alert — 3 states, judged against the viewer's real clock:
   //   live + calm  → "Em tempo real · sem alertas"   (green)
   //   live + severe→ "Alerta ativo"                   (red)
@@ -286,23 +315,16 @@ async function init(){
     <div style="display:flex;gap:8px">${GLYPH.part}${GLYPH.sun}${GLYPH.cloud}${GLYPH.rain}</div>`;
   // rose (interactive: last 24 h; network by default, per-station when a station is clicked on the map)
   renderRose();
-  // daily
+  // daily temperature range (last 30 days)
   const dc=dailyChart(SNAP.daily_temp);
   document.getElementById('daily').innerHTML=dc.svg;
   document.getElementById('vbar').innerHTML=`<b>${dc.axhi}°</b><span class="vg"></span><b>${dc.axlo}°</b>`;
-  // station rows
-  document.getElementById('rows').innerHTML=SNAP.stations.map(s=>{
-    const cls=s.fresh?'fresh':'stale', sub=s.fresh?'online':'última: '+fmtDate(s.last_time);
-    // show a CURRENT reading when the station is online (prefer fresh temp, then rain, then wind);
-    // for offline stations show the last known temp/rain (the row is greyed to signal it's old)
-    let val='—';
-    if(s.temp&&s.temp.fresh) val=`${Math.round(s.temp.v)}<i>°C</i>`;
-    else if(s.rain&&s.rain.fresh) val=`${s.rain.v}<i>mm</i>`;
-    else if(s.wind&&s.wind.fresh) val=`${s.wind.ws.toFixed(1)}<i>m/s</i>`;
-    else if(s.temp) val=`${Math.round(s.temp.v)}<i>°C</i>`;
-    else if(s.rain) val=`${s.rain.v}<i>mm</i>`;
-    return `<div class="row ${cls}">${GLYPH[iconFor(s)]}<div class="rn"><b>${s.name}</b><span>${sub}</span></div><div class="rv">${val}</div></div>`;
-  }).join('');
+  // daily rain — network mean (last 30 days)
+  if(SNAP.daily_rain && SNAP.daily_rain.length){
+    document.getElementById('drain').innerHTML=dailyRainChart(SNAP.daily_rain).svg;
+  } else {
+    const c=document.getElementById('draincard'); if(c) c.style.display='none';
+  }
   // ribbon
   document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo (Okabe-Ito #D55E00) · base orográfica OpenTopoMap · gerado '+SNAP.generated_at.slice(0,16).replace('T',' ')+' UTC';
   // map

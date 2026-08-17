@@ -108,7 +108,7 @@
     <!-- 0 · alerta de risco de chuva (previsão) — fase de teste — largura total, acima dos mapas -->
     <div class="card" id="fcalert" style="margin-top:16px;display:none"></div>
 <div class="card" id="pushcard" style="margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-  <button id="pushBtn" style="font-weight:700;font-size:14px;border-radius:22px;padding:10px 18px;border:0;background:var(--blue);color:#fff;cursor:pointer">🔔 Receber alertas de risco</button>
+  <button id="pushBtn" style="font-weight:700;font-size:14px;border-radius:22px;padding:10px 18px;border:0;background:var(--blue);color:#fff;cursor:pointer">🔔 Notificações</button>
   <span class="capt" id="pushNote" style="margin:0"></span>
 </div>
 
@@ -153,7 +153,7 @@
 
     <!-- 4 · evolução horária -->
     <div class="card" style="margin-top:16px">
-      <div class="ct">Evolução horária por bacia <span class="mut" id="hsub"></span></div>
+      <div class="ct">Evolução por bacia <span class="mut" id="hsub"></span></div>
       <div id="hourly"></div>
       <div class="hleg" id="hleg"></div>
       <div class="capt" id="hcapt">Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.</div>
@@ -221,7 +221,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='previsao'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
@@ -439,19 +439,24 @@ function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=
   // the next 24 h FROM NOW (same operational instant as the page menu); near the end of the run,
   // show whatever remains (maps, slider, downloads and archive stay full 72 h).
   const nAll=RUN.lead_h.length, s0=(typeof FUT!=='undefined'&&FUT.length)?FUT[0]:0, s1=Math.min(nAll,s0+24), n=Math.max(2,s1-s0);
+  // rain is shown ACCUMULATED over the 24 h (running total, mm); temp/wind stay instantaneous.
+  const acc=(vn==='rain'), dt=dtH();
+  const disp=b=>{const raw=M.series(b).slice(s0,s1); if(!acc)return raw; let c=0; return raw.map(v=>{c+=(v||0)*dt; return c;});};
   const W=1000,H=250,PL=48,PR=12,PT=12,PB=42,plotW=W-PL-PR,plotH=H-PT-PB;
-  const all=bs.flatMap(b=>M.series(b).slice(s0,s1)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
+  const all=bs.flatMap(b=>disp(b)); let hi=Math.max(...all), lo=vn==='temp'?Math.min(...all):0; const pad=(hi-lo)*0.08||1; hi+=pad; if(vn==='temp')lo-=pad;
   const x=i=>PL+(n>1?i/(n-1):0.5)*plotW, y=v=>PT+plotH-((v-lo)/((hi-lo)||1))*plotH, adec=hi<1?2:(hi<10?1:0);
   let ax='';[hi,(hi+lo)/2,lo].forEach(t=>{const yy=y(t);ax+=`<line x1="${PL}" y1="${yy}" x2="${W-PR}" y2="${yy}" stroke="#f1f2f4"/><text x="${PL-8}" y="${yy+4}" font-size="12" fill="#8a8f98" text-anchor="end">${t.toFixed(adec)}</text>`;});
   const step=Math.max(1,Math.ceil(n/8));
   for(let i=0;i<n;i++){if(i%step===0){const lt=(RUN.valid_times[s0+i]||'').slice(11,16);
     ax+=`<text x="${x(i).toFixed(1)}" y="${H-24}" font-size="11.5" font-weight="600" fill="#5a616b" text-anchor="middle">${lt}</text>`
        +`<text x="${x(i).toFixed(1)}" y="${H-9}" font-size="9.5" fill="#a0a1a7" text-anchor="middle">+${RUN.lead_h[s0+i]}h</text>`;}}
-  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';M.series(b).slice(s0,s1).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
+  let paths='';bs.forEach((b,k)=>{const col=STCOL[k%STCOL.length];let d='';disp(b).forEach((v,i)=>{d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';});paths+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2" opacity="0.9"/>`;});
   document.getElementById('hourly').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%">${ax}${paths}</svg>`;
   document.getElementById('hleg').innerHTML=bs.map((b,k)=>`<span class="li"><span class="sw" style="background:${STCOL[k%STCOL.length]}"></span>${short(b.name)}</span>`).join('');
-  document.getElementById('hsub').textContent=M.label+' ('+M.sUnit+') · próximas 24 h · hora local (UTC−3)';
-  document.getElementById('hcapt').textContent='Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.'+runFtr();
+  document.getElementById('hsub').textContent=(acc?('Chuva acumulada ('+M.unit+')'):(M.label+' ('+M.sUnit+')'))+' · próximas 24 h · hora local (UTC−3)';
+  document.getElementById('hcapt').textContent=(acc
+    ? 'Chuva acumulada (mm) em cada bacia — soma passo a passo ao longo das próximas 24 h da rodada (valor médio ponderado por área).'
+    : 'Série horária do valor médio (ponderado por área) em cada bacia, ao longo dos passos da rodada.')+runFtr();
 }
 // ---- SVG pan/zoom for the two forecast maps (buttons + wheel + drag; survives re-render) ----
 const ZOOM={};
@@ -567,6 +572,7 @@ function hidx(tc,rh){ if(tc==null||rh==null)return null;
     else if(rh>85&&T>=80&&T<=87) HI+=((rh-85)/10)*((87-T)/5); }
   return (HI-32)*5/9; }
 // ---- 0. forecast risk alert — rain (OMM), wind (Beaufort) and temperature (heat/cold-frost) ----
+function fmtInst(vt){var d=new Date(vt.replace(' ','T'));var wd=isNaN(d)?'':d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')+', ';return wd+vt.slice(8,10)+'/'+vt.slice(5,7)+'/'+vt.slice(0,4)+' · '+vt.slice(11,16);}
 function renderForecastAlert(){
   const el=document.getElementById('fcalert'); if(!el||!RUN||!RUN.has) return;
   const src=(RUN.bairros&&RUN.bairros.length)?RUN.bairros:(RUN.basins||[]);
@@ -598,7 +604,7 @@ function renderForecastAlert(){
     if(best!=null){const lvl=best>=41?'alert':(best>=32?'warn':'ok');
       bump(lvl);haz.push({icon:'🥵',lvl,txt:`Sensação: máx ${Math.round(best)}°C aparente${(lvl!=='ok'&&name)?' · '+short(name):''}`});}}
   if(!haz.length){el.style.display='none';return;}
-  const inst=useHour?('+'+RUN.lead_h[CURVIEW]+' h · '+RUN.valid_times[CURVIEW].slice(11,16)):'próximas horas';
+  const inst=useHour?('+'+RUN.lead_h[CURVIEW]+' h · '+fmtInst(RUN.valid_times[CURVIEW])):'próximas horas';
   const active=worstLvl==='alert';
   const headIcon=worstLvl==='ok'?'✓':'⚠️';
   const headLabel=worstLvl==='alert'?'Alerta — condição severa prevista'

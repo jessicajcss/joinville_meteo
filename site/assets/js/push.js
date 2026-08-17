@@ -32,14 +32,14 @@
   }
 
   async function refresh(btn, note) {
-    if (!supported) { btn.disabled = true; btn.textContent = '🔔 Alertas indisponíveis'; if (note) note.textContent = 'Este navegador não suporta notificações push.'; return; }
-    if (unconfigured) { btn.disabled = true; btn.textContent = '🔔 Alertas (servidor a configurar)'; if (note) note.textContent = 'Falta configurar o Worker — veja CLOUDFLARE_PUSH_SETUP.md.'; return; }
+    if (!supported) { btn.disabled = true; btn.textContent = '🔔 Notificações indisponíveis'; if (note) note.textContent = 'Este navegador não suporta notificações push.'; return; }
+    if (unconfigured) { btn.disabled = true; btn.textContent = '🔔 Notificações (servidor a configurar)'; if (note) note.textContent = 'Falta configurar o Worker — veja CLOUDFLARE_PUSH_SETUP.md.'; return; }
     var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     var iOS = /iP(hone|ad|od)/.test(navigator.platform) || (navigator.userAgent.indexOf('Mac') !== -1 && navigator.maxTouchPoints > 1);
     var sub = await currentSub();
-    if (sub) { btn.disabled = false; btn.dataset.on = '1'; btn.textContent = '🔔 Alertas ativados ✓'; if (note) note.textContent = 'Você receberá alertas de risco neste aparelho. Toque para desativar.'; }
+    if (sub) { btn.disabled = false; btn.dataset.on = '1'; btn.textContent = '🔔 Notificações ativadas ✓'; if (note) note.textContent = 'Você receberá alertas de risco neste aparelho. Toque para desativar.'; }
     else {
-      btn.dataset.on = ''; btn.textContent = '🔔 Receber alertas de risco';
+      btn.dataset.on = ''; btn.textContent = '🔔 Notificações';
       if (iOS && !standalone) { btn.disabled = true; if (note) note.textContent = 'No iPhone: use “Compartilhar → Adicionar à Tela de Início” e abra o app; depois ative aqui.'; }
       else { btn.disabled = false; if (note) note.textContent = 'Notificação no aparelho quando houver Alerta. Recurso em fase de teste.'; }
     }

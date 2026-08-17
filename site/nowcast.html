@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · Nowcast TUPANN (teste)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+/* ---- nowcast page only (independent; no change to app.css) ---- */
+#nmap{height:520px;border-radius:14px;overflow:hidden;background:#eef1f5}
+.seg{display:inline-flex;background:#eef1f5;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--mut);background:transparent;border:none;padding:9px 15px;cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.nwrap{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:14px;align-items:start}
+@media(max-width:900px){.nwrap{grid-template-columns:1fr}}
+.alert{border-radius:14px;padding:12px 16px;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:12px;line-height:1.4}
+.alert .dot{width:14px;height:14px;border-radius:50%;flex:none}
+.alert small{display:block;font-weight:600;font-size:11.5px;opacity:.85;margin-top:2px}
+.testtag{background:#fff7ea;border:1px solid #f2dfb0;border-left:4px solid #e0a11a;border-radius:12px;padding:9px 13px;margin:2px 0 0;font-size:12px;color:#8a6d1f;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:11.5px;font-weight:600;color:var(--ink)}
+.legend .li{display:flex;align-items:center;gap:6px}
+.legend .sw{width:15px;height:15px;border-radius:4px}
+.bwrap{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.brow{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.brow .nm{width:190px;flex:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .bar{flex:1;height:18px;border-radius:5px;background:#f0f4f8;overflow:hidden}
+.brow .bar span{display:block;height:100%;border-radius:5px}
+.brow .v{width:78px;text-align:right;font-weight:800;flex:none}
+.brow .v i{font-style:normal;font-weight:600;font-size:10.5px;color:var(--mut)}
+.metaline{font-size:12px;color:var(--mut);margin-top:12px;line-height:1.6}
+.capt{font-size:12.5px;color:var(--mut);margin-top:12px;line-height:1.55}
+.leaflet-tooltip.nt{font-family:'Poppins',sans-serif;font-size:12px}
+@media(max-width:680px){
+  #nmap{height:62vw;min-height:240px}
+  .brow .nm{width:auto;flex:1;min-width:0}
+  .brow .v{width:70px}
+  .seg{flex-wrap:wrap}
+  .seg button{padding:8px 12px}
+}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4078f2">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Joinville Meteo">
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div></div>
+    <div class="head">
+      <div class="htitle">Nowcast por satélite (TUPANN)<small id="hsub">Chuva prevista nos próximos minutos — grade 2 km, bacia e bairro · fase de teste</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <div class="card">
+      <div id="alertbox" class="alert" style="background:#eef7ee;color:#2f6d2e"><span class="dot" style="background:#8bc48a"></span><span>Carregando o nowcast…</span></div>
+      <div class="testtag">⚠ <b>Fase de teste (experimental).</b> Produto de pesquisa do LaCiA/UDESC baseado em nowcast de satélite (TUPANN) — <b>não é um alerta oficial da Defesa Civil</b>. Os limiares de aviso vêm do ponto operacional calibrado (nb 05e / 07b §14).</div>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:14px">
+        <div class="fg"><div class="seg" id="scaleSeg">
+          <button data-s="grid">Grade 2 km</button>
+          <button data-s="bacia" class="on">Bacia</button>
+          <button data-s="bairro">Bairro</button>
+        </div></div>
+        <div style="flex:1"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="nwrap">
+        <div>
+          <div id="nmap"></div>
+          <div class="capt" id="mapcap">Cor = nível de aviso calibrado. Passe o mouse sobre uma área para ver os valores.</div>
+        </div>
+        <div>
+          <div class="ct" style="margin-bottom:6px">Áreas em destaque <span class="mut" id="rankcap"></span></div>
+          <div class="bwrap" id="ranklist"></div>
+        </div>
+      </div>
+
+      <div class="metaline" id="metaline"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="ct">Como ler este mapa</div>
+      <p style="font-size:13px;color:var(--ink);line-height:1.6;margin:8px 0 0">
+        O <b>TUPANN</b> é um <i>nowcast</i> de chuva por satélite (imita o fluxo óptico do produto GOES-RRQPE; Catão et al. 2025):
+        a partir das imagens mais recentes, projeta a taxa de chuva (mm/h) para os próximos <b>+30 a +120 min</b> na
+        grade nativa de <b>2 km</b>. Aqui a grade é agregada por <b>bacia hidrográfica</b> e por <b>bairro</b>.
+        O <b>nível de aviso</b> (verde → vermelho) sai do <b>ponto operacional calibrado</b> — um limiar de decisão τ por
+        faixa (moderada ≥ τ<sub>mod</sub>, forte ≥ τ<sub>forte</sub>) ajustado para recuperar a taxa de acerto no extremo
+        (o TUPANN é conservador e sub-avisa; a calibração 05e / 07b §14 corrige isso). O valor mostrado por área é o
+        <b>p90</b> (o decil mais chuvoso da área), para não diluir um núcleo intenso na média.
+      </p>
+      <p style="font-size:12px;color:var(--mut);line-height:1.6;margin:8px 0 0">
+        Limites: 20 eventos são poucos para um modelo espacial (protótipo de pesquisa); entre pluviômetros o detalhe de
+        2 km é síntese fisicamente informada, não verdade independente; o nowcast tem <b>skill curto</b> (melhor em ≤ ~60 min).
+        Metodologia completa no notebook de implantação (10) e em <a href="sobre.html">Sobre</a>.
+      </p>
+    </div>
+
+    <div class="foot">
+      Nowcast: <b>TUPANN</b> (autoencoder + transformer latente sobre GOES-RRQPE) · pós-processamento ML + ponto operacional calibrado (LaCiA) · agregação por bacia/bairro em <a href="sobre.html">Sobre</a><br>
+      Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · UDESC — CCT, Joinville
+    </div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC"><span class="lgsep"></span><a href="https://www.udesc.br/cct/lacia" target="_blank" rel="noopener"><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></a></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',
+ nowcast:'<circle cx="12" cy="12" r="2.4"/><path d="M12 4.5v2M12 17.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4"/>',
+ estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+// This page's rail includes a "nowcast" entry (marked active). The other pages are NOT modified;
+// to surface Nowcast in their menus, add ['nowcast','Nowcast','nowcast.html'] to each page's NAV.
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['nowcast','Nowcast','nowcast.html'],['estacao','Estação','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='nowcast'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+// ---- warning levels (calibrated operating point) ----
+const LV={VERDE:{c:'#8bc48a',lab:'Sem destaque',rank:0},AMARELO:{c:'#f2c94c',lab:'Observar',rank:1},
+          LARANJA:{c:'#e8853a',lab:'Atenção (moderada)',rank:2},VERMELHO:{c:'#c0392b',lab:'Alerta (forte)',rank:3}};
+const lvColor=l=>(LV[l]||LV.VERDE).c;
+const DATA='data/tupann/';
+// Near-real-time gate: the TUPANN nowcast is only meaningful with a fresh observation driving it,
+// so the page is kept OFF-LINE unless the Agora network has an observation this recent (hours).
+// Mirrors the Início "offline" window (LIVE_MAX_H = 24). Raise/lower as the feed cadence changes.
+const NOWCAST_MAX_AGE_H=24;
+let META=null,WARN=null,BAS=null,BAI=null,GRID=null,LIM=null,MAP=null,LAYER=null,SCALE='bacia';
+
+const gj=async u=>{try{const r=await fetch(u,{cache:'no-store'});return r.ok?await r.json():null;}catch(e){return null;}};
+function localTime(iso){ // UTC iso -> Joinville local (UTC-3)
+  if(!iso||iso==='unknown')return '—';
+  try{const d=new Date(iso.replace(' ','T').replace(/Z?$/,'Z'));const l=new Date(d.getTime()-3*3600*1000);
+    const p=n=>String(n).padStart(2,'0');return `${p(l.getUTCDate())}/${p(l.getUTCMonth()+1)} ${p(l.getUTCHours())}:${p(l.getUTCMinutes())}`;}catch(e){return iso;}
+}
+
+async function init(){
+  META=await gj(DATA+'tupann_meta.json'); WARN=await gj(DATA+'tupann_warnings.json');
+  BAS=await gj(DATA+'tupann_basins.geojson'); BAI=await gj(DATA+'tupann_bairros.geojson');
+  GRID=await gj(DATA+'tupann_grid.geojson'); LIM=await gj('data/limite.geojson');
+  // legend
+  document.getElementById('legend').innerHTML=Object.entries(LV).map(([k,v])=>
+    `<span class="li"><span class="sw" style="background:${v.c}"></span>${v.lab}</span>`).join('');
+  MAP=L.map('nmap',{zoomControl:true,scrollWheelZoom:false,attributionControl:true});
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,opacity:.9,
+    attribution:'© <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · © OpenStreetMap'}).addTo(MAP);
+  if(LIM){L.geoJSON(LIM,{style:{color:'#556',weight:1.6,fill:false,dashArray:'4 3'}}).addTo(MAP);}
+
+  // near-real-time gate — the nowcast only runs when the network (Agora) has a recent observation
+  const snap=await gj('data/snapshot.json');
+  let ageH=Infinity, refIso=null;
+  if(snap && snap.reference_now){ refIso=snap.reference_now; const t=new Date(refIso);
+    if(!isNaN(t)) ageH=(Date.now()-t.getTime())/36e5; }
+  if(ageH>NOWCAST_MAX_AGE_H){ offline(refIso, ageH); return; }
+
+  if(!META && !BAS && !GRID){ noData(); return; }
+  renderAlert(); renderMeta();
+  document.getElementById('scaleSeg').addEventListener('click',e=>{const s=e.target.getAttribute('data-s');if(!s)return;
+    SCALE=s;[...document.querySelectorAll('#scaleSeg button')].forEach(b=>b.classList.toggle('on',b.getAttribute('data-s')===s));render();});
+  render();
+}
+
+function noData(){
+  document.getElementById('alertbox').outerHTML=
+    '<div class="alert" style="background:#eef1f5;color:#54606b"><span class="dot" style="background:#a0a1a7"></span>'+
+    '<span>Sem nowcast publicado ainda.<small>Assim que o pipeline (GitHub Action <b>forecast-tupann</b>) publicar o primeiro campo em <code>data/tupann/</code>, o mapa e os avisos aparecem aqui automaticamente.</small></span></div>';
+  if(LIM){try{MAP.fitBounds(L.geoJSON(LIM).getBounds(),{padding:[12,12]});}catch(e){}}
+}
+
+// Off-line state: the network has no recent observation, so the ML nowcast is not run.
+function offline(refIso, ageH){
+  const p=n=>String(n).padStart(2,'0');
+  let last='—';
+  if(refIso){ const d=new Date(refIso); if(!isNaN(d)) last=`${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+  const ageTxt = !isFinite(ageH) ? '' : (ageH<48 ? `há ${Math.round(ageH)} h` : `há ${Math.round(ageH/24)} dias`);
+  document.getElementById('alertbox').outerHTML=
+    '<div class="alert" style="background:#eef1f5;color:#54606b"><span class="dot" style="background:#a0a1a7"></span>'+
+    '<span>Nowcast off-line — sem dado em tempo real.<small>O nowcast do <b>TUPANN</b> roda em tempo quase real e só é ativado quando a rede tem uma observação recente na página <b>Agora</b>. '+
+    `Última leitura da rede: <b>${last}</b>${ageTxt?` (${ageTxt})`:''}. Assim que chegar um dado novo do dia, o nowcast volta a rodar automaticamente.</small></span></div>`;
+  const seg=document.getElementById('scaleSeg'); if(seg && seg.parentElement) seg.parentElement.style.display='none';
+  document.getElementById('legend').innerHTML='';
+  document.getElementById('mapcap').textContent='Mapa base — o nowcast aparece aqui quando houver observação recente da rede.';
+  document.getElementById('rankcap').textContent='';
+  document.getElementById('ranklist').innerHTML='<div class="capt">Nowcast off-line no momento.</div>';
+  document.getElementById('metaline').innerHTML='Estado: <b>off-line</b> · aguardando observação em tempo quase real da rede (página Agora).';
+  if(LIM){try{MAP.fitBounds(L.geoJSON(LIM).getBounds(),{padding:[12,12]});}catch(e){}}
+}
+
+function renderAlert(){
+  const w=WARN||{}; const nred=w.n_red||0, nora=w.n_orange||0;
+  let lvl='VERDE',msg='Sem áreas em destaque no momento.';
+  if(nred>0){lvl='VERMELHO';const top=(w.warnings||[]).find(x=>x.level==='VERMELHO');
+    msg=`Chuva forte prevista — ${nred} ${nred>1?'áreas':'área'} em alerta`+(top?` (ex.: ${top.name})`:'')+'.';}
+  else if(nora>0){lvl='LARANJA';msg=`Chuva moderada prevista — ${nora} ${nora>1?'áreas':'área'} em atenção.`;}
+  const v=LV[lvl];const bg={VERDE:'#eef7ee',AMARELO:'#fdf6e3',LARANJA:'#fdefe4',VERMELHO:'#fbeae7'}[lvl];
+  const fg={VERDE:'#2f6d2e',AMARELO:'#8a6d1f',LARANJA:'#a5521f',VERMELHO:'#9c2a1c'}[lvl];
+  document.getElementById('alertbox').outerHTML=
+    `<div id="alertbox" class="alert" style="background:${bg};color:${fg}"><span class="dot" style="background:${v.c}"></span>`+
+    `<span>${msg}<small>Nível ${v.lab.toLowerCase()} · válido para +${(META&&META.lead_min)||(w.lead_min)||30} min a partir de ${localTime((META&&META.issue_utc)||w.issue_utc)} (hora local)</small></span></div>`;
+}
+
+function renderMeta(){
+  const m=META||{};const w=WARN||{};
+  document.getElementById('metaline').innerHTML=
+    `Modelo: <b>${m.model||'TUPANN'}</b> · emissão <b>${localTime(m.issue_utc)}</b> (local, UTC−3) · antecedência <b>+${m.lead_min||0} min</b> · `+
+    `limiares calibrados τ<sub>mod</sub>=<b>${(m.tau_mod??w.tau_mod)||'—'}</b> mm/h, τ<sub>forte</sub>=<b>${(m.tau_heavy??w.tau_heavy)||'—'}</b> mm/h · `+
+    `grade ${m.grid_cells||'—'} células${m.grid_thinned?' (amostradas)':''} · atualizado ${localTime(m.generated_at)} · <i>${m.phase||'teste'}</i>`;
+}
+
+function styleZone(f){const l=f.properties.level||'VERDE';return {fillColor:lvColor(l),weight:1,color:'#fff',fillOpacity:l==='VERDE'?0.25:0.72};}
+function render(){
+  if(LAYER){MAP.removeLayer(LAYER);LAYER=null;}
+  const cap=document.getElementById('mapcap');
+  if(SCALE==='grid'){
+    if(!GRID){cap.textContent='Grade indisponível.';renderRank([]);return;}
+    LAYER=L.geoJSON(GRID,{pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:4,fillColor:lvColor(f.properties.level),
+      color:'#fff',weight:.5,fillOpacity:.85}),onEachFeature:(f,ly)=>ly.bindTooltip(
+      `${(+f.properties.rain_mm_h).toFixed(1)} mm/h`,{className:'nt',sticky:true})}).addTo(MAP);
+    cap.textContent='Grade nativa de 2 km (células dentro do município). Cor = nível de aviso.';
+    fit(); renderRank(rankFromGrid()); return;
+  }
+  const gjz=(SCALE==='bacia')?BAS:BAI;
+  if(!gjz){cap.textContent='Camada indisponível.';renderRank([]);return;}
+  LAYER=L.geoJSON(gjz,{style:styleZone,onEachFeature:(f,ly)=>{const p=f.properties;
+    ly.bindTooltip(`<b>${p.name}</b><br>p90 ${(+p.p90_mm_h).toFixed(1)} mm/h · máx ${(+p.max_mm_h).toFixed(1)}<br>${(LV[p.level]||LV.VERDE).lab}`,{className:'nt',sticky:true});
+    ly.on('mouseover',()=>ly.setStyle({weight:2.4,color:'#383a42'}));ly.on('mouseout',()=>LAYER.resetStyle(ly));}}).addTo(MAP);
+  cap.textContent=(SCALE==='bacia'?'Por bacia hidrográfica':'Por bairro')+'. Valor = p90 (decil mais chuvoso da área). Cor = nível de aviso.';
+  fit(); renderRank(rankFromZones(gjz));
+}
+function fit(){try{MAP.fitBounds(LAYER.getBounds(),{padding:[12,12]});}catch(e){if(LIM)try{MAP.fitBounds(L.geoJSON(LIM).getBounds(),{padding:[12,12]});}catch(_){}}}
+
+function rankFromZones(g){return g.features.map(f=>({name:f.properties.name,v:+f.properties.p90_mm_h,level:f.properties.level}))
+  .sort((a,b)=>b.v-a.v);}
+function rankFromGrid(){ // aggregate grid points to a small ranked set by level count
+  const c={VERMELHO:0,LARANJA:0,AMARELO:0,VERDE:0};(GRID.features||[]).forEach(f=>c[f.properties.level]=(c[f.properties.level]||0)+1);
+  return Object.entries(c).filter(([k,n])=>n>0&&k!=='VERDE').map(([k,n])=>({name:(LV[k]||LV.VERDE).lab,v:n,level:k,isCount:true}));
+}
+function renderRank(rows){
+  document.getElementById('rankcap').textContent=SCALE==='grid'?'células por nível':'p90 mm/h';
+  const top=rows.filter(r=>r.isCount||r.level!=='VERDE').slice(0,12);
+  if(!top.length){document.getElementById('ranklist').innerHTML='<div class="capt">Nenhuma área acima do limiar de atenção.</div>';return;}
+  const mx=Math.max(1,...top.map(r=>r.v));
+  document.getElementById('ranklist').innerHTML=top.map(r=>`<div class="brow">
+    <span class="nm" title="${r.name}">${r.name}</span>
+    <span class="bar"><span style="width:${Math.max(4,r.v/mx*100)}%;background:${lvColor(r.level)}"></span></span>
+    <span class="v">${r.isCount?r.v:(+r.v).toFixed(1)}<i>${r.isCount?' cél.':' mm/h'}</i></span></div>`).join('');
+}
+init();
+</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body>
+</html>

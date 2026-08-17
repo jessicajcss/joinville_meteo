@@ -66,18 +66,27 @@
 
     <!-- overview intro -->
     <div class="card">
-      <div class="ct">O ano climatológico de Joinville <span class="mut" id="clyears"></span></div>
+      <div class="ct">O ciclo anual de Joinville <span class="mut" id="clyears"></span></div>
       <div class="sec-narr lead-wrap" id="overtext"></div>
     </div>
 
-    <!-- Section 1: Temperature -->
+    <!-- Section 1: Annual trend (moved to top) -->
     <div class="card sec">
-      <div class="sec-h"><span class="sec-n t">1</span><span class="sec-t">Temperatura</span></div>
+      <div class="sec-h"><span class="sec-n y">1</span><span class="sec-t">Ano a ano</span></div>
+      <div class="sec-lead lead-wrap" id="alead"></div>
+      <div class="capt">barras = chuva anual (mm) · linha = temperatura média anual (°C)</div>
+      <div id="annual"></div>
+      <div class="legrow"><span><i style="background:#4078f2"></i>chuva anual</span><span><i class="dot" style="background:#d55e00"></i>temperatura média</span></div>
+    </div>
+
+    <!-- Section 2: Temperature -->
+    <div class="card sec">
+      <div class="sec-h"><span class="sec-n t">2</span><span class="sec-t">Temperatura</span></div>
       <div class="sec-lead lead-wrap" id="tlead"></div>
       <div class="sec-narr lead-wrap" id="tnarr"></div>
       <div class="twocol">
         <div>
-          <div class="subt">Climatologia mensal — °C médios por mês</div>
+          <div class="subt">Média mensal — °C médios por mês</div>
           <div id="tempClimo"></div>
         </div>
         <div>
@@ -92,14 +101,14 @@
       <div class="krow" id="tkeys"></div>
     </div>
 
-    <!-- Section 2: Rainfall -->
+    <!-- Section 3: Rainfall -->
     <div class="card sec">
-      <div class="sec-h"><span class="sec-n r">2</span><span class="sec-t">Chuva</span></div>
+      <div class="sec-h"><span class="sec-n r">3</span><span class="sec-t">Chuva</span></div>
       <div class="sec-lead lead-wrap" id="rlead"></div>
       <div class="sec-narr lead-wrap" id="rnarr"></div>
       <div class="twocol">
         <div>
-          <div class="subt">Climatologia mensal — mm médios por mês</div>
+          <div class="subt">Média mensal — mm médios por mês</div>
           <div id="rainClimo"></div>
         </div>
         <div>
@@ -113,14 +122,14 @@
       <div class="krow" id="rkeys"></div>
     </div>
 
-    <!-- Section 3: Wind speed -->
+    <!-- Section 4: Wind speed -->
     <div class="card sec">
-      <div class="sec-h"><span class="sec-n w">3</span><span class="sec-t">Vento</span></div>
+      <div class="sec-h"><span class="sec-n w">4</span><span class="sec-t">Vento</span></div>
       <div class="sec-lead lead-wrap" id="wlead"></div>
       <div class="sec-narr lead-wrap" id="wnarr"></div>
       <div class="twocol">
         <div>
-          <div class="subt">Climatologia mensal — m/s médios por mês</div>
+          <div class="subt">Média mensal — m/s médios por mês</div>
           <div id="windClimo"></div>
         </div>
         <div>
@@ -133,15 +142,6 @@
       <div class="hm-wrap" id="hmWind"></div>
       <div class="hcbar"><span>0</span><span class="g" style="background:linear-gradient(90deg,#f7fcf5,#c7e9c0,#74c476,#238b45,#00441b)"></span><span id="whi"></span></div>
       <div class="krow" id="wkeys"></div>
-    </div>
-
-    <!-- Section 4: Annual trend -->
-    <div class="card sec">
-      <div class="sec-h"><span class="sec-n y">4</span><span class="sec-t">Ano a ano</span></div>
-      <div class="sec-lead lead-wrap" id="alead"></div>
-      <div class="capt">barras = chuva anual (mm) · linha = temperatura média anual (°C)</div>
-      <div id="annual"></div>
-      <div class="legrow"><span><i style="background:#4078f2"></i>chuva anual</span><span><i class="dot" style="background:#d55e00"></i>temperatura média</span></div>
     </div>
 
     <div class="card sec"><div class="hnote" id="note"></div></div>
@@ -161,7 +161,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='cidade'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
@@ -252,7 +252,7 @@ async function init(){
   document.getElementById('tlo').textContent=tlo+'°';document.getElementById('thi').textContent=thi+'°';
   // Section 1
   document.getElementById('tlead').innerHTML=`A temperatura média de Joinville vai de <b class="t">${cl.temp[coldM]} °C</b> em ${mn[coldM].toLowerCase()} a <b class="t">${cl.temp[hotM]} °C</b> em ${mn[hotM].toLowerCase()}, com média anual de <b class="t">${tmean} °C</b>.`;
-  document.getElementById('tnarr').innerHTML='À esquerda, a temperatura média de cada mês (climatologia); à direita, os dias mais quentes e mais frios já medidos pela rede. Abaixo, o mapa de calor mostra cada mês de cada ano — laranja nos meses quentes, azul nos frios, de cima (mais antigo) para baixo (mais recente).';
+  document.getElementById('tnarr').innerHTML='À esquerda, a temperatura média de cada mês (média do período); à direita, os dias mais quentes e mais frios já medidos pela rede. Abaixo, o mapa de calor mostra cada mês de cada ano — laranja nos meses quentes, azul nos frios, de cima (mais antigo) para baixo (mais recente).';
   document.getElementById('tempClimo').innerHTML=tempClimo(cl.temp);
   if(st.hottest_days&&st.coldest_days) document.getElementById('trank').innerHTML=tempRank(st.hottest_days,st.coldest_days);
   document.getElementById('hmTemp').innerHTML=heatmap(C.temp,C.years,C.months,v=>ramp(TEMPRAMP,(v-tlo)/(thi-tlo)),v=>Math.round(v));
@@ -274,7 +274,7 @@ async function init(){
   if(cl.wind){
     const wmaxM=argmax(cl.wind),wminM=argmin(cl.wind), gr=(st.windiest_days&&st.windiest_days[0])||null;
     document.getElementById('wlead').innerHTML=`O vento em Joinville é geralmente fraco, com média mensal entre <b class="w">${cl.wind[wminM]}</b> e <b class="w">${cl.wind[wmaxM]} m/s</b>.`+(gr?` A rajada mais forte já medida pela rede chegou a <b class="w">${gr.gust} m/s</b> em ${fmtBR(gr.date)}.`:'');
-    document.getElementById('wnarr').innerHTML=`À esquerda, a velocidade média de cada mês (climatologia); à direita, os dias de rajada mais forte. Abaixo, o mapa de calor mostra a velocidade média de cada mês em cada ano. A direção predominante do vento está na página <a href="cidade.html">Cidade</a> (item 6).`;
+    document.getElementById('wnarr').innerHTML=`À esquerda, a velocidade média de cada mês (média do período); à direita, os dias de rajada mais forte. Abaixo, o mapa de calor mostra a velocidade média de cada mês em cada ano. A direção predominante do vento está na página <a href="cidade.html">Cidade</a> (item 6).`;
     document.getElementById('windClimo').innerHTML=windClimo(cl.wind);
     if(gr){const wm=gr.gust;
       document.getElementById('wrank').innerHTML=st.windiest_days.map((d,i)=>{const w=(d.gust/wm*100).toFixed(0);

@@ -83,7 +83,7 @@
       <div class="ct">Linha do tempo dos desastres <span class="mut">eventos por ano · cor = tipo</span></div>
       <div id="timeline"></div>
       <div class="leg2" id="tlleg"></div>
-      <a class="tolink" href="cidade_tempchuvavento.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:14px">Ver climatologia · Temperatura × Chuva × Vento  (heatmaps) →</a>
+      <a class="tolink" href="cidade_tempchuvavento.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:700;text-decoration:none;margin-top:14px">Ver histórico · Temperatura × Chuva × Vento  (heatmaps) →</a>
     </div>
     <div class="hnote" style="margin:14px 4px 0">Fonte: Relatório de Histórico de Ocorrências de Desastres em Joinville. Secretaria de Proteção Civil e Segurança Pública — SEPROT, Unidade de Proteção e Defesa Civil — SEPROT.UPC (Prefeitura de Joinville). <span id="lastupd"></span><br>
     Um evento pode atingir vários bairros; a contagem do mapa soma o valor da métrica escolhida para cada bairro no filtro selecionado. Situação: <b>Normalidade</b> (registro), <b>Emergência</b> (SE) e <b>Calamidade</b> (ECP) conforme reconhecimento oficial.</div>
@@ -102,7 +102,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='risco'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 // "dangerous" heat palette — dark maroon (most severe/frequent) to light amber

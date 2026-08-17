@@ -45,12 +45,16 @@
       
     </div>
     <div class="head">
-      <div class="htitle">Histórico · cidade<small>O clima de Joinville em cinco parâmetros</small></div>
+      <div class="htitle">Histórico Cidade<small>O clima de Joinville em cinco parâmetros</small></div>
       <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
     </div>
     <div class="card">
       <div class="intro" id="intro"></div>
-      <a class="tolink" href="cidade_tempchuvavento.html">Ver análise detalhada · Temperatura × Chuva × Vento →</a>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px">
+        <a class="tolink" href="cidade_tempchuvavento.html" style="margin-top:0">Ver análise detalhada · Temperatura × Chuva × Vento →</a>
+        <span style="flex:1"></span>
+        <button id="valToggle" type="button" aria-pressed="false" style="display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--ink);border:1.5px solid #e3e6ea;border-radius:12px;padding:9px 15px;font-size:12.5px;font-weight:700;cursor:pointer">🔢 Mostrar todos os valores</button>
+      </div>
     </div>
     <div id="sections"></div>
     <div class="card vsec"><div class="hnote" id="note"></div></div>
@@ -69,7 +73,7 @@ const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 
  previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
  ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
  sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
-const NAV=[['agora','Agora','index.html'],['cidade','Cidade','cidade.html'],['risco','Risco','risco.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Estação','estacao.html'],['baixar','Baixar','estacao.html'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
 document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='cidade'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
 
 const hex2rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];};
@@ -98,7 +102,7 @@ function monthlyStrip(clim,rmp,fmt,unit){
     const tip=(v==null)?`${MN[i]}: sem dados`:`${MN[i]}: ${fmt(v)}${unit}`;
     if(v==null){s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="#f1f2f4" style="cursor:default"><title>${tip}</title></rect>`;}
     else{const c=rmp((v-lo)/span);s+=`<rect x="${x+gap/2}" y="${top}" width="${cw-gap}" height="${ch}" rx="3" fill="${c}" style="cursor:default"><title>${tip}</title></rect>`;
-      if(i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${top+ch/2+4.5}" font-size="12" font-weight="800" fill="${textOn(c)}" text-anchor="middle" pointer-events="none">${fmt(v)}</text>`;}});
+      if(SHOW_ALL||i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${top+ch/2+4.5}" font-size="12" font-weight="${(i===iMax||i===iMin)?800:600}" fill="${textOn(c)}" text-anchor="middle" pointer-events="none">${fmt(v)}</text>`;}});
   return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
 }
 function yearStrip(annual,rmp,fmt,unit){
@@ -107,7 +111,7 @@ function yearStrip(annual,rmp,fmt,unit){
   const iMax=vals.indexOf(hi),iMin=vals.indexOf(lo);let s='';
   annual.forEach((a,i)=>{const x=i*cw,c=rmp((a.value-lo)/span);
     s+=`<rect x="${x+gap/2}" y="0" width="${cw-gap}" height="${ch}" rx="2.5" fill="${c}" style="cursor:default"><title>${a.year}: ${fmt(a.value)}${unit}</title></rect>`;
-    if(i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${ch/2+4.5}" font-size="11" font-weight="800" fill="${textOn(c)}" text-anchor="middle" pointer-events="none">${fmt(a.value)}</text>`;});
+    if(SHOW_ALL||i===iMax||i===iMin)s+=`<text x="${x+cw/2}" y="${ch/2+4.5}" font-size="11" font-weight="${(i===iMax||i===iMin)?800:600}" fill="${textOn(c)}" text-anchor="middle" pointer-events="none">${fmt(a.value)}</text>`;});
   s+=`<text x="2" y="${ch+15}" font-size="11" fill="#a0a1a7">${annual[0].year}</text>`;
   s+=`<text x="${W-2}" y="${ch+15}" font-size="11" fill="#a0a1a7" text-anchor="end">${annual[annual.length-1].year}</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`;
@@ -154,10 +158,22 @@ const DESC={
 const FMT={temp:v=>v.toFixed(1),rain:v=>Math.round(v),umid:v=>Math.round(v),solar:v=>Math.round(v),wind:v=>v.toFixed(1)};
 const ORDER=['temp','rain','umid','solar','wind'];
 
+let CDATA=null, SHOW_ALL=false;
 async function init(){
-  const C=await fetch('data/city_history.json').then(r=>r.json());
-  const V=C.variables, yr=`${C.years[0]}–${C.years[C.years.length-1]}`;
+  CDATA=await fetch('data/city_history.json').then(r=>r.json());
+  const C=CDATA, yr=`${C.years[0]}–${C.years[C.years.length-1]}`;
   document.getElementById('intro').innerHTML=`Olhamos o clima de Joinville (SC) por cinco parâmetros — <b>temperatura</b>, <b>chuva</b>, <b>umidade</b>, <b>radiação solar</b> e <b>vento</b> — ao longo de ${yr}. O sistema meteorológico é complexo e de difícil previsão, mas a análise do histórico ajuda a entender as condições de longo prazo e a resposta a eventos extremos — cada vez mais relevante com as mudanças climáticas.`;
+  const tg=document.getElementById('valToggle');
+  if(tg) tg.addEventListener('click',()=>{ SHOW_ALL=!SHOW_ALL;
+    tg.setAttribute('aria-pressed',SHOW_ALL?'true':'false');
+    tg.innerHTML=SHOW_ALL?'🔢 Mostrar só mín. e máx.':'🔢 Mostrar todos os valores';
+    renderSections(); });
+  renderSections();
+  document.getElementById('note').textContent=C.notes;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+C.generated_at.slice(0,16).replace('T',' ')+' UTC';
+}
+function renderSections(){
+  const C=CDATA, V=C.variables, yr=`${C.years[0]}–${C.years[C.years.length-1]}`;
   let html='';
   ORDER.forEach((k,idx)=>{
     const v=V[k]; if(!v) return; const rmp=RAMPS[v.ramp], fmt=FMT[k];
@@ -167,7 +183,7 @@ async function init(){
       <div class="vhead"><div class="ic ${k}">${IC[k]}</div>
         <div><div class="tt"><span class="num">${idx+1}.</span> ${v.label} <span class="u">(${v.unit})</span></div>
         <div class="ds">${DESC[k]||''}</div></div></div>
-      <div class="striplab">Média mensal <span>climatologia ${yr}</span>${cbar(v.ramp,cmn,cmx,fmt,v.unit)}</div>
+      <div class="striplab">Média mensal <span>média do período ${yr}</span>${cbar(v.ramp,cmn,cmx,fmt,v.unit)}</div>
       ${monthlyStrip(v.clim,rmp,fmt,v.unit)}
       <div class="striplab">Tendência anual <span>${v.annual[0].year}–${v.annual[v.annual.length-1].year}</span>${cbar(v.ramp,amn,amx,fmt,v.unit)}</div>
       ${yearStrip(v.annual,rmp,fmt,v.unit)}
@@ -182,7 +198,7 @@ async function init(){
       <div class="vhead"><div class="ic wind">${IC.wind}</div>
         <div><div class="tt"><span class="num">6.</span> Vento · direção <span class="u">(resultante vetorial)</span></div>
         <div class="ds">${DIRDESC}</div></div></div>
-      <div class="striplab">Direção predominante por mês <span>climatologia ${yr}</span>${cbar('wind',plo,phi,v=>Math.round(v),'%')}</div>
+      <div class="striplab">Direção predominante por mês <span>média do período ${yr}</span>${cbar('wind',plo,phi,v=>Math.round(v),'%')}</div>
       ${dirStrip(WD.clim,MN,plo,phi,false)}
       <div class="striplab">Direção predominante por ano <span>${WD.annual[0].year}–${WD.annual[WD.annual.length-1].year}</span></div>
       ${dirStrip(WD.annual,null,plo,phi,true)}
@@ -190,8 +206,6 @@ async function init(){
     </div>`;
   }
   document.getElementById('sections').innerHTML=html;
-  document.getElementById('note').textContent=C.notes;
-  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+C.generated_at.slice(0,16).replace('T',' ')+' UTC';
 }
 init();
 </script>

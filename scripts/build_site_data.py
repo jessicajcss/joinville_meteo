@@ -40,7 +40,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 FRESH_DAYS   = 8            # a reading within this many days of the network "now" is "online"
 ROSE_MONTHS  = 12          # wind-rose pooled over the last N months of available hourly data
-DAILY_DAYS   = 20          # daily temperature-range strip length
+DAILY_DAYS   = 30          # daily strip length (temperature range AND rain share this axis)
 WIND_HOURS   = 24          # wind line-plot span
 
 # WMO / OMM rainfall intensity classes (mm/h). Ref: WMO-No. 407, International
@@ -132,6 +132,10 @@ for code, d in hourly.items():
         "umid": ({"v": round(umid["v"]), "t": umid["t"], "fresh": is_fresh(umid["t"])} if umid else None),
         "feels": ({"v": round(feels["v"], 1), "t": feels["t"], "fresh": is_fresh(feels["t"])} if feels else None),
         "rain": ({"v": r24["v"], "t": r24["t"], "fresh": is_fresh(r24["t"])} if r24 else None),
+        # explicit 1 h and 24 h accumulations (the map offers both as separate layers).
+        # rain_1h = last hourly precip total (mm); rain_24h = 24 h running total (mm).
+        "rain_1h": ({"v": rr1["v"], "t": rr1["t"], "fresh": is_fresh(rr1["t"])} if rr1 else None),
+        "rain_24h": ({"v": r24["v"], "t": r24["t"], "fresh": is_fresh(r24["t"])} if r24 else None),
         "rain_rate": (rr1 if rr1 else None),
         "wind": wind,
         "last_time": last_time,
@@ -173,7 +177,11 @@ def network_wind_series():
 
 wind24 = network_wind_series()
 
-# ---- last-20-day network daily temperature range (mean of station daily extremes) ----
+# ---- last-30-day network daily temperature range + daily rain (mean over stations) ----
+# Both strips share the SAME date axis (the last DAILY_DAYS days that have temperature data), so
+# the two daily charts on the Início page line up. daily_rain is the network MEAN of each
+# station's daily precipitation total (mm), pooled over every station reporting prec that day
+# (rain gauges included) — a whole-network daily rainfall, companion to the temperature strip.
 def network_daily_temp():
     frames = []
     for c in hourly:
@@ -181,15 +189,37 @@ def network_daily_temp():
         if dd is None or "temp_max" not in dd.columns or "temp_min" not in dd.columns: continue
         sub = dd[["date", "temp_max", "temp_min"]].dropna(subset=["temp_max", "temp_min"])
         if len(sub): frames.append(sub.assign(code=c))
-    if not frames: return []
+    if not frames: return [], []
     alld = pd.concat(frames)
-    g = alld.groupby("date").agg(mx=("temp_max", "mean"), mn=("temp_min", "mean")).dropna(how="all")
-    g = g.dropna()
+    g = alld.groupby("date").agg(mx=("temp_max", "mean"), mn=("temp_min", "mean")).dropna()
     g = g.tail(DAILY_DAYS)
-    return [{"d": t.strftime("%d/%m"), "mn": round(float(row["mn"]), 1), "mx": round(float(row["mx"]), 1)}
-            for t, row in g.iterrows()]
+    out = [{"d": t.strftime("%d/%m"), "mn": round(float(row["mn"]), 1), "mx": round(float(row["mx"]), 1)}
+           for t, row in g.iterrows()]
+    return out, list(g.index)
 
-daily_temp = network_daily_temp()
+def network_daily_rain(dates):
+    """Network-mean daily precipitation total (mm) on the given dates. Pools every station that
+    has a daily master with prec (including pure rain gauges). `n` = stations averaged that day."""
+    frames = []
+    for c in set(hourly) | set(masters.codes(DAILY)):
+        dd = load_daily(c)
+        if dd is None or "prec" not in dd.columns: continue
+        sub = dd[["date", "prec"]].dropna(subset=["prec"])
+        if len(sub): frames.append(sub)
+    if not frames or not len(dates):
+        return [{"d": d.strftime("%d/%m"), "v": None, "n": 0} for d in dates]
+    rall = pd.concat(frames)
+    rg = rall.groupby("date")["prec"].agg(["mean", "count"])
+    out = []
+    for d in dates:
+        if d in rg.index:
+            out.append({"d": d.strftime("%d/%m"), "v": round(float(rg.loc[d, "mean"]), 1), "n": int(rg.loc[d, "count"])})
+        else:
+            out.append({"d": d.strftime("%d/%m"), "v": None, "n": 0})
+    return out
+
+daily_temp, daily_dates = network_daily_temp()
+daily_rain = network_daily_rain(daily_dates)
 
 # ---- openair-style wind rose: 16 dir x speed-class frequency (%) ----
 # Direction QC: (1) CALM winds (ws < CALM_MS) carry no meaningful direction — a vane can't
@@ -430,6 +460,7 @@ snap = {
     "stations": stations,
     "wind24h": wind24,
     "daily_temp": daily_temp,
+    "daily_rain": daily_rain,
     "windrose": rose,
     "windrose24": rose24,
     "alert": alert,
@@ -452,6 +483,7 @@ print(f"temp_mean = {temp_mean} | wind_mean = {wind_mean} | wind_now = {snap['ne
 print(f"rain_24h_max = {rain_max}")
 print(f"wind24h pts = {len(wind24)} (non-null {sum(1 for x in wind24 if x['ws'] is not None)})")
 print(f"daily_temp days = {len(daily_temp)}")
+print(f"daily_rain days = {len(daily_rain)} (rainy {sum(1 for x in daily_rain if x['v'])})")
 print(f"windrose n = {rose['n'] if rose else 0} obs over {ROSE_MONTHS} months")
 print(f"alert active = {alert['active']} | rain = {alert['rain']} | temp = {alert['temp']}")
 print("online stations:", [s["name"] for s in stations if s["fresh"]])
