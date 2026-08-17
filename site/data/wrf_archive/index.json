@@ -20,15 +20,15 @@
    "year": "2026",
    "csv": "grade_2026.csv",
    "gz": "grade_2026.csv.gz",
-   "rows": 130500,
+   "rows": 137700,
    "first": "2026-07-26 04:00",
-   "last": "2026-08-18 21:00",
-   "bytes_csv": 11482588,
-   "bytes_gz": 1440073
+   "last": "2026-08-19 21:00",
+   "bytes_csv": 12116818,
+   "bytes_gz": 1517816
   }
  ],
- "total_rows": 130500,
+ "total_rows": 137700,
  "unit_note": "rain_mm_h mm/h; temp_degC °C; u10/v10/wind_ms m/s; wind_dir_deg deg (from).",
  "tz_note": "valid_time_local = Joinville local (UTC-3); run_time_utc = model cycle in UTC.",
- "generated_at": "2026-08-16T09:55:02Z"
+ "generated_at": "2026-08-17T10:12:31Z"
 }
