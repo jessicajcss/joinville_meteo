@@ -21,6 +21,8 @@
 .ccinvite .ccbtn{background:var(--blue);color:#fff;font-weight:800;font-size:14px;padding:12px 20px;border-radius:12px;white-space:nowrap;box-shadow:0 4px 12px rgba(64,120,242,.28);transition:filter .15s}
 .ccinvite:hover .ccbtn{filter:brightness(1.06)}
 @media(max-width:560px){.ccinvite .ccbtn{width:100%;text-align:center}.ccinvite .ccrow>div:nth-child(2){min-width:100%}}
+.vbar{width:32px}
+.vbar.rain .vg{background:#4078f2}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4078f2">
@@ -62,8 +64,9 @@
         <div class="card" style="margin-top:16px" id="draincard">
           <div class="ct">Chuva diária — média da rede (últimos 30 dias)</div>
           <div class="capt">cada barra é a <b>média das estações</b> do total de chuva do dia (mm) — leia os valores no eixo mm à esquerda; dias sem chuva aparecem sem barra</div>
-          <div class="dailyrow"><div class="chart" id="drain"></div></div>
+          <div class="dailyrow"><div class="chart" id="drain"></div><div class="vbar rain" id="rvbar"></div></div>
         </div>
+        <a href="30dias.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:var(--blue);color:#fff;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;text-decoration:none">📊 Comparar estes 30 dias com o mesmo período do ano anterior <span style="opacity:.85;font-weight:600">— 30 dias →</span></a>
       </div>
       <div>
         <div class="card kma" id="kma"></div>
@@ -321,9 +324,11 @@ async function init(){
   document.getElementById('vbar').innerHTML=`<b>${dc.axhi}°</b><span class="vg"></span><b>${dc.axlo}°</b>`;
   // daily rain — network mean (last 30 days)
   if(SNAP.daily_rain && SNAP.daily_rain.length){
-    document.getElementById('drain').innerHTML=dailyRainChart(SNAP.daily_rain).svg;
+    const rc=dailyRainChart(SNAP.daily_rain);
+    document.getElementById('drain').innerHTML=rc.svg;
+    document.getElementById('rvbar').innerHTML=`<b>${rc.axhi}</b><span class="vg"></span><b>0</b>`;
   } else {
-    const c=document.getElementById('draincard'); if(c) c.style.display='none';
+    const c=document.getElementById('draincard'); if(c){c.style.display='none';}
   }
   // ribbon
   document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo (Okabe-Ito #D55E00) · base orográfica OpenTopoMap · gerado '+SNAP.generated_at.slice(0,16).replace('T',' ')+' UTC';

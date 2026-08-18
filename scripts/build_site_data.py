@@ -221,6 +221,37 @@ def network_daily_rain(dates):
 daily_temp, daily_dates = network_daily_temp()
 daily_rain = network_daily_rain(daily_dates)
 
+# ---- same window ONE YEAR earlier (for the "30 dias vs. ano anterior" comparison page) ----
+# For each date in daily_dates, look up the SAME month-day in the previous year across the network:
+# temperature range (mean of station extremes) and rain (network-mean daily total). None where absent.
+def network_daily_lastyear(dates):
+    tframes, rframes = [], []
+    for c in set(hourly) | set(masters.codes(DAILY)):
+        dd = load_daily(c)
+        if dd is None: continue
+        if "temp_max" in dd.columns and "temp_min" in dd.columns:
+            sub = dd[["date", "temp_max", "temp_min"]].dropna(subset=["temp_max", "temp_min"])
+            if len(sub): tframes.append(sub)
+        if "prec" in dd.columns:
+            subr = dd[["date", "prec"]].dropna(subset=["prec"])
+            if len(subr): rframes.append(subr)
+    tdf = pd.concat(tframes).groupby("date").agg(mx=("temp_max", "mean"), mn=("temp_min", "mean")).dropna() if tframes else None
+    rser = pd.concat(rframes).groupby("date")["prec"].mean() if rframes else None
+    def ly(t):
+        try: return t.replace(year=t.year - 1)
+        except ValueError: return t - pd.Timedelta(days=365)   # 29 Feb guard
+    dt_ly, dr_ly = [], []
+    for t in dates:
+        lt = ly(t); d = t.strftime("%d/%m")
+        if tdf is not None and lt in tdf.index:
+            dt_ly.append({"d": d, "mn": round(float(tdf.loc[lt, "mn"]), 1), "mx": round(float(tdf.loc[lt, "mx"]), 1)})
+        else:
+            dt_ly.append({"d": d, "mn": None, "mx": None})
+        dr_ly.append({"d": d, "v": (round(float(rser[lt]), 1) if (rser is not None and lt in rser.index) else None)})
+    return dt_ly, dr_ly
+
+daily_temp_ly, daily_rain_ly = network_daily_lastyear(daily_dates)
+
 # ---- openair-style wind rose: 16 dir x speed-class frequency (%) ----
 # Direction QC: (1) CALM winds (ws < CALM_MS) carry no meaningful direction — a vane can't
 # resolve one at ~0 speed — so they are excluded from the sectors and reported as a calm %.
@@ -461,6 +492,8 @@ snap = {
     "wind24h": wind24,
     "daily_temp": daily_temp,
     "daily_rain": daily_rain,
+    "daily_temp_ly": daily_temp_ly,
+    "daily_rain_ly": daily_rain_ly,
     "windrose": rose,
     "windrose24": rose24,
     "alert": alert,

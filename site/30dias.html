@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joinville · 30 dias (comparação)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<style>
+.intro{font-size:15px;color:#4a5158;line-height:1.65;max-width:900px;margin:2px 0 12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.pair{grid-template-columns:1fr}}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:4px 0 2px}
+@media(max-width:560px){.chips{grid-template-columns:1fr}}
+.chip{background:#f7f9fc;border:1px solid var(--line);border-radius:13px;padding:11px 13px}
+.chip .k{font-size:11.5px;color:var(--mut);font-weight:600}
+.chip .v{font-size:23px;font-weight:800;line-height:1.1;margin-top:2px}
+.chip .v .u{font-size:13px;color:var(--mut);font-weight:600;margin-left:2px}
+.chip .d{font-size:11.5px;font-weight:700;margin-top:3px}
+.vbar{width:32px}
+.vbar.rain .vg{background:#4078f2}
+.backlink{display:inline-flex;align-items:center;gap:7px;background:#eef4ff;color:#2f5fd0;border:1px solid #d8e6fb;border-radius:11px;padding:8px 14px;font-size:12.5px;font-weight:700;text-decoration:none;margin-top:14px}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4078f2">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Joinville Meteo">
+</head>
+<body>
+<div class="app">
+  <div class="rail" id="rail"></div>
+  <div class="main">
+    <div class="tb"><div class="logo"><span class="m"></span>Joinville · <b>Meteo</b></div></div>
+    <div class="head">
+      <div class="htitle">30 dias<small id="hsub">Últimos 30 dias vs. mesmo período do ano anterior · média da rede</small></div>
+      <img class="hero" src="assets/img/windmill.png" alt="Moinho de Joinville">
+    </div>
+
+    <div class="card">
+      <div class="intro" id="intro"></div>
+      <div class="chips" id="chips"></div>
+      <a class="backlink" href="index.html">← Voltar ao monitoramento (Agora)</a>
+    </div>
+
+    <!-- Temperatura: gráfico do Agora (esq.) + comparação com o ano anterior (dir.) -->
+    <div class="pair" style="margin-top:16px">
+      <div class="card">
+        <div class="ct">Temperatura diária — média da rede (últimos 30 dias)</div>
+        <div class="capt">cada barra vai da mínima à máxima do dia — leia os valores no eixo °C à esquerda; a cor acompanha a escala de temperatura</div>
+        <div class="dailyrow"><div class="chart" id="tDaily"></div><div class="vbar" id="tVbar"></div></div>
+      </div>
+      <div class="card">
+        <div class="ct"><span>Temperatura — anomalia diária vs. <span id="lyT"></span></span></div>
+        <div class="capt">cada barra = quanto o dia foi <b style="color:#d55e00">mais quente</b> ou <b style="color:#4078f2">mais frio</b> que o mesmo dia do ano anterior (média mín.–máx.)</div>
+        <div class="chart" id="tAnom"></div>
+      </div>
+    </div>
+
+    <!-- Chuva: gráfico do Agora (esq.) + chuva acumulada ano vs ano (dir.) -->
+    <div class="pair" style="margin-top:16px">
+      <div class="card">
+        <div class="ct">Chuva diária — média da rede (últimos 30 dias)</div>
+        <div class="capt">cada barra é a <b>média das estações</b> do total de chuva do dia (mm) — leia os valores no eixo mm à esquerda; dias sem chuva aparecem sem barra</div>
+        <div class="dailyrow"><div class="chart" id="rDaily"></div><div class="vbar rain" id="rVbar"></div></div>
+      </div>
+      <div class="card">
+        <div class="ct"><span>Chuva acumulada — <span id="tyR"></span> vs. <span id="lyR"></span></span></div>
+        <div class="capt"><span style="color:#4078f2;font-weight:800">──</span> este ano · <span style="color:#9aa0a6;font-weight:800">╌╌</span> ano anterior — a <b>distância vertical no fim</b> é o excedente (ou déficit) de chuva frente ao ano anterior</div>
+        <div class="chart" id="rCum"></div>
+      </div>
+    </div>
+
+    <div class="card vsec" style="margin-top:16px"><div class="hnote" id="note"></div></div>
+    <div class="foot">Fonte dos dados: <a href="https://www.joinville.sc.gov.br/institucional/seprot/" target="_blank" rel="noopener">SEPROT — Secretaria de Proteção Civil e Segurança Pública · Prefeitura de Joinville</a><br>
+    Dashboard gerenciado pelo projeto de pesquisa do <a href="https://www.udesc.br/cct/lacia" target="_blank" rel="noopener">Laboratório de Ciência das Águas (LaCiA)</a> · PPGEC · Universidade do Estado de Santa Catarina — CCT/UDESC, Joinville</div>
+    <div class="footlogos"><img class="lg-udesc" src="assets/img/udesc.png" alt="UDESC Joinville — CCT"><span class="lgsep"></span><a href="https://www.udesc.br/cct/lacia" target="_blank" rel="noopener"><img class="lg-lacia" src="assets/img/lacia.jpg" alt="LaCiA"></a></div>
+    <div class="ribbon" id="ribbon"></div>
+  </div>
+</div>
+<script>
+const RAIL_ICONS={agora:'<path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>',
+ cidade:'<path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M14 21V11l5 3v7"/><path d="M8 10v0M8 13v0M8 16v0"/>',
+ risco:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v0"/>',
+ rio:'<path d="M3 8c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/>',
+ previsao:'<path d="M7 16a4 4 0 1 1 .9-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1-.5 7"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',estacao:'<path d="M5 20V10M12 20V4M19 20V13"/>', baixar:'<path d="M12 3v11M8 11l4 4 4-4"/><path d="M4 20h16"/>',
+ ciencia:'<circle cx="9" cy="7" r="3"/><path d="M2.5 20c0-3.3 3-5 6.5-5s6.5 1.7 6.5 5"/><path d="M16 3.6a3 3 0 0 1 0 6"/><path d="M18.5 20c0-2.6-.8-4.1-2.2-4.8"/>',
+ sobre:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/>'};
+// standard rail — this page is NOT in the menu (reached from the Agora link); "Agora" stays highlighted.
+const NAV=[['agora','Agora','index.html'],['cidade','Histórico Cidade','cidade.html'],['rio','Chuva–Rio','rio.html'],['previsao','Previsão','previsao.html'],['estacao','Histórico Estação','estacao.html'],['baixar','Baixar','estacao.html#download'],['risco','Risco','risco.html'],['ciencia','Ciência cidadã','ciencia_cidada.html'],['sobre','Sobre','sobre.html']];
+document.getElementById('rail').innerHTML=NAV.map(([k,l,href])=>`<a class="ri${k==='agora'?' on':''}" href="${href}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${RAIL_ICONS[k]}</svg><span>${l}</span></a>`).join('');
+
+// ===== left plots: identical to the Agora page =====
+function dailyChart(td){
+  const tmn=Math.min(...td.map(x=>x.mn)),tmx=Math.max(...td.map(x=>x.mx));
+  const step=(tmx-tmn)>15?5:((tmx-tmn)>6?2:1);
+  const axlo=Math.floor(tmn/step)*step,axhi=Math.ceil(tmx/step)*step;
+  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/td.length;
+  const sy=t=>PT+(axhi-t)/(axhi-axlo)*PLOTH;
+  let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}°</text>`;}
+  let bars='';td.forEach((r,i)=>{const cx=PL+i*bw+bw/2,yt=sy(r.mx),yb=sy(r.mn);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(yb-yt,3).toFixed(1)}" rx="5" fill="url(#tg)"/>`;});
+  const lstep=Math.max(1,Math.ceil(td.length/10));
+  let labs=td.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><defs><linearGradient id="tg" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${PT}" y2="${PT+PLOTH}"><stop offset="0" stop-color="#d55e00"/><stop offset="0.4" stop-color="#e0e0a0"/><stop offset="0.7" stop-color="#8aa0e0"/><stop offset="1" stop-color="#4078f2"/></linearGradient></defs><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">°C</text>${grid}${bars}${labs}</svg>`;
+  return {svg,axlo,axhi};
+}
+function dailyRainChart(rd){
+  const vals=rd.map(x=>x.v==null?0:x.v);
+  const vmax=Math.max(...vals,1);
+  const step=vmax>40?20:(vmax>20?10:(vmax>8?5:(vmax>3?2:1)));
+  const axlo=0, axhi=Math.max(step,Math.ceil(vmax/step)*step);
+  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/rd.length;
+  const sy=v=>PT+(axhi-v)/(axhi-axlo)*PLOTH, y0=sy(0);
+  let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}</text>`;}
+  let bars='';rd.forEach((r,i)=>{const v=(r.v==null?0:r.v);if(v<=0)return;const cx=PL+i*bw+bw/2,yt=sy(v);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(y0-yt,2).toFixed(1)}" rx="3" fill="#4078f2"/>`;});
+  const lstep=Math.max(1,Math.ceil(rd.length/10));
+  let labs=rd.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">mm</text>${grid}${bars}${labs}</svg>`;
+  return {svg,axlo,axhi};
+}
+
+// ===== comparison plots (right side) =====
+function midOf(x){return (x && x.mn!=null && x.mx!=null)?(x.mn+x.mx)/2:null;}
+function anomChart(td,tdly){
+  const a=td.map((x,i)=>{const A=midOf(x),B=midOf(tdly[i]);return (A!=null&&B!=null)?Math.round((A-B)*10)/10:null;});
+  const present=a.filter(v=>v!=null);
+  const M=Math.max(1,...present.map(v=>Math.abs(v)))*1.15;
+  const PL=36,PR=10,PT=12,CW=600,PLOTH=166,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/td.length;
+  const sy=v=>PT+PLOTH/2-(v/M)*(PLOTH/2), y0=sy(0);
+  let grid='';[Math.round(M),-Math.round(M)].forEach(t=>{if(t===0)return;const y=sy(t);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${t>0?'+':''}${t}</text>`;});
+  grid+=`<line x1="${PL}" y1="${y0.toFixed(1)}" x2="${CW-PR}" y2="${y0.toFixed(1)}" stroke="#c3cbd3" stroke-width="1.2"/><text x="${PL-7}" y="${(y0+3).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">0</text>`;
+  let bars='';a.forEach((v,i)=>{if(v==null)return;const cx=PL+i*bw+bw/2,yv=sy(v),col=v>0?'#d55e00':'#4078f2',top=Math.min(yv,y0),h=Math.max(Math.abs(yv-y0),1);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${top.toFixed(1)}" width="10" height="${h.toFixed(1)}" rx="2" fill="${col}"/>`;});
+  const lstep=Math.max(1,Math.ceil(td.length/10));
+  let labs=td.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  return `<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">°C</text>${grid}${bars}${labs}</svg>`;
+}
+function cumChart(dr,drly){
+  const c1=[],c2=[];let s1=0,s2=0;
+  dr.forEach((x,i)=>{s1+=(x.v||0);c1.push(Math.round(s1*10)/10);const y=drly[i];s2+=((y&&y.v)||0);c2.push(Math.round(s2*10)/10);});
+  const ymax=Math.max(1,...c1,...c2)*1.08;
+  const PL=40,PR=16,PT=12,CW=600,PLOTH=166,CH=PT+PLOTH,plotW=CW-PL-PR,n=dr.length;
+  const X=i=>PL+(n>1?i/(n-1):0.5)*plotW, Y=v=>PT+PLOTH-(v/ymax)*PLOTH;
+  const step=ymax>150?50:(ymax>60?25:(ymax>20?10:5));
+  let grid='';for(let t=0;t<=ymax;t+=step){const y=Y(t);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${t}</text>`;}
+  const lstep=Math.max(1,Math.ceil(n/10));
+  let labs=dr.map((r,i)=>i%lstep===0?`<text x="${X(i).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  const pts=arr=>arr.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const l2=`<polyline points="${pts(c2)}" fill="none" stroke="#9aa0a6" stroke-width="2" stroke-dasharray="6 4"/>`;
+  const l1=`<polyline points="${pts(c1)}" fill="none" stroke="#4078f2" stroke-width="2.6"/>`;
+  const e1=`<circle cx="${X(n-1).toFixed(1)}" cy="${Y(c1[n-1]).toFixed(1)}" r="3.3" fill="#4078f2"/><text x="${(X(n-1)-5).toFixed(1)}" y="${(Y(c1[n-1])-6).toFixed(1)}" font-size="11.5" font-weight="800" fill="#2f5fd0" text-anchor="end">${c1[n-1].toFixed(0)} mm</text>`;
+  const e2=`<circle cx="${X(n-1).toFixed(1)}" cy="${Y(c2[n-1]).toFixed(1)}" r="3.3" fill="#9aa0a6"/><text x="${(X(n-1)-5).toFixed(1)}" y="${(Y(c2[n-1])+13).toFixed(1)}" font-size="11.5" font-weight="800" fill="#7c8288" text-anchor="end">${c2[n-1].toFixed(0)} mm</text>`;
+  return `<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><text x="${PL-32}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-32} ${PT+PLOTH/2})">mm</text>${grid}${l2}${l1}${e1}${e2}${labs}</svg>`;
+}
+function chipsHTML(dr,drly,td,tdly,LY){
+  const totR=dr.reduce((s,x)=>s+(x.v||0),0), totR2=drly.reduce((s,x)=>s+((x&&x.v)||0),0);
+  const midMean=arr=>{const v=arr.map(midOf).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+  const mT=midMean(td);
+  const anv=td.map((x,i)=>{const A=midOf(x),B=midOf(tdly[i]);return (A!=null&&B!=null)?(A-B):null;}).filter(v=>v!=null);
+  const wet=dr.filter(x=>(x.v||0)>=0.1).length, wet2=drly.filter(x=>((x&&x.v)||0)>=0.1).length;
+  const dR=Math.round(totR-totR2), dT=anv.length?Math.round((anv.reduce((a,b)=>a+b,0)/anv.length)*10)/10:null, dW=wet-wet2;
+  const delta=(d,unit,warmRed)=>{ if(d==null) return '';
+    const up=d>0, arw=up?'▲':'▼', sign=up?'+':'−';
+    let col='#2f5fd0'; if(warmRed) col= up?'#c0392b':'#2f6db0';
+    return `<div class="d" style="color:${col}">${arw} ${sign}${Math.abs(d)}${unit} <span style="color:#8a9099;font-weight:600">vs. ${LY}</span></div>`;};
+  return `<div class="chip"><div class="k">Chuva acumulada</div><div class="v">${totR.toFixed(0)}<span class="u"> mm</span></div>${delta(dR,' mm',false)}</div>`
+       + `<div class="chip"><div class="k">Temperatura média</div><div class="v">${mT!=null?mT.toFixed(1):'—'}<span class="u"> °C</span></div>${delta(dT,' °C',true)}</div>`
+       + `<div class="chip"><div class="k">Dias com chuva</div><div class="v">${wet}<span class="u"></span></div>${delta(dW,'',false)}</div>`;
+}
+
+async function init(){
+  const S=await fetch('data/snapshot.json').then(r=>r.json());
+  const TY=+S.reference_now.slice(0,4), LY=TY-1;
+  const td=S.daily_temp||[], tdly=S.daily_temp_ly||[], dr=S.daily_rain||[], drly=S.daily_rain_ly||[];
+  document.getElementById('lyT').textContent=LY;
+  document.getElementById('tyR').textContent=TY; document.getElementById('lyR').textContent=LY;
+  document.getElementById('intro').innerHTML=`Os mesmos gráficos da página <b>Agora</b> (últimos 30 dias) lado a lado com a comparação frente ao <b>mesmo período de ${LY}</b> — para ver rapidamente se o período está mais quente ou frio, e mais seco ou chuvoso, que no ano anterior. Valores: média da rede de estações e pluviômetros de Joinville.`;
+  // left (Agora replicas)
+  const dc=dailyChart(td); document.getElementById('tDaily').innerHTML=dc.svg;
+  document.getElementById('tVbar').innerHTML=`<b>${dc.axhi}°</b><span class="vg"></span><b>${dc.axlo}°</b>`;
+  const rc=dailyRainChart(dr); document.getElementById('rDaily').innerHTML=rc.svg;
+  document.getElementById('rVbar').innerHTML=`<b>${rc.axhi}</b><span class="vg"></span><b>0</b>`;
+  // right (comparisons)
+  document.getElementById('tAnom').innerHTML=(tdly.length?anomChart(td,tdly):'<div class="capt">Sem dados do ano anterior para comparar.</div>');
+  document.getElementById('rCum').innerHTML=cumChart(dr,drly);
+  document.getElementById('chips').innerHTML=chipsHTML(dr,drly,td,tdly,LY);
+  document.getElementById('note').innerHTML=`Comparação pelo <b>mesmo dia do calendário</b> do ano anterior; dias sem registro em ${LY} ficam em branco na anomalia. A temperatura usa o ponto médio da faixa mín.–máx. do dia. Página independente (não aparece no menu) — acesse pelo link na página <b>Agora</b>.`;
+  document.getElementById('ribbon').innerHTML='Tema Atom One Light · paleta segura para daltonismo · gerado '+(S.generated_at||'').slice(0,16).replace('T',' ')+' UTC';
+}
+init();
+</script>
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body>
+</html>
