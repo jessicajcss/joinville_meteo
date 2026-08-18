@@ -440,7 +440,7 @@ function drawSeries(){const vn=CURVAR, M=VARS[vn], bs=(RUN.basins||[]).filter(b=
   // show whatever remains (maps, slider, downloads and archive stay full 72 h).
   const nAll=RUN.lead_h.length, s0=(typeof FUT!=='undefined'&&FUT.length)?FUT[0]:0, s1=Math.min(nAll,s0+24), n=Math.max(2,s1-s0);
   // rain is shown ACCUMULATED over the 24 h (running total, mm); temp/wind stay instantaneous.
-  const acc=(vn==='rain'), dt=dtH(), DRY=0.1;   // < DRY mm/h conta como "sem chuva" -> zera o acumulado
+  const acc=(vn==='rain'), dt=dtH(), DRY=0.005;   // < DRY mm/h (arredonda p/ 0,00 mm/h) conta como "sem chuva" -> zera o acumulado
   const disp=b=>{const raw=M.series(b).slice(s0,s1); if(!acc)return raw; let c=0;
     return raw.map(v=>{v=v||0; if(v>=DRY){c+=v*dt;} else {c=0;} return c;});};
   const W=1000,H=250,PL=48,PR=12,PT=12,PB=42,plotW=W-PL-PR,plotH=H-PT-PB;
