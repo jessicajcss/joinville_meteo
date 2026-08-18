@@ -162,7 +162,7 @@ function dailyChart(td){
   const tmn=Math.min(...td.map(x=>x.mn)),tmx=Math.max(...td.map(x=>x.mx));
   const step=(tmx-tmn)>15?5:((tmx-tmn)>6?2:1);
   const axlo=Math.floor(tmn/step)*step,axhi=Math.ceil(tmx/step)*step;
-  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/td.length;
+  const PL=44,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/td.length;
   const BP=10, sy=t=>PT+(axhi-t)/(axhi-axlo)*(PLOTH-BP);
   let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}°</text>`;}
   let bars='';td.forEach((r,i)=>{const cx=PL+i*bw+bw/2,yt=sy(r.mx),yb=sy(r.mn);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(yb-yt,3).toFixed(1)}" rx="5" fill="url(#tg)"/>`;});
@@ -177,7 +177,7 @@ function dailyRainChart(rd){
   const vmax=Math.max(...vals,1);
   const step=vmax>40?20:(vmax>20?10:(vmax>8?5:(vmax>3?2:1)));
   const axlo=0, axhi=Math.max(step,Math.ceil(vmax/step)*step);
-  const PL=36,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/rd.length;
+  const PL=44,PR=10,PT=10,CW=600,PLOTH=170,CH=PT+PLOTH,plotW=CW-PL-PR,bw=plotW/rd.length;
   const BP=10, sy=v=>PT+(axhi-v)/(axhi-axlo)*(PLOTH-BP), y0=sy(0);
   let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}</text>`;}
   let bars='';rd.forEach((r,i)=>{const v=(r.v==null?0:r.v);if(v<=0)return;const cx=PL+i*bw+bw/2,yt=sy(v);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(y0-yt,2).toFixed(1)}" rx="3" fill="#4078f2"/>`;});
