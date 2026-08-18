@@ -45,7 +45,7 @@ body{background:linear-gradient(135deg,#c9d4ea,#e7ecf4);font-family:'Poppins','N
 .leaflet-div-icon{background:transparent;border:none}
 .tog{position:absolute;left:26px;top:26px;display:flex;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden;font-size:11px;z-index:500;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .tog span{padding:6px 12px;color:var(--mut);cursor:pointer}.tog .on{background:var(--blue);color:#fff;font-weight:700}
-.mapleg{position:absolute;right:26px;top:26px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-size:9.5px;color:var(--ink);z-index:500;display:flex;align-items:center;flex-wrap:wrap;gap:2px 6px;max-width:200px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.mapleg{position:absolute;right:26px;top:65px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-size:9.5px;color:var(--ink);z-index:500;display:flex;align-items:center;flex-wrap:wrap;gap:2px 6px;max-width:200px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 .mapleg .lgb{flex-basis:100%;color:var(--mut);font-size:8.5px;font-weight:400;line-height:1.25}
 .leg{position:absolute;left:26px;bottom:26px;font-size:11px;color:var(--mut);background:rgba(255,255,255,.9);padding:6px 10px;border-radius:9px;z-index:500}
 .leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 4px 0 8px;vertical-align:-1px}
@@ -139,7 +139,7 @@ body{background:linear-gradient(135deg,#c9d4ea,#e7ecf4);font-family:'Poppins','N
   #map{height:64vw;min-height:240px}
   .main svg{max-width:100%!important}
   .tog{left:10px;top:10px;font-size:10px}.tog span{padding:5px 8px}
-  .mapleg{right:10px;top:10px;max-width:46vw;font-size:8.5px;padding:5px 7px}
+  .mapleg{right:10px;top:48px;max-width:46vw;font-size:8.5px;padding:5px 7px}
   .leg{left:10px;bottom:10px;font-size:10px}
   .kma .kb{flex-wrap:wrap}
   .footlogos{gap:14px;padding:12px 12px;width:auto;max-width:100%;flex-wrap:wrap}

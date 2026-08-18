@@ -104,7 +104,7 @@ function dailyChart(td){
   let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}°</text>`;}
   let bars='';td.forEach((r,i)=>{const cx=PL+i*bw+bw/2,yt=sy(r.mx),yb=sy(r.mn);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(yb-yt,3).toFixed(1)}" rx="5" fill="url(#tg)"/>`;});
   const lstep=Math.max(1,Math.ceil(td.length/10));
-  let labs=td.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  let labs=td.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="12.7" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
   const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><defs><linearGradient id="tg" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${PT}" y2="${PT+PLOTH}"><stop offset="0" stop-color="#d55e00"/><stop offset="0.4" stop-color="#e0e0a0"/><stop offset="0.7" stop-color="#8aa0e0"/><stop offset="1" stop-color="#4078f2"/></linearGradient></defs><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">°C</text>${grid}${bars}${labs}</svg>`;
   return {svg,axlo,axhi};
 }
@@ -118,7 +118,7 @@ function dailyRainChart(rd){
   let grid='';for(let tk=axlo;tk<=axhi;tk+=step){const y=sy(tk);grid+=`<line x1="${PL}" y1="${y.toFixed(1)}" x2="${CW-PR}" y2="${y.toFixed(1)}" stroke="#eef0f2"/><text x="${PL-7}" y="${(y+3.2).toFixed(1)}" font-size="12" fill="#a0a1a7" text-anchor="end">${tk}</text>`;}
   let bars='';rd.forEach((r,i)=>{const v=(r.v==null?0:r.v);if(v<=0)return;const cx=PL+i*bw+bw/2,yt=sy(v);bars+=`<rect x="${(cx-5).toFixed(1)}" y="${yt.toFixed(1)}" width="10" height="${Math.max(y0-yt,2).toFixed(1)}" rx="3" fill="#4078f2"/>`;});
   const lstep=Math.max(1,Math.ceil(rd.length/10));
-  let labs=rd.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="11.5" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
+  let labs=rd.map((r,i)=>i%lstep===0?`<text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${CH+14}" font-size="12.7" fill="#a0a1a7" text-anchor="middle">${r.d.slice(0,5)}</text>`:'').join('');
   const svg=`<svg viewBox="0 0 ${CW} ${CH+20}" width="100%" height="200"><text x="${PL-30}" y="${PT+PLOTH/2}" font-size="12" fill="#a0a1a7" text-anchor="middle" transform="rotate(-90 ${PL-30} ${PT+PLOTH/2})">mm</text>${grid}${bars}${labs}</svg>`;
   return {svg,axlo,axhi};
 }
