@@ -9,8 +9,8 @@ body{background:linear-gradient(135deg,#c9d4ea,#e7ecf4);font-family:'Poppins','N
 .rail .ri.on{background:var(--blue);color:#fff}
 .main{flex:1;padding:20px 24px 22px;min-width:0}
 .tb{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;color:var(--blue)}
-.logo b{color:var(--purple)} .logo .m{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));display:inline-block}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;color:#1E52A0}
+.logo b{color:#B8860B} .logo .m{width:24px;height:24px;border-radius:7px;background:#1E52A0;display:inline-block;position:relative} .logo .m::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:11px;background:#fff;transform:translate(-50%,-50%) rotate(45deg);border-radius:2px}
 .search{flex:1;max-width:340px;background:#fff;border-radius:22px;padding:9px 16px;color:var(--mut);font-size:13px;border:1px solid var(--line)}
 .tbtn{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--blue)}
 .head{display:flex;align-items:center;gap:18px;margin-bottom:16px}
