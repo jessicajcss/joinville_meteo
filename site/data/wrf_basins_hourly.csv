@@ -1,505 +1,505 @@
 basin,id,valid_time_local,lead_h,precip_mm_h,accum_mm,t2m_degC,wspd_ms
-Bacia Hidrográfica do Palmital,2,2026-09-13 22:00,1,0.004,0.004,16.41,8.77
-Bacia Hidrográfica do Palmital,2,2026-09-13 23:00,2,0.007,0.011,16.25,7.52
-Bacia Hidrográfica do Palmital,2,2026-09-14 00:00,3,0.277,0.288,15.84,6.73
-Bacia Hidrográfica do Palmital,2,2026-09-14 01:00,4,0.433,0.721,15.46,6.81
-Bacia Hidrográfica do Palmital,2,2026-09-14 02:00,5,0.097,0.818,15.36,6.53
-Bacia Hidrográfica do Palmital,2,2026-09-14 03:00,6,0.016,0.834,15.37,6.16
-Bacia Hidrográfica do Palmital,2,2026-09-14 04:00,7,0.008,0.842,15.67,6.92
-Bacia Hidrográfica do Palmital,2,2026-09-14 05:00,8,0.021,0.863,15.72,6.89
-Bacia Hidrográfica do Palmital,2,2026-09-14 06:00,9,0.004,0.867,15.81,8.16
-Bacia Hidrográfica do Palmital,2,2026-09-14 07:00,10,0.085,0.952,15.48,9.55
-Bacia Hidrográfica do Palmital,2,2026-09-14 08:00,11,0.456,1.408,15.57,9.12
-Bacia Hidrográfica do Palmital,2,2026-09-14 09:00,12,0.247,1.655,16.16,9.07
-Bacia Hidrográfica do Palmital,2,2026-09-14 10:00,13,0.101,1.756,16.77,8.91
-Bacia Hidrográfica do Palmital,2,2026-09-14 11:00,14,0.241,1.997,17.02,8.6
-Bacia Hidrográfica do Palmital,2,2026-09-14 12:00,15,0.339,2.336,17.04,8.38
-Bacia Hidrográfica do Palmital,2,2026-09-14 13:00,16,0.162,2.498,17.41,6.35
-Bacia Hidrográfica do Palmital,2,2026-09-14 14:00,17,0.343,2.841,17.43,5.57
-Bacia Hidrográfica do Palmital,2,2026-09-14 15:00,18,0.479,3.32,17.22,4.85
-Bacia Hidrográfica do Palmital,2,2026-09-14 16:00,19,0.712,4.032,16.62,5.44
-Bacia Hidrográfica do Palmital,2,2026-09-14 17:00,20,0.266,4.298,16.69,5.71
-Bacia Hidrográfica do Palmital,2,2026-09-14 18:00,21,0.336,4.634,17.07,5.67
-Bacia Hidrográfica do Palmital,2,2026-09-14 19:00,22,0.28,4.914,16.95,5.14
-Bacia Hidrográfica do Palmital,2,2026-09-14 20:00,23,0.348,5.262,16.69,5.58
-Bacia Hidrográfica do Palmital,2,2026-09-14 21:00,24,0.234,5.496,16.5,5.71
-Bacia Hidrográfica do Palmital,2,2026-09-14 22:00,25,0.299,5.795,16.44,4.34
-Bacia Hidrográfica do Palmital,2,2026-09-14 23:00,26,0.046,5.841,16.39,4.92
-Bacia Hidrográfica do Palmital,2,2026-09-15 00:00,27,0.004,5.845,16.32,4.93
-Bacia Hidrográfica do Palmital,2,2026-09-15 01:00,28,0.0,5.845,16.17,5.14
-Bacia Hidrográfica do Palmital,2,2026-09-15 02:00,29,0.0,5.845,16.06,5.34
-Bacia Hidrográfica do Palmital,2,2026-09-15 03:00,30,0.0,5.845,16.03,4.87
-Bacia Hidrográfica do Palmital,2,2026-09-15 04:00,31,0.0,5.845,16.12,4.55
-Bacia Hidrográfica do Palmital,2,2026-09-15 05:00,32,0.0,5.845,16.1,5.55
-Bacia Hidrográfica do Palmital,2,2026-09-15 06:00,33,0.0,5.845,16.08,5.28
-Bacia Hidrográfica do Palmital,2,2026-09-15 07:00,34,0.0,5.845,16.09,5.34
-Bacia Hidrográfica do Palmital,2,2026-09-15 08:00,35,0.0,5.845,16.08,5.09
-Bacia Hidrográfica do Palmital,2,2026-09-15 09:00,36,0.0,5.845,16.44,4.73
-Bacia Hidrográfica do Palmital,2,2026-09-15 10:00,37,0.0,5.845,16.94,4.25
-Bacia Hidrográfica do Palmital,2,2026-09-15 11:00,38,0.0,5.845,17.46,3.64
-Bacia Hidrográfica do Palmital,2,2026-09-15 12:00,39,0.0,5.845,17.82,1.93
-Bacia Hidrográfica do Palmital,2,2026-09-15 13:00,40,0.0,5.845,17.75,3.63
-Bacia Hidrográfica do Palmital,2,2026-09-15 14:00,41,0.0,5.845,17.66,5.5
-Bacia Hidrográfica do Palmital,2,2026-09-15 15:00,42,0.0,5.845,17.54,6.35
-Bacia Hidrográfica do Palmital,2,2026-09-15 16:00,43,0.0,5.845,17.54,5.88
-Bacia Hidrográfica do Palmital,2,2026-09-15 17:00,44,0.0,5.845,17.66,5.28
-Bacia Hidrográfica do Palmital,2,2026-09-15 18:00,45,0.0,5.845,17.74,5.83
-Bacia Hidrográfica do Palmital,2,2026-09-15 19:00,46,0.0,5.845,17.69,5.43
-Bacia Hidrográfica do Palmital,2,2026-09-15 20:00,47,0.0,5.845,17.63,5.49
-Bacia Hidrográfica do Palmital,2,2026-09-15 21:00,48,0.0,5.845,17.68,5.28
-Bacia Hidrográfica do Palmital,2,2026-09-15 22:00,49,0.011,5.856,17.69,5.61
-Bacia Hidrográfica do Palmital,2,2026-09-15 23:00,50,0.005,5.861,17.62,5.53
-Bacia Hidrográfica do Palmital,2,2026-09-16 00:00,51,0.002,5.863,17.66,5.22
-Bacia Hidrográfica do Palmital,2,2026-09-16 01:00,52,0.001,5.864,17.75,5.64
-Bacia Hidrográfica do Palmital,2,2026-09-16 02:00,53,0.011,5.875,17.64,6.11
-Bacia Hidrográfica do Palmital,2,2026-09-16 03:00,54,0.035,5.91,17.17,6.75
-Bacia Hidrográfica do Palmital,2,2026-09-16 04:00,55,0.035,5.945,16.76,6.69
-Bacia Hidrográfica do Palmital,2,2026-09-16 05:00,56,0.034,5.979,16.71,6.26
-Bacia Hidrográfica do Palmital,2,2026-09-16 06:00,57,0.038,6.017,16.71,5.4
-Bacia Hidrográfica do Palmital,2,2026-09-16 07:00,58,0.153,6.17,16.64,4.46
-Bacia Hidrográfica do Palmital,2,2026-09-16 08:00,59,0.062,6.232,16.95,4.29
-Bacia Hidrográfica do Palmital,2,2026-09-16 09:00,60,0.001,6.233,17.24,4.18
-Bacia Hidrográfica do Palmital,2,2026-09-16 10:00,61,0.034,6.267,16.97,4.74
-Bacia Hidrográfica do Palmital,2,2026-09-16 11:00,62,0.078,6.345,16.88,4.16
-Bacia Hidrográfica do Palmital,2,2026-09-16 12:00,63,0.013,6.358,17.11,3.74
-Bacia Hidrográfica do Palmital,2,2026-09-16 13:00,64,0.001,6.359,17.26,4.15
-Bacia Hidrográfica do Palmital,2,2026-09-16 14:00,65,0.0,6.359,17.34,4.42
-Bacia Hidrográfica do Palmital,2,2026-09-16 15:00,66,0.0,6.359,17.35,5.22
-Bacia Hidrográfica do Palmital,2,2026-09-16 16:00,67,0.0,6.359,17.46,6.03
-Bacia Hidrográfica do Palmital,2,2026-09-16 17:00,68,0.0,6.359,17.65,7.21
-Bacia Hidrográfica do Palmital,2,2026-09-16 18:00,69,0.0,6.359,17.74,8.35
-Bacia Hidrográfica do Palmital,2,2026-09-16 19:00,70,0.001,6.36,17.81,8.15
-Bacia Hidrográfica do Palmital,2,2026-09-16 20:00,71,0.0,6.36,17.86,7.51
-Bacia Hidrográfica do Palmital,2,2026-09-16 21:00,72,0.0,6.36,17.92,7.75
-Bacias independentes da vertente leste,3,2026-09-13 22:00,1,0.034,0.034,16.5,10.05
-Bacias independentes da vertente leste,3,2026-09-13 23:00,2,0.02,0.054,16.42,8.81
-Bacias independentes da vertente leste,3,2026-09-14 00:00,3,0.168,0.222,16.22,8.79
-Bacias independentes da vertente leste,3,2026-09-14 01:00,4,0.405,0.627,15.7,8.54
-Bacias independentes da vertente leste,3,2026-09-14 02:00,5,0.137,0.764,15.69,7.69
-Bacias independentes da vertente leste,3,2026-09-14 03:00,6,0.002,0.766,15.79,7.32
-Bacias independentes da vertente leste,3,2026-09-14 04:00,7,0.005,0.771,15.95,8.17
-Bacias independentes da vertente leste,3,2026-09-14 05:00,8,0.019,0.79,15.91,7.93
-Bacias independentes da vertente leste,3,2026-09-14 06:00,9,0.012,0.802,15.92,9.26
-Bacias independentes da vertente leste,3,2026-09-14 07:00,10,0.09,0.892,15.76,10.57
-Bacias independentes da vertente leste,3,2026-09-14 08:00,11,0.466,1.358,15.74,9.85
-Bacias independentes da vertente leste,3,2026-09-14 09:00,12,0.441,1.799,16.16,9.94
-Bacias independentes da vertente leste,3,2026-09-14 10:00,13,0.148,1.947,16.62,9.45
-Bacias independentes da vertente leste,3,2026-09-14 11:00,14,0.23,2.177,16.88,8.62
-Bacias independentes da vertente leste,3,2026-09-14 12:00,15,0.394,2.571,17.04,7.44
-Bacias independentes da vertente leste,3,2026-09-14 13:00,16,0.02,2.591,17.37,5.79
-Bacias independentes da vertente leste,3,2026-09-14 14:00,17,0.058,2.649,17.4,5.37
-Bacias independentes da vertente leste,3,2026-09-14 15:00,18,0.051,2.7,17.39,5.05
-Bacias independentes da vertente leste,3,2026-09-14 16:00,19,0.147,2.847,16.95,5.67
-Bacias independentes da vertente leste,3,2026-09-14 17:00,20,0.118,2.965,17.03,5.64
-Bacias independentes da vertente leste,3,2026-09-14 18:00,21,0.153,3.118,17.12,5.69
-Bacias independentes da vertente leste,3,2026-09-14 19:00,22,0.081,3.199,17.18,5.08
-Bacias independentes da vertente leste,3,2026-09-14 20:00,23,0.08,3.279,17.12,6.12
-Bacias independentes da vertente leste,3,2026-09-14 21:00,24,0.061,3.34,17.03,5.39
-Bacias independentes da vertente leste,3,2026-09-14 22:00,25,0.066,3.406,17.09,4.17
-Bacias independentes da vertente leste,3,2026-09-14 23:00,26,0.04,3.446,16.99,4.64
-Bacias independentes da vertente leste,3,2026-09-15 00:00,27,0.028,3.474,16.99,4.23
-Bacias independentes da vertente leste,3,2026-09-15 01:00,28,0.018,3.492,16.77,4.56
-Bacias independentes da vertente leste,3,2026-09-15 02:00,29,0.002,3.494,16.53,5.18
-Bacias independentes da vertente leste,3,2026-09-15 03:00,30,0.001,3.495,16.46,4.69
-Bacias independentes da vertente leste,3,2026-09-15 04:00,31,0.0,3.495,16.47,4.01
-Bacias independentes da vertente leste,3,2026-09-15 05:00,32,0.0,3.495,16.44,4.91
-Bacias independentes da vertente leste,3,2026-09-15 06:00,33,0.0,3.495,16.32,4.81
-Bacias independentes da vertente leste,3,2026-09-15 07:00,34,0.003,3.498,16.32,4.61
-Bacias independentes da vertente leste,3,2026-09-15 08:00,35,0.0,3.498,16.37,4.61
-Bacias independentes da vertente leste,3,2026-09-15 09:00,36,0.0,3.498,16.53,4.3
-Bacias independentes da vertente leste,3,2026-09-15 10:00,37,0.0,3.498,16.75,3.73
-Bacias independentes da vertente leste,3,2026-09-15 11:00,38,0.0,3.498,16.99,3.15
-Bacias independentes da vertente leste,3,2026-09-15 12:00,39,0.0,3.498,17.17,2.52
-Bacias independentes da vertente leste,3,2026-09-15 13:00,40,0.0,3.498,17.37,3.69
-Bacias independentes da vertente leste,3,2026-09-15 14:00,41,0.0,3.498,17.44,4.47
-Bacias independentes da vertente leste,3,2026-09-15 15:00,42,0.0,3.498,17.39,5.71
-Bacias independentes da vertente leste,3,2026-09-15 16:00,43,0.0,3.498,17.39,5.83
-Bacias independentes da vertente leste,3,2026-09-15 17:00,44,0.0,3.498,17.59,5.38
-Bacias independentes da vertente leste,3,2026-09-15 18:00,45,0.0,3.498,17.67,6.28
-Bacias independentes da vertente leste,3,2026-09-15 19:00,46,0.0,3.498,17.57,6.12
-Bacias independentes da vertente leste,3,2026-09-15 20:00,47,0.0,3.498,17.59,5.54
-Bacias independentes da vertente leste,3,2026-09-15 21:00,48,0.0,3.498,17.7,5.64
-Bacias independentes da vertente leste,3,2026-09-15 22:00,49,0.0,3.498,17.69,5.78
-Bacias independentes da vertente leste,3,2026-09-15 23:00,50,0.001,3.499,17.67,5.47
-Bacias independentes da vertente leste,3,2026-09-16 00:00,51,0.0,3.499,17.69,5.08
-Bacias independentes da vertente leste,3,2026-09-16 01:00,52,0.0,3.499,17.79,5.54
-Bacias independentes da vertente leste,3,2026-09-16 02:00,53,0.007,3.506,17.64,6.44
-Bacias independentes da vertente leste,3,2026-09-16 03:00,54,0.029,3.535,17.12,6.89
-Bacias independentes da vertente leste,3,2026-09-16 04:00,55,0.027,3.562,16.97,6.59
-Bacias independentes da vertente leste,3,2026-09-16 05:00,56,0.021,3.583,16.9,6.22
-Bacias independentes da vertente leste,3,2026-09-16 06:00,57,0.019,3.602,16.9,5.57
-Bacias independentes da vertente leste,3,2026-09-16 07:00,58,0.02,3.622,16.94,4.93
-Bacias independentes da vertente leste,3,2026-09-16 08:00,59,0.056,3.678,17.09,4.52
-Bacias independentes da vertente leste,3,2026-09-16 09:00,60,0.004,3.682,17.23,4.87
-Bacias independentes da vertente leste,3,2026-09-16 10:00,61,0.007,3.689,17.09,5.38
-Bacias independentes da vertente leste,3,2026-09-16 11:00,62,0.006,3.695,17.04,5.25
-Bacias independentes da vertente leste,3,2026-09-16 12:00,63,0.005,3.7,17.11,4.83
-Bacias independentes da vertente leste,3,2026-09-16 13:00,64,0.0,3.7,17.2,4.69
-Bacias independentes da vertente leste,3,2026-09-16 14:00,65,0.0,3.7,17.24,5.18
-Bacias independentes da vertente leste,3,2026-09-16 15:00,66,0.0,3.7,17.29,5.53
-Bacias independentes da vertente leste,3,2026-09-16 16:00,67,0.0,3.7,17.44,6.23
-Bacias independentes da vertente leste,3,2026-09-16 17:00,68,0.0,3.7,17.63,7.56
-Bacias independentes da vertente leste,3,2026-09-16 18:00,69,0.0,3.7,17.74,8.25
-Bacias independentes da vertente leste,3,2026-09-16 19:00,70,0.001,3.701,17.74,8.21
-Bacias independentes da vertente leste,3,2026-09-16 20:00,71,0.0,3.701,17.78,8.11
-Bacias independentes da vertente leste,3,2026-09-16 21:00,72,0.0,3.701,17.8,8.39
-Bacia Hidrográfica da vertente sul,5,2026-09-13 22:00,1,0.084,0.084,16.25,9.35
-Bacia Hidrográfica da vertente sul,5,2026-09-13 23:00,2,0.067,0.151,16.21,8.01
-Bacia Hidrográfica da vertente sul,5,2026-09-14 00:00,3,0.047,0.198,15.99,7.7
-Bacia Hidrográfica da vertente sul,5,2026-09-14 01:00,4,0.404,0.602,15.46,7.31
-Bacia Hidrográfica da vertente sul,5,2026-09-14 02:00,5,0.053,0.655,15.66,7.27
-Bacia Hidrográfica da vertente sul,5,2026-09-14 03:00,6,0.0,0.655,15.64,7.11
-Bacia Hidrográfica da vertente sul,5,2026-09-14 04:00,7,0.002,0.657,15.82,8.51
-Bacia Hidrográfica da vertente sul,5,2026-09-14 05:00,8,0.01,0.667,15.72,8.04
-Bacia Hidrográfica da vertente sul,5,2026-09-14 06:00,9,0.026,0.693,15.63,9.15
-Bacia Hidrográfica da vertente sul,5,2026-09-14 07:00,10,0.125,0.818,15.57,10.32
-Bacia Hidrográfica da vertente sul,5,2026-09-14 08:00,11,0.387,1.205,15.74,9.67
-Bacia Hidrográfica da vertente sul,5,2026-09-14 09:00,12,0.335,1.54,15.99,9.6
-Bacia Hidrográfica da vertente sul,5,2026-09-14 10:00,13,0.133,1.673,16.53,9.38
-Bacia Hidrográfica da vertente sul,5,2026-09-14 11:00,14,0.357,2.03,16.66,9.24
-Bacia Hidrográfica da vertente sul,5,2026-09-14 12:00,15,0.456,2.486,16.87,8.28
-Bacia Hidrográfica da vertente sul,5,2026-09-14 13:00,16,0.025,2.511,17.27,6.15
-Bacia Hidrográfica da vertente sul,5,2026-09-14 14:00,17,0.107,2.618,17.2,5.89
-Bacia Hidrográfica da vertente sul,5,2026-09-14 15:00,18,0.04,2.658,16.94,6.29
-Bacia Hidrográfica da vertente sul,5,2026-09-14 16:00,19,0.183,2.841,16.45,6.63
-Bacia Hidrográfica da vertente sul,5,2026-09-14 17:00,20,0.098,2.939,16.95,5.87
-Bacia Hidrográfica da vertente sul,5,2026-09-14 18:00,21,0.137,3.076,17.01,5.73
-Bacia Hidrográfica da vertente sul,5,2026-09-14 19:00,22,0.059,3.135,17.15,5.27
-Bacia Hidrográfica da vertente sul,5,2026-09-14 20:00,23,0.077,3.212,16.83,6.2
-Bacia Hidrográfica da vertente sul,5,2026-09-14 21:00,24,0.08,3.292,17.07,5.03
-Bacia Hidrográfica da vertente sul,5,2026-09-14 22:00,25,0.082,3.374,17.02,4.08
-Bacia Hidrográfica da vertente sul,5,2026-09-14 23:00,26,0.091,3.465,16.77,4.26
-Bacia Hidrográfica da vertente sul,5,2026-09-15 00:00,27,0.13,3.595,16.8,4.1
-Bacia Hidrográfica da vertente sul,5,2026-09-15 01:00,28,0.056,3.651,16.35,4.69
-Bacia Hidrográfica da vertente sul,5,2026-09-15 02:00,29,0.0,3.651,16.3,4.98
-Bacia Hidrográfica da vertente sul,5,2026-09-15 03:00,30,0.0,3.651,16.24,4.07
-Bacia Hidrográfica da vertente sul,5,2026-09-15 04:00,31,0.0,3.651,16.22,3.94
-Bacia Hidrográfica da vertente sul,5,2026-09-15 05:00,32,0.0,3.651,16.11,4.9
-Bacia Hidrográfica da vertente sul,5,2026-09-15 06:00,33,0.0,3.651,16.14,4.37
-Bacia Hidrográfica da vertente sul,5,2026-09-15 07:00,34,0.0,3.651,16.12,4.36
-Bacia Hidrográfica da vertente sul,5,2026-09-15 08:00,35,0.0,3.651,15.98,4.23
-Bacia Hidrográfica da vertente sul,5,2026-09-15 09:00,36,0.0,3.651,16.23,4.0
-Bacia Hidrográfica da vertente sul,5,2026-09-15 10:00,37,0.0,3.651,16.65,2.74
-Bacia Hidrográfica da vertente sul,5,2026-09-15 11:00,38,0.0,3.651,16.96,2.06
-Bacia Hidrográfica da vertente sul,5,2026-09-15 12:00,39,0.0,3.651,17.14,3.04
-Bacia Hidrográfica da vertente sul,5,2026-09-15 13:00,40,0.0,3.651,17.34,4.31
-Bacia Hidrográfica da vertente sul,5,2026-09-15 14:00,41,0.0,3.651,17.37,4.73
-Bacia Hidrográfica da vertente sul,5,2026-09-15 15:00,42,0.0,3.651,17.31,5.74
-Bacia Hidrográfica da vertente sul,5,2026-09-15 16:00,43,0.0,3.651,17.38,6.0
-Bacia Hidrográfica da vertente sul,5,2026-09-15 17:00,44,0.0,3.651,17.6,5.48
-Bacia Hidrográfica da vertente sul,5,2026-09-15 18:00,45,0.0,3.651,17.57,6.88
-Bacia Hidrográfica da vertente sul,5,2026-09-15 19:00,46,0.0,3.651,17.43,6.38
-Bacia Hidrográfica da vertente sul,5,2026-09-15 20:00,47,0.0,3.651,17.5,5.65
-Bacia Hidrográfica da vertente sul,5,2026-09-15 21:00,48,0.0,3.651,17.59,6.11
-Bacia Hidrográfica da vertente sul,5,2026-09-15 22:00,49,0.0,3.651,17.59,5.99
-Bacia Hidrográfica da vertente sul,5,2026-09-15 23:00,50,0.0,3.651,17.59,5.67
-Bacia Hidrográfica da vertente sul,5,2026-09-16 00:00,51,0.0,3.651,17.63,5.14
-Bacia Hidrográfica da vertente sul,5,2026-09-16 01:00,52,0.0,3.651,17.73,5.63
-Bacia Hidrográfica da vertente sul,5,2026-09-16 02:00,53,0.011,3.662,17.49,6.6
-Bacia Hidrográfica da vertente sul,5,2026-09-16 03:00,54,0.071,3.733,16.84,7.08
-Bacia Hidrográfica da vertente sul,5,2026-09-16 04:00,55,0.045,3.778,16.7,6.92
-Bacia Hidrográfica da vertente sul,5,2026-09-16 05:00,56,0.027,3.805,16.69,6.38
-Bacia Hidrográfica da vertente sul,5,2026-09-16 06:00,57,0.012,3.817,16.69,5.6
-Bacia Hidrográfica da vertente sul,5,2026-09-16 07:00,58,0.003,3.82,16.8,5.14
-Bacia Hidrográfica da vertente sul,5,2026-09-16 08:00,59,0.003,3.823,16.98,4.99
-Bacia Hidrográfica da vertente sul,5,2026-09-16 09:00,60,0.004,3.827,16.94,5.4
-Bacia Hidrográfica da vertente sul,5,2026-09-16 10:00,61,0.006,3.833,16.88,5.42
-Bacia Hidrográfica da vertente sul,5,2026-09-16 11:00,62,0.001,3.834,16.92,5.2
-Bacia Hidrográfica da vertente sul,5,2026-09-16 12:00,63,0.0,3.834,17.02,4.51
-Bacia Hidrográfica da vertente sul,5,2026-09-16 13:00,64,0.0,3.834,17.18,4.38
-Bacia Hidrográfica da vertente sul,5,2026-09-16 14:00,65,0.0,3.834,17.19,5.5
-Bacia Hidrográfica da vertente sul,5,2026-09-16 15:00,66,0.0,3.834,17.27,5.69
-Bacia Hidrográfica da vertente sul,5,2026-09-16 16:00,67,0.0,3.834,17.41,6.63
-Bacia Hidrográfica da vertente sul,5,2026-09-16 17:00,68,0.0,3.834,17.62,7.84
-Bacia Hidrográfica da vertente sul,5,2026-09-16 18:00,69,0.0,3.834,17.71,8.25
-Bacia Hidrográfica da vertente sul,5,2026-09-16 19:00,70,0.003,3.837,17.71,8.32
-Bacia Hidrográfica da vertente sul,5,2026-09-16 20:00,71,0.0,3.837,17.73,8.31
-Bacia Hidrográfica da vertente sul,5,2026-09-16 21:00,72,0.0,3.837,17.71,8.19
-Bacia Hidrográfica do Piraí,6,2026-09-13 22:00,1,0.105,0.105,15.4,6.86
-Bacia Hidrográfica do Piraí,6,2026-09-13 23:00,2,0.128,0.233,15.4,5.31
-Bacia Hidrográfica do Piraí,6,2026-09-14 00:00,3,0.119,0.352,14.95,4.84
-Bacia Hidrográfica do Piraí,6,2026-09-14 01:00,4,0.323,0.675,14.68,5.08
-Bacia Hidrográfica do Piraí,6,2026-09-14 02:00,5,0.017,0.692,14.77,6.0
-Bacia Hidrográfica do Piraí,6,2026-09-14 03:00,6,0.0,0.692,14.85,6.03
-Bacia Hidrográfica do Piraí,6,2026-09-14 04:00,7,0.0,0.692,14.99,7.08
-Bacia Hidrográfica do Piraí,6,2026-09-14 05:00,8,0.002,0.694,14.86,6.57
-Bacia Hidrográfica do Piraí,6,2026-09-14 06:00,9,0.06,0.754,14.78,7.44
-Bacia Hidrográfica do Piraí,6,2026-09-14 07:00,10,0.184,0.938,14.78,8.2
-Bacia Hidrográfica do Piraí,6,2026-09-14 08:00,11,0.227,1.165,15.02,7.95
-Bacia Hidrográfica do Piraí,6,2026-09-14 09:00,12,0.101,1.266,15.38,8.1
-Bacia Hidrográfica do Piraí,6,2026-09-14 10:00,13,0.154,1.42,15.89,8.34
-Bacia Hidrográfica do Piraí,6,2026-09-14 11:00,14,0.446,1.866,16.26,8.34
-Bacia Hidrográfica do Piraí,6,2026-09-14 12:00,15,0.209,2.075,16.67,8.09
-Bacia Hidrográfica do Piraí,6,2026-09-14 13:00,16,0.035,2.11,16.83,6.87
-Bacia Hidrográfica do Piraí,6,2026-09-14 14:00,17,0.228,2.338,16.43,6.59
-Bacia Hidrográfica do Piraí,6,2026-09-14 15:00,18,0.225,2.563,16.18,6.24
-Bacia Hidrográfica do Piraí,6,2026-09-14 16:00,19,0.422,2.985,16.27,5.59
-Bacia Hidrográfica do Piraí,6,2026-09-14 17:00,20,0.127,3.112,16.64,5.25
-Bacia Hidrográfica do Piraí,6,2026-09-14 18:00,21,0.168,3.28,16.43,5.25
-Bacia Hidrográfica do Piraí,6,2026-09-14 19:00,22,0.072,3.352,16.19,5.29
-Bacia Hidrográfica do Piraí,6,2026-09-14 20:00,23,0.105,3.457,16.26,5.12
-Bacia Hidrográfica do Piraí,6,2026-09-14 21:00,24,0.127,3.584,16.14,4.59
-Bacia Hidrográfica do Piraí,6,2026-09-14 22:00,25,0.103,3.687,15.98,3.19
-Bacia Hidrográfica do Piraí,6,2026-09-14 23:00,26,0.225,3.912,15.89,3.3
-Bacia Hidrográfica do Piraí,6,2026-09-15 00:00,27,0.219,4.131,15.66,4.06
-Bacia Hidrográfica do Piraí,6,2026-09-15 01:00,28,0.094,4.225,15.46,4.06
-Bacia Hidrográfica do Piraí,6,2026-09-15 02:00,29,0.003,4.228,15.35,4.38
-Bacia Hidrográfica do Piraí,6,2026-09-15 03:00,30,0.0,4.228,15.14,3.4
-Bacia Hidrográfica do Piraí,6,2026-09-15 04:00,31,0.0,4.228,14.82,4.34
-Bacia Hidrográfica do Piraí,6,2026-09-15 05:00,32,0.0,4.228,14.85,4.36
-Bacia Hidrográfica do Piraí,6,2026-09-15 06:00,33,0.0,4.228,14.85,3.83
-Bacia Hidrográfica do Piraí,6,2026-09-15 07:00,34,0.0,4.228,14.6,4.22
-Bacia Hidrográfica do Piraí,6,2026-09-15 08:00,35,0.0,4.228,15.08,3.59
-Bacia Hidrográfica do Piraí,6,2026-09-15 09:00,36,0.0,4.228,16.23,3.21
-Bacia Hidrográfica do Piraí,6,2026-09-15 10:00,37,0.0,4.228,17.04,1.99
-Bacia Hidrográfica do Piraí,6,2026-09-15 11:00,38,0.0,4.228,17.59,1.41
-Bacia Hidrográfica do Piraí,6,2026-09-15 12:00,39,0.002,4.23,17.56,3.92
-Bacia Hidrográfica do Piraí,6,2026-09-15 13:00,40,0.006,4.236,17.36,4.87
-Bacia Hidrográfica do Piraí,6,2026-09-15 14:00,41,0.0,4.236,17.34,5.01
-Bacia Hidrográfica do Piraí,6,2026-09-15 15:00,42,0.0,4.236,17.3,5.79
-Bacia Hidrográfica do Piraí,6,2026-09-15 16:00,43,0.0,4.236,17.39,5.82
-Bacia Hidrográfica do Piraí,6,2026-09-15 17:00,44,0.0,4.236,17.52,5.88
-Bacia Hidrográfica do Piraí,6,2026-09-15 18:00,45,0.0,4.236,17.36,6.93
-Bacia Hidrográfica do Piraí,6,2026-09-15 19:00,46,0.0,4.236,17.15,6.33
-Bacia Hidrográfica do Piraí,6,2026-09-15 20:00,47,0.0,4.236,17.13,5.75
-Bacia Hidrográfica do Piraí,6,2026-09-15 21:00,48,0.0,4.236,17.12,6.15
-Bacia Hidrográfica do Piraí,6,2026-09-15 22:00,49,0.006,4.242,17.19,5.94
-Bacia Hidrográfica do Piraí,6,2026-09-15 23:00,50,0.003,4.245,17.25,5.5
-Bacia Hidrográfica do Piraí,6,2026-09-16 00:00,51,0.0,4.245,17.3,4.98
-Bacia Hidrográfica do Piraí,6,2026-09-16 01:00,52,0.0,4.245,17.24,5.44
-Bacia Hidrográfica do Piraí,6,2026-09-16 02:00,53,0.018,4.263,16.77,6.35
-Bacia Hidrográfica do Piraí,6,2026-09-16 03:00,54,0.057,4.32,16.27,6.63
-Bacia Hidrográfica do Piraí,6,2026-09-16 04:00,55,0.06,4.38,16.09,6.26
-Bacia Hidrográfica do Piraí,6,2026-09-16 05:00,56,0.052,4.432,16.03,5.45
-Bacia Hidrográfica do Piraí,6,2026-09-16 06:00,57,0.013,4.445,16.17,4.67
-Bacia Hidrográfica do Piraí,6,2026-09-16 07:00,58,0.009,4.454,16.26,4.37
-Bacia Hidrográfica do Piraí,6,2026-09-16 08:00,59,0.001,4.455,16.33,4.69
-Bacia Hidrográfica do Piraí,6,2026-09-16 09:00,60,0.002,4.457,16.43,4.72
-Bacia Hidrográfica do Piraí,6,2026-09-16 10:00,61,0.005,4.462,16.73,4.26
-Bacia Hidrográfica do Piraí,6,2026-09-16 11:00,62,0.0,4.462,17.01,3.62
-Bacia Hidrográfica do Piraí,6,2026-09-16 12:00,63,0.002,4.464,17.15,3.05
-Bacia Hidrográfica do Piraí,6,2026-09-16 13:00,64,0.002,4.466,17.16,3.83
-Bacia Hidrográfica do Piraí,6,2026-09-16 14:00,65,0.003,4.469,17.28,4.9
-Bacia Hidrográfica do Piraí,6,2026-09-16 15:00,66,0.002,4.471,17.22,5.88
-Bacia Hidrográfica do Piraí,6,2026-09-16 16:00,67,0.0,4.471,17.38,6.7
-Bacia Hidrográfica do Piraí,6,2026-09-16 17:00,68,0.0,4.471,17.54,7.72
-Bacia Hidrográfica do Piraí,6,2026-09-16 18:00,69,0.0,4.471,17.56,8.1
-Bacia Hidrográfica do Piraí,6,2026-09-16 19:00,70,0.002,4.473,17.47,7.94
-Bacia Hidrográfica do Piraí,6,2026-09-16 20:00,71,0.0,4.473,17.47,7.76
-Bacia Hidrográfica do Piraí,6,2026-09-16 21:00,72,0.0,4.473,17.45,7.84
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-13 22:00,1,0.009,0.009,11.82,2.71
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-13 23:00,2,0.083,0.092,12.57,2.16
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 00:00,3,0.204,0.296,12.46,2.01
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 01:00,4,0.234,0.53,12.45,2.17
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 02:00,5,0.0,0.53,11.42,3.02
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 03:00,6,0.0,0.53,11.99,3.05
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 04:00,7,0.001,0.531,12.34,3.1
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 05:00,8,0.002,0.533,12.03,2.55
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 06:00,9,0.047,0.58,12.12,3.04
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 07:00,10,0.177,0.757,12.16,3.13
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 08:00,11,0.261,1.018,12.5,2.7
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 09:00,12,0.088,1.106,13.2,2.75
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 10:00,13,0.252,1.358,13.62,2.97
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 11:00,14,0.21,1.568,14.38,3.8
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 12:00,15,0.075,1.643,14.78,3.95
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 13:00,16,0.042,1.685,15.04,3.71
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 14:00,17,0.146,1.831,14.86,2.97
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 15:00,18,0.203,2.034,14.77,2.78
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 16:00,19,0.391,2.425,14.53,2.31
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 17:00,20,0.128,2.553,14.51,2.6
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 18:00,21,0.168,2.721,14.17,2.92
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 19:00,22,0.035,2.756,14.02,2.79
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 20:00,23,0.177,2.933,13.96,2.83
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 21:00,24,0.163,3.096,13.75,2.61
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 22:00,25,0.183,3.279,13.67,2.27
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 23:00,26,0.337,3.616,13.5,2.49
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 00:00,27,0.156,3.772,13.33,2.65
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 01:00,28,0.01,3.782,12.39,3.04
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 02:00,29,0.0,3.782,11.84,2.92
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 03:00,30,0.0,3.782,11.47,2.91
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 04:00,31,0.0,3.782,11.11,3.44
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 05:00,32,0.0,3.782,11.64,3.12
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 06:00,33,0.0,3.782,11.54,3.24
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 07:00,34,0.0,3.782,11.69,3.42
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 08:00,35,0.0,3.782,13.85,3.31
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 09:00,36,0.0,3.782,15.99,3.36
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 10:00,37,0.0,3.782,17.47,3.48
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 11:00,38,0.007,3.789,18.92,2.72
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 12:00,39,0.021,3.81,19.68,1.85
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 13:00,40,0.073,3.883,19.43,3.66
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 14:00,41,0.04,3.923,18.79,4.67
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 15:00,42,0.001,3.924,18.39,5.06
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 16:00,43,0.0,3.924,18.06,4.43
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 17:00,44,0.0,3.924,17.72,4.27
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 18:00,45,0.0,3.924,16.82,4.38
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 19:00,46,0.0,3.924,14.94,3.31
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 20:00,47,0.0,3.924,14.29,3.15
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 21:00,48,0.0,3.924,13.98,3.24
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 22:00,49,0.002,3.926,15.12,2.88
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 23:00,50,0.003,3.929,15.37,2.32
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 00:00,51,0.001,3.93,15.41,2.38
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 01:00,52,0.0,3.93,15.32,2.84
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 02:00,53,0.018,3.948,15.01,3.32
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 03:00,54,0.046,3.994,14.58,3.48
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 04:00,55,0.058,4.052,14.25,3.2
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 05:00,56,0.037,4.089,14.07,2.52
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 06:00,57,0.007,4.096,13.96,2.07
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 07:00,58,0.003,4.099,14.28,1.88
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 08:00,59,0.009,4.108,14.77,2.44
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 09:00,60,0.016,4.124,15.67,2.05
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 10:00,61,0.01,4.134,16.59,1.59
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 11:00,62,0.038,4.172,17.81,0.63
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 12:00,63,0.045,4.217,17.97,0.71
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 13:00,64,0.021,4.238,17.49,2.77
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 14:00,65,0.045,4.283,18.22,1.61
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 15:00,66,0.02,4.303,17.75,3.87
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 16:00,67,0.009,4.312,17.6,4.87
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 17:00,68,0.0,4.312,17.36,5.8
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 18:00,69,0.0,4.312,16.6,4.87
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 19:00,70,0.0,4.312,15.45,4.02
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 20:00,71,0.0,4.312,15.93,3.76
-Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 21:00,72,0.0,4.312,15.99,3.78
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-13 22:00,1,0.006,0.006,14.75,5.04
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-13 23:00,2,0.045,0.051,14.76,4.23
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 00:00,3,0.184,0.235,14.42,3.57
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 01:00,4,0.4,0.635,14.24,4.13
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 02:00,5,0.017,0.652,14.06,4.81
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 03:00,6,0.009,0.661,14.16,4.81
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 04:00,7,0.002,0.663,14.36,5.52
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 05:00,8,0.002,0.665,14.23,5.07
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 06:00,9,0.001,0.666,14.32,6.27
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 07:00,10,0.1,0.766,14.05,7.16
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 08:00,11,0.429,1.195,14.24,6.52
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 09:00,12,0.151,1.346,14.85,6.45
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 10:00,13,0.061,1.407,15.63,6.95
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 11:00,14,0.255,1.662,15.98,7.32
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 12:00,15,0.37,2.032,16.17,6.9
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 13:00,16,0.415,2.447,16.29,5.42
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 14:00,17,0.537,2.984,16.18,5.13
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 15:00,18,0.589,3.573,15.84,5.18
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 16:00,19,0.563,4.136,15.58,4.99
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 17:00,20,0.169,4.305,15.82,4.6
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 18:00,21,0.211,4.516,15.82,4.78
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 19:00,22,0.156,4.672,15.55,4.32
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 20:00,23,0.229,4.901,15.4,4.77
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 21:00,24,0.156,5.057,15.31,4.48
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 22:00,25,0.143,5.2,15.19,3.83
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 23:00,26,0.097,5.297,15.17,4.24
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 00:00,27,0.014,5.311,15.06,4.1
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 01:00,28,0.001,5.312,14.89,4.35
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 02:00,29,0.0,5.312,14.67,4.46
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 03:00,30,0.0,5.312,14.78,3.88
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 04:00,31,0.0,5.312,14.74,4.43
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 05:00,32,0.001,5.313,14.81,4.72
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 06:00,33,0.0,5.313,14.84,4.52
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 07:00,34,0.0,5.313,14.74,4.71
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 08:00,35,0.0,5.313,15.38,4.21
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 09:00,36,0.0,5.313,16.41,4.21
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 10:00,37,0.0,5.313,17.25,3.92
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 11:00,38,0.0,5.313,18.07,3.27
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 12:00,39,0.0,5.313,18.78,1.54
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 13:00,40,0.011,5.324,18.66,3.78
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 14:00,41,0.016,5.34,17.94,5.86
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 15:00,42,0.0,5.34,17.64,6.13
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 16:00,43,0.0,5.34,17.57,5.31
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 17:00,44,0.0,5.34,17.61,4.68
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 18:00,45,0.0,5.34,17.5,5.28
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 19:00,46,0.0,5.34,17.06,5.08
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 20:00,47,0.001,5.341,16.89,4.96
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 21:00,48,0.001,5.342,16.83,4.85
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 22:00,49,0.031,5.373,16.91,5.0
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 23:00,50,0.054,5.427,16.91,4.65
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 00:00,51,0.026,5.453,16.97,4.31
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 01:00,52,0.003,5.456,16.99,4.67
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 02:00,53,0.014,5.47,16.73,5.13
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 03:00,54,0.037,5.507,16.19,5.72
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 04:00,55,0.039,5.546,15.81,5.53
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 05:00,56,0.042,5.588,15.73,4.94
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 06:00,57,0.035,5.623,15.74,4.03
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 07:00,58,0.069,5.692,15.81,3.25
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 08:00,59,0.008,5.7,16.24,3.28
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 09:00,60,0.003,5.703,16.41,3.66
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 10:00,61,0.027,5.73,16.45,3.51
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 11:00,62,0.011,5.741,17.01,2.37
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 12:00,63,0.005,5.746,17.11,2.14
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 13:00,64,0.002,5.748,17.18,3.48
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 14:00,65,0.0,5.748,17.32,3.7
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 15:00,66,0.0,5.748,17.3,4.65
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 16:00,67,0.0,5.748,17.32,5.39
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 17:00,68,0.0,5.748,17.49,6.69
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 18:00,69,0.0,5.748,17.43,7.28
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 19:00,70,0.002,5.75,17.2,7.09
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 20:00,71,0.0,5.75,17.38,6.5
-Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 21:00,72,0.0,5.75,17.41,6.67
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-13 22:00,1,0.055,0.055,16.14,8.51
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-13 23:00,2,0.05,0.105,16.05,6.95
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 00:00,3,0.064,0.169,15.68,6.26
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 01:00,4,0.379,0.548,15.24,6.29
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 02:00,5,0.022,0.57,15.48,6.68
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 03:00,6,0.0,0.57,15.51,6.59
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 04:00,7,0.001,0.571,15.68,7.98
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 05:00,8,0.005,0.576,15.57,7.5
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 06:00,9,0.028,0.604,15.48,8.64
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 07:00,10,0.122,0.726,15.41,9.68
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 08:00,11,0.369,1.095,15.67,9.25
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 09:00,12,0.275,1.37,15.84,9.19
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 10:00,13,0.113,1.483,16.4,9.27
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 11:00,14,0.41,1.893,16.53,9.22
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 12:00,15,0.239,2.132,16.84,8.67
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 13:00,16,0.032,2.164,17.19,6.7
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 14:00,17,0.233,2.397,16.95,6.55
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 15:00,18,0.103,2.5,16.58,6.9
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 16:00,19,0.284,2.784,16.36,6.49
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 17:00,20,0.097,2.881,16.91,5.91
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 18:00,21,0.172,3.053,16.9,5.85
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 19:00,22,0.062,3.115,16.9,5.48
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 20:00,23,0.093,3.208,16.66,6.14
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 21:00,24,0.099,3.307,16.87,5.09
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 22:00,25,0.085,3.392,16.68,3.98
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 23:00,26,0.161,3.553,16.5,4.1
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 00:00,27,0.162,3.715,16.4,4.22
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 01:00,28,0.049,3.764,15.98,4.73
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 02:00,29,0.0,3.764,16.02,4.98
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 03:00,30,0.0,3.764,15.95,3.92
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 04:00,31,0.0,3.764,15.8,4.5
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 05:00,32,0.001,3.765,15.66,5.07
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 06:00,33,0.0,3.765,15.72,4.47
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 07:00,34,0.0,3.765,15.51,4.76
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 08:00,35,0.0,3.765,15.42,4.33
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 09:00,36,0.0,3.765,16.09,4.11
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 10:00,37,0.0,3.765,16.79,2.71
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 11:00,38,0.0,3.765,17.25,1.73
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 12:00,39,0.0,3.765,17.25,3.5
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 13:00,40,0.0,3.765,17.36,4.59
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 14:00,41,0.0,3.765,17.36,4.95
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 15:00,42,0.0,3.765,17.31,5.99
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 16:00,43,0.0,3.765,17.39,5.94
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 17:00,44,0.0,3.765,17.61,5.46
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 18:00,45,0.0,3.765,17.55,6.98
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 19:00,46,0.0,3.765,17.41,6.4
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 20:00,47,0.0,3.765,17.46,5.78
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 21:00,48,0.0,3.765,17.55,6.24
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 22:00,49,0.003,3.768,17.53,6.12
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 23:00,50,0.0,3.768,17.54,5.78
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 00:00,51,0.0,3.768,17.6,5.19
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 01:00,52,0.0,3.768,17.67,5.73
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 02:00,53,0.01,3.778,17.37,6.63
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 03:00,54,0.081,3.859,16.69,7.16
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 04:00,55,0.065,3.924,16.52,6.96
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 05:00,56,0.035,3.959,16.49,6.35
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 06:00,57,0.011,3.97,16.58,5.41
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 07:00,58,0.006,3.976,16.69,4.93
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 08:00,59,0.002,3.978,16.85,4.89
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 09:00,60,0.003,3.981,16.76,5.35
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 10:00,61,0.003,3.984,16.8,5.16
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 11:00,62,0.0,3.984,16.9,4.8
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 12:00,63,0.0,3.984,17.05,4.08
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 13:00,64,0.0,3.984,17.21,4.11
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 14:00,65,0.0,3.984,17.25,5.33
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 15:00,66,0.0,3.984,17.27,5.66
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 16:00,67,0.0,3.984,17.4,6.6
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 17:00,68,0.0,3.984,17.61,7.86
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 18:00,69,0.0,3.984,17.72,8.34
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 19:00,70,0.002,3.986,17.72,8.3
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 20:00,71,0.0,3.986,17.73,8.25
-Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 21:00,72,0.0,3.986,17.7,8.39
+Bacia Hidrográfica do Palmital,2,2026-09-14 22:00,1,0.0,0.0,15.8,3.63
+Bacia Hidrográfica do Palmital,2,2026-09-14 23:00,2,0.0,0.0,16.05,2.85
+Bacia Hidrográfica do Palmital,2,2026-09-15 00:00,3,0.0,0.0,16.02,3.16
+Bacia Hidrográfica do Palmital,2,2026-09-15 01:00,4,0.0,0.0,16.16,2.65
+Bacia Hidrográfica do Palmital,2,2026-09-15 02:00,5,0.0,0.0,16.09,3.84
+Bacia Hidrográfica do Palmital,2,2026-09-15 03:00,6,0.0,0.0,15.77,4.85
+Bacia Hidrográfica do Palmital,2,2026-09-15 04:00,7,0.0,0.0,15.36,3.97
+Bacia Hidrográfica do Palmital,2,2026-09-15 05:00,8,0.0,0.0,15.23,4.44
+Bacia Hidrográfica do Palmital,2,2026-09-15 06:00,9,0.0,0.0,14.58,4.64
+Bacia Hidrográfica do Palmital,2,2026-09-15 07:00,10,0.0,0.0,14.53,5.1
+Bacia Hidrográfica do Palmital,2,2026-09-15 08:00,11,0.0,0.0,14.86,4.68
+Bacia Hidrográfica do Palmital,2,2026-09-15 09:00,12,0.0,0.0,15.88,4.55
+Bacia Hidrográfica do Palmital,2,2026-09-15 10:00,13,0.0,0.0,16.77,3.38
+Bacia Hidrográfica do Palmital,2,2026-09-15 11:00,14,0.0,0.0,17.47,1.9
+Bacia Hidrográfica do Palmital,2,2026-09-15 12:00,15,0.0,0.0,17.64,1.55
+Bacia Hidrográfica do Palmital,2,2026-09-15 13:00,16,0.0,0.0,17.74,3.49
+Bacia Hidrográfica do Palmital,2,2026-09-15 14:00,17,0.0,0.0,17.88,4.25
+Bacia Hidrográfica do Palmital,2,2026-09-15 15:00,18,0.0,0.0,17.7,5.21
+Bacia Hidrográfica do Palmital,2,2026-09-15 16:00,19,0.0,0.0,17.61,5.34
+Bacia Hidrográfica do Palmital,2,2026-09-15 17:00,20,0.0,0.0,17.81,4.6
+Bacia Hidrográfica do Palmital,2,2026-09-15 18:00,21,0.0,0.0,17.99,4.4
+Bacia Hidrográfica do Palmital,2,2026-09-15 19:00,22,0.001,0.001,17.93,5.0
+Bacia Hidrográfica do Palmital,2,2026-09-15 20:00,23,0.006,0.007,17.71,5.9
+Bacia Hidrográfica do Palmital,2,2026-09-15 21:00,24,0.007,0.014,17.59,6.33
+Bacia Hidrográfica do Palmital,2,2026-09-15 22:00,25,0.003,0.017,17.47,7.11
+Bacia Hidrográfica do Palmital,2,2026-09-15 23:00,26,0.0,0.017,17.35,7.44
+Bacia Hidrográfica do Palmital,2,2026-09-16 00:00,27,0.004,0.021,17.32,7.26
+Bacia Hidrográfica do Palmital,2,2026-09-16 01:00,28,0.006,0.027,17.46,6.92
+Bacia Hidrográfica do Palmital,2,2026-09-16 02:00,29,0.017,0.044,17.29,6.98
+Bacia Hidrográfica do Palmital,2,2026-09-16 03:00,30,0.001,0.045,17.31,6.35
+Bacia Hidrográfica do Palmital,2,2026-09-16 04:00,31,0.0,0.045,17.36,6.37
+Bacia Hidrográfica do Palmital,2,2026-09-16 05:00,32,0.001,0.046,17.16,6.5
+Bacia Hidrográfica do Palmital,2,2026-09-16 06:00,33,0.0,0.046,16.94,6.12
+Bacia Hidrográfica do Palmital,2,2026-09-16 07:00,34,0.0,0.046,16.98,5.52
+Bacia Hidrográfica do Palmital,2,2026-09-16 08:00,35,0.0,0.046,17.11,4.67
+Bacia Hidrográfica do Palmital,2,2026-09-16 09:00,36,0.001,0.047,17.24,3.94
+Bacia Hidrográfica do Palmital,2,2026-09-16 10:00,37,0.0,0.047,17.29,3.27
+Bacia Hidrográfica do Palmital,2,2026-09-16 11:00,38,0.012,0.059,17.2,3.04
+Bacia Hidrográfica do Palmital,2,2026-09-16 12:00,39,0.002,0.061,17.19,2.11
+Bacia Hidrográfica do Palmital,2,2026-09-16 13:00,40,0.0,0.061,17.38,2.45
+Bacia Hidrográfica do Palmital,2,2026-09-16 14:00,41,0.0,0.061,17.52,3.72
+Bacia Hidrográfica do Palmital,2,2026-09-16 15:00,42,0.0,0.061,17.65,4.51
+Bacia Hidrográfica do Palmital,2,2026-09-16 16:00,43,0.0,0.061,17.82,5.36
+Bacia Hidrográfica do Palmital,2,2026-09-16 17:00,44,0.0,0.061,18.02,6.46
+Bacia Hidrográfica do Palmital,2,2026-09-16 18:00,45,0.0,0.061,18.1,7.14
+Bacia Hidrográfica do Palmital,2,2026-09-16 19:00,46,0.0,0.061,18.08,7.55
+Bacia Hidrográfica do Palmital,2,2026-09-16 20:00,47,0.0,0.061,18.0,7.49
+Bacia Hidrográfica do Palmital,2,2026-09-16 21:00,48,0.0,0.061,17.95,6.99
+Bacia Hidrográfica do Palmital,2,2026-09-16 22:00,49,0.0,0.061,17.92,6.49
+Bacia Hidrográfica do Palmital,2,2026-09-16 23:00,50,0.0,0.061,17.82,5.88
+Bacia Hidrográfica do Palmital,2,2026-09-17 00:00,51,0.0,0.061,17.76,5.26
+Bacia Hidrográfica do Palmital,2,2026-09-17 01:00,52,0.0,0.061,17.72,4.67
+Bacia Hidrográfica do Palmital,2,2026-09-17 02:00,53,0.001,0.062,17.64,4.3
+Bacia Hidrográfica do Palmital,2,2026-09-17 03:00,54,0.002,0.064,17.47,3.87
+Bacia Hidrográfica do Palmital,2,2026-09-17 04:00,55,0.003,0.067,17.26,3.6
+Bacia Hidrográfica do Palmital,2,2026-09-17 05:00,56,0.003,0.07,17.03,3.55
+Bacia Hidrográfica do Palmital,2,2026-09-17 06:00,57,0.002,0.072,16.94,3.13
+Bacia Hidrográfica do Palmital,2,2026-09-17 07:00,58,0.001,0.073,17.04,2.86
+Bacia Hidrográfica do Palmital,2,2026-09-17 08:00,59,0.017,0.09,17.21,2.78
+Bacia Hidrográfica do Palmital,2,2026-09-17 09:00,60,0.01,0.1,17.41,3.31
+Bacia Hidrográfica do Palmital,2,2026-09-17 10:00,61,0.003,0.103,17.54,3.64
+Bacia Hidrográfica do Palmital,2,2026-09-17 11:00,62,0.0,0.103,17.53,3.78
+Bacia Hidrográfica do Palmital,2,2026-09-17 12:00,63,0.0,0.103,17.58,4.17
+Bacia Hidrográfica do Palmital,2,2026-09-17 13:00,64,0.0,0.103,17.68,4.31
+Bacia Hidrográfica do Palmital,2,2026-09-17 14:00,65,0.0,0.103,17.77,4.45
+Bacia Hidrográfica do Palmital,2,2026-09-17 15:00,66,0.0,0.103,17.88,4.55
+Bacia Hidrográfica do Palmital,2,2026-09-17 16:00,67,0.0,0.103,17.99,4.63
+Bacia Hidrográfica do Palmital,2,2026-09-17 17:00,68,0.0,0.103,18.2,4.67
+Bacia Hidrográfica do Palmital,2,2026-09-17 18:00,69,0.032,0.135,18.33,4.87
+Bacia Hidrográfica do Palmital,2,2026-09-17 19:00,70,0.001,0.136,18.29,4.84
+Bacia Hidrográfica do Palmital,2,2026-09-17 20:00,71,0.0,0.136,18.59,5.19
+Bacia Hidrográfica do Palmital,2,2026-09-17 21:00,72,0.0,0.136,18.71,5.78
+Bacias independentes da vertente leste,3,2026-09-14 22:00,1,0.0,0.0,16.08,4.2
+Bacias independentes da vertente leste,3,2026-09-14 23:00,2,0.0,0.0,16.25,3.27
+Bacias independentes da vertente leste,3,2026-09-15 00:00,3,0.0,0.0,16.27,3.26
+Bacias independentes da vertente leste,3,2026-09-15 01:00,4,0.0,0.0,16.42,2.68
+Bacias independentes da vertente leste,3,2026-09-15 02:00,5,0.0,0.0,16.37,3.64
+Bacias independentes da vertente leste,3,2026-09-15 03:00,6,0.0,0.0,16.09,4.9
+Bacias independentes da vertente leste,3,2026-09-15 04:00,7,0.0,0.0,15.85,4.17
+Bacias independentes da vertente leste,3,2026-09-15 05:00,8,0.0,0.0,15.82,4.57
+Bacias independentes da vertente leste,3,2026-09-15 06:00,9,0.0,0.0,15.07,4.84
+Bacias independentes da vertente leste,3,2026-09-15 07:00,10,0.0,0.0,14.9,5.31
+Bacias independentes da vertente leste,3,2026-09-15 08:00,11,0.0,0.0,15.13,5.16
+Bacias independentes da vertente leste,3,2026-09-15 09:00,12,0.0,0.0,15.81,5.53
+Bacias independentes da vertente leste,3,2026-09-15 10:00,13,0.0,0.0,16.45,4.24
+Bacias independentes da vertente leste,3,2026-09-15 11:00,14,0.0,0.0,17.09,2.96
+Bacias independentes da vertente leste,3,2026-09-15 12:00,15,0.0,0.0,17.43,0.5
+Bacias independentes da vertente leste,3,2026-09-15 13:00,16,0.0,0.0,17.51,2.08
+Bacias independentes da vertente leste,3,2026-09-15 14:00,17,0.0,0.0,17.49,3.87
+Bacias independentes da vertente leste,3,2026-09-15 15:00,18,0.0,0.0,17.43,5.11
+Bacias independentes da vertente leste,3,2026-09-15 16:00,19,0.0,0.0,17.58,5.91
+Bacias independentes da vertente leste,3,2026-09-15 17:00,20,0.0,0.0,17.81,5.76
+Bacias independentes da vertente leste,3,2026-09-15 18:00,21,0.003,0.003,17.91,4.93
+Bacias independentes da vertente leste,3,2026-09-15 19:00,22,0.001,0.004,17.78,5.46
+Bacias independentes da vertente leste,3,2026-09-15 20:00,23,0.003,0.007,17.65,6.09
+Bacias independentes da vertente leste,3,2026-09-15 21:00,24,0.001,0.008,17.51,6.48
+Bacias independentes da vertente leste,3,2026-09-15 22:00,25,0.018,0.026,17.44,7.18
+Bacias independentes da vertente leste,3,2026-09-15 23:00,26,0.001,0.027,17.26,7.28
+Bacias independentes da vertente leste,3,2026-09-16 00:00,27,0.0,0.027,17.36,7.26
+Bacias independentes da vertente leste,3,2026-09-16 01:00,28,0.001,0.028,17.46,7.05
+Bacias independentes da vertente leste,3,2026-09-16 02:00,29,0.003,0.031,17.4,6.96
+Bacias independentes da vertente leste,3,2026-09-16 03:00,30,0.0,0.031,17.4,6.55
+Bacias independentes da vertente leste,3,2026-09-16 04:00,31,0.0,0.031,17.37,6.56
+Bacias independentes da vertente leste,3,2026-09-16 05:00,32,0.0,0.031,17.09,6.74
+Bacias independentes da vertente leste,3,2026-09-16 06:00,33,0.0,0.031,17.03,6.54
+Bacias independentes da vertente leste,3,2026-09-16 07:00,34,0.0,0.031,17.05,6.06
+Bacias independentes da vertente leste,3,2026-09-16 08:00,35,0.0,0.031,17.16,5.33
+Bacias independentes da vertente leste,3,2026-09-16 09:00,36,0.001,0.032,17.27,4.48
+Bacias independentes da vertente leste,3,2026-09-16 10:00,37,0.0,0.032,17.3,3.87
+Bacias independentes da vertente leste,3,2026-09-16 11:00,38,0.0,0.032,17.21,3.45
+Bacias independentes da vertente leste,3,2026-09-16 12:00,39,0.002,0.034,17.21,2.72
+Bacias independentes da vertente leste,3,2026-09-16 13:00,40,0.0,0.034,17.37,2.74
+Bacias independentes da vertente leste,3,2026-09-16 14:00,41,0.0,0.034,17.52,3.27
+Bacias independentes da vertente leste,3,2026-09-16 15:00,42,0.0,0.034,17.65,4.54
+Bacias independentes da vertente leste,3,2026-09-16 16:00,43,0.0,0.034,17.84,5.69
+Bacias independentes da vertente leste,3,2026-09-16 17:00,44,0.0,0.034,18.0,6.63
+Bacias independentes da vertente leste,3,2026-09-16 18:00,45,0.0,0.034,18.05,7.1
+Bacias independentes da vertente leste,3,2026-09-16 19:00,46,0.0,0.034,17.98,7.36
+Bacias independentes da vertente leste,3,2026-09-16 20:00,47,0.0,0.034,17.88,7.36
+Bacias independentes da vertente leste,3,2026-09-16 21:00,48,0.0,0.034,17.9,6.96
+Bacias independentes da vertente leste,3,2026-09-16 22:00,49,0.0,0.034,17.88,6.53
+Bacias independentes da vertente leste,3,2026-09-16 23:00,50,0.0,0.034,17.8,6.06
+Bacias independentes da vertente leste,3,2026-09-17 00:00,51,0.0,0.034,17.72,5.5
+Bacias independentes da vertente leste,3,2026-09-17 01:00,52,0.0,0.034,17.66,4.84
+Bacias independentes da vertente leste,3,2026-09-17 02:00,53,0.0,0.034,17.59,4.29
+Bacias independentes da vertente leste,3,2026-09-17 03:00,54,0.0,0.034,17.48,3.8
+Bacias independentes da vertente leste,3,2026-09-17 04:00,55,0.0,0.034,17.42,3.31
+Bacias independentes da vertente leste,3,2026-09-17 05:00,56,0.002,0.036,17.47,3.02
+Bacias independentes da vertente leste,3,2026-09-17 06:00,57,0.0,0.036,17.5,2.73
+Bacias independentes da vertente leste,3,2026-09-17 07:00,58,0.015,0.051,17.45,2.66
+Bacias independentes da vertente leste,3,2026-09-17 08:00,59,0.029,0.08,17.3,3.0
+Bacias independentes da vertente leste,3,2026-09-17 09:00,60,0.008,0.088,17.27,3.28
+Bacias independentes da vertente leste,3,2026-09-17 10:00,61,0.002,0.09,17.33,3.67
+Bacias independentes da vertente leste,3,2026-09-17 11:00,62,0.0,0.09,17.34,3.84
+Bacias independentes da vertente leste,3,2026-09-17 12:00,63,0.001,0.091,17.45,3.72
+Bacias independentes da vertente leste,3,2026-09-17 13:00,64,0.0,0.091,17.59,3.76
+Bacias independentes da vertente leste,3,2026-09-17 14:00,65,0.0,0.091,17.74,3.91
+Bacias independentes da vertente leste,3,2026-09-17 15:00,66,0.001,0.092,17.81,3.97
+Bacias independentes da vertente leste,3,2026-09-17 16:00,67,0.0,0.092,17.86,3.5
+Bacias independentes da vertente leste,3,2026-09-17 17:00,68,0.0,0.092,17.97,3.32
+Bacias independentes da vertente leste,3,2026-09-17 18:00,69,0.0,0.092,17.99,3.42
+Bacias independentes da vertente leste,3,2026-09-17 19:00,70,0.0,0.092,18.22,3.93
+Bacias independentes da vertente leste,3,2026-09-17 20:00,71,0.0,0.092,18.61,5.15
+Bacias independentes da vertente leste,3,2026-09-17 21:00,72,0.0,0.092,18.71,5.55
+Bacia Hidrográfica da vertente sul,5,2026-09-14 22:00,1,0.0,0.0,15.96,3.59
+Bacia Hidrográfica da vertente sul,5,2026-09-14 23:00,2,0.0,0.0,16.18,2.72
+Bacia Hidrográfica da vertente sul,5,2026-09-15 00:00,3,0.0,0.0,16.15,3.16
+Bacia Hidrográfica da vertente sul,5,2026-09-15 01:00,4,0.0,0.0,16.25,2.19
+Bacia Hidrográfica da vertente sul,5,2026-09-15 02:00,5,0.0,0.0,16.07,4.12
+Bacia Hidrográfica da vertente sul,5,2026-09-15 03:00,6,0.0,0.0,15.64,4.98
+Bacia Hidrográfica da vertente sul,5,2026-09-15 04:00,7,0.0,0.0,15.48,3.97
+Bacia Hidrográfica da vertente sul,5,2026-09-15 05:00,8,0.0,0.0,15.06,4.98
+Bacia Hidrográfica da vertente sul,5,2026-09-15 06:00,9,0.0,0.0,14.07,4.91
+Bacia Hidrográfica da vertente sul,5,2026-09-15 07:00,10,0.0,0.0,14.39,5.6
+Bacia Hidrográfica da vertente sul,5,2026-09-15 08:00,11,0.0,0.0,14.92,5.2
+Bacia Hidrográfica da vertente sul,5,2026-09-15 09:00,12,0.0,0.0,15.8,5.85
+Bacia Hidrográfica da vertente sul,5,2026-09-15 10:00,13,0.0,0.0,16.63,4.11
+Bacia Hidrográfica da vertente sul,5,2026-09-15 11:00,14,0.0,0.0,17.43,2.54
+Bacia Hidrográfica da vertente sul,5,2026-09-15 12:00,15,0.0,0.0,17.67,0.74
+Bacia Hidrográfica da vertente sul,5,2026-09-15 13:00,16,0.0,0.0,17.58,3.34
+Bacia Hidrográfica da vertente sul,5,2026-09-15 14:00,17,0.0,0.0,17.4,4.87
+Bacia Hidrográfica da vertente sul,5,2026-09-15 15:00,18,0.0,0.0,17.44,5.89
+Bacia Hidrográfica da vertente sul,5,2026-09-15 16:00,19,0.0,0.0,17.6,6.35
+Bacia Hidrográfica da vertente sul,5,2026-09-15 17:00,20,0.0,0.0,17.73,6.16
+Bacia Hidrográfica da vertente sul,5,2026-09-15 18:00,21,0.009,0.009,17.73,5.46
+Bacia Hidrográfica da vertente sul,5,2026-09-15 19:00,22,0.002,0.011,17.55,5.76
+Bacia Hidrográfica da vertente sul,5,2026-09-15 20:00,23,0.0,0.011,17.48,6.23
+Bacia Hidrográfica da vertente sul,5,2026-09-15 21:00,24,0.0,0.011,17.39,6.79
+Bacia Hidrográfica da vertente sul,5,2026-09-15 22:00,25,0.003,0.014,17.35,7.19
+Bacia Hidrográfica da vertente sul,5,2026-09-15 23:00,26,0.0,0.014,17.17,7.3
+Bacia Hidrográfica da vertente sul,5,2026-09-16 00:00,27,0.0,0.014,17.36,7.19
+Bacia Hidrográfica da vertente sul,5,2026-09-16 01:00,28,0.001,0.015,17.37,6.88
+Bacia Hidrográfica da vertente sul,5,2026-09-16 02:00,29,0.002,0.017,17.32,6.6
+Bacia Hidrográfica da vertente sul,5,2026-09-16 03:00,30,0.0,0.017,17.32,6.39
+Bacia Hidrográfica da vertente sul,5,2026-09-16 04:00,31,0.0,0.017,17.03,6.82
+Bacia Hidrográfica da vertente sul,5,2026-09-16 05:00,32,0.0,0.017,16.85,6.66
+Bacia Hidrográfica da vertente sul,5,2026-09-16 06:00,33,0.0,0.017,16.9,6.29
+Bacia Hidrográfica da vertente sul,5,2026-09-16 07:00,34,0.0,0.017,16.97,5.89
+Bacia Hidrográfica da vertente sul,5,2026-09-16 08:00,35,0.0,0.017,17.04,5.17
+Bacia Hidrográfica da vertente sul,5,2026-09-16 09:00,36,0.0,0.017,17.1,4.36
+Bacia Hidrográfica da vertente sul,5,2026-09-16 10:00,37,0.0,0.017,17.04,3.95
+Bacia Hidrográfica da vertente sul,5,2026-09-16 11:00,38,0.0,0.017,17.0,3.08
+Bacia Hidrográfica da vertente sul,5,2026-09-16 12:00,39,0.0,0.017,17.13,2.53
+Bacia Hidrográfica da vertente sul,5,2026-09-16 13:00,40,0.0,0.017,17.36,2.73
+Bacia Hidrográfica da vertente sul,5,2026-09-16 14:00,41,0.0,0.017,17.54,3.71
+Bacia Hidrográfica da vertente sul,5,2026-09-16 15:00,42,0.0,0.017,17.67,4.83
+Bacia Hidrográfica da vertente sul,5,2026-09-16 16:00,43,0.0,0.017,17.86,5.82
+Bacia Hidrográfica da vertente sul,5,2026-09-16 17:00,44,0.0,0.017,18.0,6.78
+Bacia Hidrográfica da vertente sul,5,2026-09-16 18:00,45,0.0,0.017,18.02,7.27
+Bacia Hidrográfica da vertente sul,5,2026-09-16 19:00,46,0.0,0.017,17.9,7.49
+Bacia Hidrográfica da vertente sul,5,2026-09-16 20:00,47,0.0,0.017,17.79,7.28
+Bacia Hidrográfica da vertente sul,5,2026-09-16 21:00,48,0.0,0.017,17.8,6.81
+Bacia Hidrográfica da vertente sul,5,2026-09-16 22:00,49,0.0,0.017,17.77,6.42
+Bacia Hidrográfica da vertente sul,5,2026-09-16 23:00,50,0.0,0.017,17.64,5.92
+Bacia Hidrográfica da vertente sul,5,2026-09-17 00:00,51,0.0,0.017,17.53,5.42
+Bacia Hidrográfica da vertente sul,5,2026-09-17 01:00,52,0.006,0.023,17.46,4.89
+Bacia Hidrográfica da vertente sul,5,2026-09-17 02:00,53,0.0,0.023,17.44,4.3
+Bacia Hidrográfica da vertente sul,5,2026-09-17 03:00,54,0.0,0.023,17.39,3.78
+Bacia Hidrográfica da vertente sul,5,2026-09-17 04:00,55,0.005,0.028,17.33,3.2
+Bacia Hidrográfica da vertente sul,5,2026-09-17 05:00,56,0.004,0.032,17.36,2.95
+Bacia Hidrográfica da vertente sul,5,2026-09-17 06:00,57,0.002,0.034,17.36,2.81
+Bacia Hidrográfica da vertente sul,5,2026-09-17 07:00,58,0.04,0.074,17.26,2.86
+Bacia Hidrográfica da vertente sul,5,2026-09-17 08:00,59,0.04,0.114,17.07,3.05
+Bacia Hidrográfica da vertente sul,5,2026-09-17 09:00,60,0.011,0.125,17.03,3.18
+Bacia Hidrográfica da vertente sul,5,2026-09-17 10:00,61,0.002,0.127,17.12,3.78
+Bacia Hidrográfica da vertente sul,5,2026-09-17 11:00,62,0.004,0.131,17.17,3.79
+Bacia Hidrográfica da vertente sul,5,2026-09-17 12:00,63,0.0,0.131,17.31,3.9
+Bacia Hidrográfica da vertente sul,5,2026-09-17 13:00,64,0.0,0.131,17.45,4.02
+Bacia Hidrográfica da vertente sul,5,2026-09-17 14:00,65,0.0,0.131,17.55,3.9
+Bacia Hidrográfica da vertente sul,5,2026-09-17 15:00,66,0.0,0.131,17.67,3.96
+Bacia Hidrográfica da vertente sul,5,2026-09-17 16:00,67,0.0,0.131,17.73,3.49
+Bacia Hidrográfica da vertente sul,5,2026-09-17 17:00,68,0.0,0.131,17.85,3.28
+Bacia Hidrográfica da vertente sul,5,2026-09-17 18:00,69,0.0,0.131,17.87,3.43
+Bacia Hidrográfica da vertente sul,5,2026-09-17 19:00,70,0.0,0.131,17.86,3.55
+Bacia Hidrográfica da vertente sul,5,2026-09-17 20:00,71,0.0,0.131,18.38,4.21
+Bacia Hidrográfica da vertente sul,5,2026-09-17 21:00,72,0.0,0.131,18.67,5.56
+Bacia Hidrográfica do Piraí,6,2026-09-14 22:00,1,0.0,0.0,15.34,2.99
+Bacia Hidrográfica do Piraí,6,2026-09-14 23:00,2,0.0,0.0,15.48,2.64
+Bacia Hidrográfica do Piraí,6,2026-09-15 00:00,3,0.0,0.0,15.15,2.8
+Bacia Hidrográfica do Piraí,6,2026-09-15 01:00,4,0.0,0.0,15.18,2.61
+Bacia Hidrográfica do Piraí,6,2026-09-15 02:00,5,0.0,0.0,14.49,4.14
+Bacia Hidrográfica do Piraí,6,2026-09-15 03:00,6,0.0,0.0,14.08,4.29
+Bacia Hidrográfica do Piraí,6,2026-09-15 04:00,7,0.0,0.0,13.82,3.5
+Bacia Hidrográfica do Piraí,6,2026-09-15 05:00,8,0.0,0.0,13.42,4.67
+Bacia Hidrográfica do Piraí,6,2026-09-15 06:00,9,0.0,0.0,13.04,4.61
+Bacia Hidrográfica do Piraí,6,2026-09-15 07:00,10,0.0,0.0,13.34,5.39
+Bacia Hidrográfica do Piraí,6,2026-09-15 08:00,11,0.0,0.0,14.65,4.75
+Bacia Hidrográfica do Piraí,6,2026-09-15 09:00,12,0.0,0.0,16.02,5.12
+Bacia Hidrográfica do Piraí,6,2026-09-15 10:00,13,0.0,0.0,17.2,3.44
+Bacia Hidrográfica do Piraí,6,2026-09-15 11:00,14,0.0,0.0,18.15,1.57
+Bacia Hidrográfica do Piraí,6,2026-09-15 12:00,15,0.003,0.003,18.22,2.28
+Bacia Hidrográfica do Piraí,6,2026-09-15 13:00,16,0.012,0.015,17.61,4.69
+Bacia Hidrográfica do Piraí,6,2026-09-15 14:00,17,0.0,0.015,17.45,5.94
+Bacia Hidrográfica do Piraí,6,2026-09-15 15:00,18,0.0,0.015,17.45,6.37
+Bacia Hidrográfica do Piraí,6,2026-09-15 16:00,19,0.0,0.015,17.5,6.18
+Bacia Hidrográfica do Piraí,6,2026-09-15 17:00,20,0.0,0.015,17.51,6.1
+Bacia Hidrográfica do Piraí,6,2026-09-15 18:00,21,0.006,0.021,17.46,5.66
+Bacia Hidrográfica do Piraí,6,2026-09-15 19:00,22,0.002,0.023,17.22,5.8
+Bacia Hidrográfica do Piraí,6,2026-09-15 20:00,23,0.002,0.025,17.19,6.23
+Bacia Hidrográfica do Piraí,6,2026-09-15 21:00,24,0.003,0.028,17.01,6.63
+Bacia Hidrográfica do Piraí,6,2026-09-15 22:00,25,0.001,0.029,16.97,6.79
+Bacia Hidrográfica do Piraí,6,2026-09-15 23:00,26,0.002,0.031,16.97,6.85
+Bacia Hidrográfica do Piraí,6,2026-09-16 00:00,27,0.003,0.034,17.02,6.58
+Bacia Hidrográfica do Piraí,6,2026-09-16 01:00,28,0.001,0.035,16.95,5.97
+Bacia Hidrográfica do Piraí,6,2026-09-16 02:00,29,0.003,0.038,16.8,5.78
+Bacia Hidrográfica do Piraí,6,2026-09-16 03:00,30,0.001,0.039,16.62,5.91
+Bacia Hidrográfica do Piraí,6,2026-09-16 04:00,31,0.003,0.042,16.32,5.96
+Bacia Hidrográfica do Piraí,6,2026-09-16 05:00,32,0.001,0.043,16.32,5.89
+Bacia Hidrográfica do Piraí,6,2026-09-16 06:00,33,0.001,0.044,16.38,5.53
+Bacia Hidrográfica do Piraí,6,2026-09-16 07:00,34,0.0,0.044,16.41,5.0
+Bacia Hidrográfica do Piraí,6,2026-09-16 08:00,35,0.0,0.044,16.47,4.27
+Bacia Hidrográfica do Piraí,6,2026-09-16 09:00,36,0.001,0.045,16.57,3.75
+Bacia Hidrográfica do Piraí,6,2026-09-16 10:00,37,0.003,0.048,16.86,2.95
+Bacia Hidrográfica do Piraí,6,2026-09-16 11:00,38,0.015,0.063,17.11,2.15
+Bacia Hidrográfica do Piraí,6,2026-09-16 12:00,39,0.012,0.075,17.23,2.45
+Bacia Hidrográfica do Piraí,6,2026-09-16 13:00,40,0.009,0.084,17.44,3.31
+Bacia Hidrográfica do Piraí,6,2026-09-16 14:00,41,0.006,0.09,17.54,4.08
+Bacia Hidrográfica do Piraí,6,2026-09-16 15:00,42,0.004,0.094,17.69,4.79
+Bacia Hidrográfica do Piraí,6,2026-09-16 16:00,43,0.0,0.094,17.82,5.92
+Bacia Hidrográfica do Piraí,6,2026-09-16 17:00,44,0.0,0.094,17.95,6.72
+Bacia Hidrográfica do Piraí,6,2026-09-16 18:00,45,0.0,0.094,17.86,7.27
+Bacia Hidrográfica do Piraí,6,2026-09-16 19:00,46,0.0,0.094,17.59,7.4
+Bacia Hidrográfica do Piraí,6,2026-09-16 20:00,47,0.0,0.094,17.43,7.01
+Bacia Hidrográfica do Piraí,6,2026-09-16 21:00,48,0.0,0.094,17.37,6.64
+Bacia Hidrográfica do Piraí,6,2026-09-16 22:00,49,0.0,0.094,17.18,6.24
+Bacia Hidrográfica do Piraí,6,2026-09-16 23:00,50,0.0,0.094,16.99,5.49
+Bacia Hidrográfica do Piraí,6,2026-09-17 00:00,51,0.0,0.094,16.86,4.82
+Bacia Hidrográfica do Piraí,6,2026-09-17 01:00,52,0.001,0.095,16.74,4.12
+Bacia Hidrográfica do Piraí,6,2026-09-17 02:00,53,0.003,0.098,16.44,3.64
+Bacia Hidrográfica do Piraí,6,2026-09-17 03:00,54,0.015,0.113,15.93,3.24
+Bacia Hidrográfica do Piraí,6,2026-09-17 04:00,55,0.015,0.128,15.43,3.22
+Bacia Hidrográfica do Piraí,6,2026-09-17 05:00,56,0.006,0.134,15.31,3.37
+Bacia Hidrográfica do Piraí,6,2026-09-17 06:00,57,0.008,0.142,15.3,3.27
+Bacia Hidrográfica do Piraí,6,2026-09-17 07:00,58,0.011,0.153,15.51,3.08
+Bacia Hidrográfica do Piraí,6,2026-09-17 08:00,59,0.031,0.184,16.27,2.72
+Bacia Hidrográfica do Piraí,6,2026-09-17 09:00,60,0.067,0.251,16.57,3.07
+Bacia Hidrográfica do Piraí,6,2026-09-17 10:00,61,0.043,0.294,16.75,3.49
+Bacia Hidrográfica do Piraí,6,2026-09-17 11:00,62,0.032,0.326,16.89,3.76
+Bacia Hidrográfica do Piraí,6,2026-09-17 12:00,63,0.019,0.345,17.0,4.03
+Bacia Hidrográfica do Piraí,6,2026-09-17 13:00,64,0.016,0.361,17.18,4.18
+Bacia Hidrográfica do Piraí,6,2026-09-17 14:00,65,0.002,0.363,17.3,3.88
+Bacia Hidrográfica do Piraí,6,2026-09-17 15:00,66,0.001,0.364,17.41,3.76
+Bacia Hidrográfica do Piraí,6,2026-09-17 16:00,67,0.001,0.365,17.55,3.54
+Bacia Hidrográfica do Piraí,6,2026-09-17 17:00,68,0.0,0.365,17.7,3.42
+Bacia Hidrográfica do Piraí,6,2026-09-17 18:00,69,0.0,0.365,17.75,3.57
+Bacia Hidrográfica do Piraí,6,2026-09-17 19:00,70,0.0,0.365,17.61,3.69
+Bacia Hidrográfica do Piraí,6,2026-09-17 20:00,71,0.0,0.365,17.73,3.74
+Bacia Hidrográfica do Piraí,6,2026-09-17 21:00,72,0.0,0.365,18.17,4.73
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 22:00,1,0.0,0.0,12.27,2.77
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-14 23:00,2,0.0,0.0,12.46,2.58
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 00:00,3,0.0,0.0,11.5,2.26
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 01:00,4,0.0,0.0,11.32,2.95
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 02:00,5,0.0,0.0,11.06,3.15
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 03:00,6,0.003,0.003,11.07,3.02
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 04:00,7,0.004,0.007,10.93,2.77
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 05:00,8,0.003,0.01,11.03,3.89
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 06:00,9,0.0,0.01,11.08,3.42
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 07:00,10,0.0,0.01,11.4,3.99
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 08:00,11,0.0,0.01,14.08,3.83
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 09:00,12,0.0,0.01,16.38,4.47
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 10:00,13,0.0,0.01,17.99,3.52
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 11:00,14,0.0,0.01,19.53,2.75
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 12:00,15,0.028,0.038,20.76,1.56
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 13:00,16,0.087,0.125,20.41,3.49
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 14:00,17,0.047,0.172,19.1,5.29
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 15:00,18,0.001,0.173,18.51,5.39
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 16:00,19,0.0,0.173,18.15,4.7
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 17:00,20,0.001,0.174,17.68,4.55
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 18:00,21,0.001,0.175,16.93,3.96
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 19:00,22,0.001,0.176,15.19,3.36
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 20:00,23,0.005,0.181,14.9,3.29
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 21:00,24,0.002,0.183,14.37,3.29
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 22:00,25,0.001,0.184,14.64,3.39
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-15 23:00,26,0.001,0.185,15.35,3.46
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 00:00,27,0.011,0.196,15.29,3.03
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 01:00,28,0.004,0.2,15.18,2.98
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 02:00,29,0.002,0.202,14.97,3.08
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 03:00,30,0.001,0.203,14.45,2.99
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 04:00,31,0.001,0.204,14.47,2.76
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 05:00,32,0.003,0.207,13.57,2.76
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 06:00,33,0.002,0.209,13.63,2.84
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 07:00,34,0.0,0.209,14.35,2.25
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 08:00,35,0.001,0.21,14.9,1.94
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 09:00,36,0.001,0.211,15.73,1.69
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 10:00,37,0.037,0.248,17.43,0.6
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 11:00,38,0.08,0.328,18.36,0.4
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 12:00,39,0.162,0.49,18.97,0.75
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 13:00,40,0.13,0.62,19.34,1.77
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 14:00,41,0.112,0.732,19.06,2.79
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 15:00,42,0.054,0.786,18.65,3.91
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 16:00,43,0.004,0.79,18.0,4.92
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 17:00,44,0.0,0.79,17.82,5.29
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 18:00,45,0.0,0.79,16.86,4.38
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 19:00,46,0.0,0.79,14.92,4.24
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 20:00,47,0.0,0.79,13.99,3.75
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 21:00,48,0.0,0.79,13.29,3.38
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 22:00,49,0.0,0.79,12.64,3.22
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-16 23:00,50,0.0,0.79,12.45,2.95
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 00:00,51,0.0,0.79,13.12,2.71
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 01:00,52,0.0,0.79,13.36,2.52
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 02:00,53,0.0,0.79,12.2,2.8
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 03:00,54,0.001,0.791,10.9,3.11
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 04:00,55,0.0,0.791,10.2,3.25
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 05:00,56,0.0,0.791,9.93,3.22
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 06:00,57,0.0,0.791,9.69,3.09
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 07:00,58,0.0,0.791,10.72,2.66
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 08:00,59,0.001,0.792,14.81,2.11
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 09:00,60,0.01,0.802,16.88,2.43
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 10:00,61,0.116,0.918,17.49,3.24
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 11:00,62,0.115,1.033,17.8,3.32
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 12:00,63,0.076,1.109,17.72,3.65
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 13:00,64,0.134,1.243,18.44,3.85
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 14:00,65,0.026,1.269,18.56,3.95
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 15:00,66,0.007,1.276,18.47,3.91
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 16:00,67,0.006,1.282,18.17,3.9
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 17:00,68,0.016,1.298,17.83,3.82
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 18:00,69,0.0,1.298,17.17,3.21
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 19:00,70,0.0,1.298,15.03,3.27
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 20:00,71,0.0,1.298,14.4,3.01
+Bacia Hidrográfica do Itapocuzinho,7,2026-09-17 21:00,72,0.0,1.298,14.22,2.85
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 22:00,1,0.0,0.0,14.79,2.96
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-14 23:00,2,0.0,0.0,14.89,2.79
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 00:00,3,0.0,0.0,14.42,2.8
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 01:00,4,0.0,0.0,14.45,2.73
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 02:00,5,0.0,0.0,14.05,3.85
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 03:00,6,0.0,0.0,13.62,4.45
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 04:00,7,0.0,0.0,13.34,3.73
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 05:00,8,0.0,0.0,13.06,4.5
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 06:00,9,0.0,0.0,12.76,4.21
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 07:00,10,0.0,0.0,13.08,4.94
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 08:00,11,0.0,0.0,14.79,4.1
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 09:00,12,0.0,0.0,16.41,4.4
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 10:00,13,0.0,0.0,17.58,3.09
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 11:00,14,0.0,0.0,18.52,1.95
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 12:00,15,0.0,0.0,18.98,0.97
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 13:00,16,0.004,0.004,18.73,3.39
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 14:00,17,0.02,0.024,18.23,5.02
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 15:00,18,0.0,0.024,17.76,5.61
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 16:00,19,0.0,0.024,17.66,4.89
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 17:00,20,0.0,0.024,17.7,4.52
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 18:00,21,0.001,0.025,17.73,4.39
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 19:00,22,0.002,0.027,17.25,4.86
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 20:00,23,0.005,0.032,16.99,5.35
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 21:00,24,0.007,0.039,17.0,5.51
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 22:00,25,0.003,0.042,16.96,6.27
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-15 23:00,26,0.0,0.042,16.78,6.2
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 00:00,27,0.016,0.058,16.78,5.79
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 01:00,28,0.011,0.069,16.72,5.61
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 02:00,29,0.008,0.077,16.5,5.53
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 03:00,30,0.001,0.078,16.38,4.94
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 04:00,31,0.0,0.078,16.31,5.03
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 05:00,32,0.0,0.078,16.04,4.96
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 06:00,33,0.002,0.08,16.03,4.55
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 07:00,34,0.002,0.082,16.01,4.04
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 08:00,35,0.0,0.082,16.2,3.49
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 09:00,36,0.0,0.082,16.51,3.06
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 10:00,37,0.008,0.09,16.92,2.5
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 11:00,38,0.013,0.103,17.28,1.51
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 12:00,39,0.009,0.112,17.41,1.96
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 13:00,40,0.026,0.138,17.59,3.08
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 14:00,41,0.006,0.144,17.65,4.0
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 15:00,42,0.009,0.153,17.74,4.27
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 16:00,43,0.0,0.153,17.78,5.2
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 17:00,44,0.0,0.153,17.89,6.18
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 18:00,45,0.0,0.153,17.8,6.38
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 19:00,46,0.0,0.153,17.41,6.66
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 20:00,47,0.0,0.153,17.11,6.4
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 21:00,48,0.0,0.153,16.86,5.81
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 22:00,49,0.0,0.153,16.61,5.18
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-16 23:00,50,0.0,0.153,16.66,4.57
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 00:00,51,0.0,0.153,16.65,4.11
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 01:00,52,0.002,0.155,16.47,3.66
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 02:00,53,0.001,0.156,15.84,3.2
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 03:00,54,0.007,0.163,15.16,3.15
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 04:00,55,0.006,0.169,14.49,3.82
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 05:00,56,0.002,0.171,14.06,4.09
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 06:00,57,0.0,0.171,13.96,3.74
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 07:00,58,0.003,0.174,14.38,3.44
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 08:00,59,0.007,0.181,15.88,3.31
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 09:00,60,0.001,0.182,16.93,3.53
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 10:00,61,0.013,0.195,17.36,3.84
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 11:00,62,0.011,0.206,17.48,4.11
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 12:00,63,0.002,0.208,17.64,4.47
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 13:00,64,0.002,0.21,17.76,4.63
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 14:00,65,0.0,0.21,17.8,4.67
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 15:00,66,0.002,0.212,17.82,4.54
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 16:00,67,0.005,0.217,17.88,4.5
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 17:00,68,0.001,0.218,17.96,4.59
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 18:00,69,0.001,0.219,17.99,4.64
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 19:00,70,0.002,0.221,17.68,4.77
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 20:00,71,0.002,0.223,17.65,4.53
+Bacia Hidrográfica do Cubatão (sub-bacia),1,2026-09-17 21:00,72,0.006,0.229,17.87,5.03
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 22:00,1,0.0,0.0,15.83,3.28
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-14 23:00,2,0.0,0.0,16.04,2.69
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 00:00,3,0.0,0.0,15.91,3.13
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 01:00,4,0.0,0.0,16.01,2.47
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 02:00,5,0.0,0.0,15.56,4.57
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 03:00,6,0.0,0.0,14.99,5.06
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 04:00,7,0.0,0.0,14.68,3.98
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 05:00,8,0.0,0.0,14.03,5.24
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 06:00,9,0.0,0.0,13.39,5.04
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 07:00,10,0.0,0.0,13.88,5.83
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 08:00,11,0.0,0.0,14.73,5.24
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 09:00,12,0.0,0.0,15.89,5.89
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 10:00,13,0.0,0.0,16.92,4.04
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 11:00,14,0.0,0.0,17.82,2.28
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 12:00,15,0.0,0.0,17.97,1.55
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 13:00,16,0.0,0.0,17.7,3.9
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 14:00,17,0.0,0.0,17.44,5.31
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 15:00,18,0.0,0.0,17.46,6.11
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 16:00,19,0.0,0.0,17.58,6.25
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 17:00,20,0.0,0.0,17.7,6.05
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 18:00,21,0.011,0.011,17.7,5.48
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 19:00,22,0.001,0.012,17.51,5.81
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 20:00,23,0.0,0.012,17.48,6.31
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 21:00,24,0.001,0.013,17.37,6.85
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 22:00,25,0.001,0.014,17.33,7.1
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-15 23:00,26,0.0,0.014,17.17,7.44
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 00:00,27,0.001,0.015,17.34,7.16
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 01:00,28,0.001,0.016,17.32,6.77
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 02:00,29,0.004,0.02,17.22,6.57
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 03:00,30,0.001,0.021,17.19,6.4
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 04:00,31,0.0,0.021,16.85,6.65
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 05:00,32,0.0,0.021,16.77,6.51
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 06:00,33,0.0,0.021,16.84,6.08
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 07:00,34,0.0,0.021,16.89,5.73
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 08:00,35,0.0,0.021,16.93,4.84
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 09:00,36,0.0,0.021,16.95,4.08
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 10:00,37,0.0,0.021,16.92,3.75
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 11:00,38,0.0,0.021,16.97,2.51
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 12:00,39,0.0,0.021,17.13,2.41
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 13:00,40,0.0,0.021,17.34,2.94
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 14:00,41,0.0,0.021,17.52,3.82
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 15:00,42,0.0,0.021,17.64,4.63
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 16:00,43,0.0,0.021,17.86,5.7
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 17:00,44,0.0,0.021,18.01,6.78
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 18:00,45,0.0,0.021,18.03,7.37
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 19:00,46,0.0,0.021,17.9,7.59
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 20:00,47,0.0,0.021,17.78,7.4
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 21:00,48,0.0,0.021,17.78,6.86
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 22:00,49,0.0,0.021,17.73,6.47
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-16 23:00,50,0.0,0.021,17.6,5.99
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 00:00,51,0.0,0.021,17.51,5.45
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 01:00,52,0.005,0.026,17.44,4.83
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 02:00,53,0.002,0.028,17.41,4.23
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 03:00,54,0.01,0.038,17.28,3.54
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 04:00,55,0.02,0.058,17.01,3.05
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 05:00,56,0.005,0.063,16.93,3.11
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 06:00,57,0.006,0.069,16.92,3.08
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 07:00,58,0.053,0.122,16.84,2.98
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 08:00,59,0.034,0.156,16.88,2.81
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 09:00,60,0.022,0.178,16.88,3.21
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 10:00,61,0.003,0.181,17.06,3.64
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 11:00,62,0.001,0.182,17.11,3.86
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 12:00,63,0.0,0.182,17.26,4.05
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 13:00,64,0.0,0.182,17.39,4.28
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 14:00,65,0.0,0.182,17.5,4.12
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 15:00,66,0.0,0.182,17.61,4.2
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 16:00,67,0.0,0.182,17.72,3.9
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 17:00,68,0.0,0.182,17.87,3.67
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 18:00,69,0.0,0.182,17.92,3.8
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 19:00,70,0.0,0.182,17.86,3.8
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 20:00,71,0.0,0.182,18.14,3.84
+Bacia Hidrográfica do Rio Cachoeira,4,2026-09-17 21:00,72,0.0,0.182,18.65,5.39
