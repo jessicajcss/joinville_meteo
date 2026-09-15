@@ -40,6 +40,9 @@ jobs:
       - name: Update airport (SBJV) from the IEM archive
         run: python scripts/fetch_airport.py || echo "airport fetch failed (non-fatal)"
 
+      - name: Re-export 5-min year-chunks (wind roses + wind heatmap source)
+        run: python scripts/build_fivemin_chunks.py
+
       - name: Regenerate dashboard snapshot from the masters
         run: python scripts/build_site_data.py
 
