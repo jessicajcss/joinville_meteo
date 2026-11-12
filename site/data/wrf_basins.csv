@@ -1,8 +1,8 @@
 id,name,area_km2,coverage_pct,rain_total_mm,rain_peak_mm_h,temp_mean_degC,temp_min_degC,temp_max_degC,wind_mean_ms,wind_max_ms,wind_dir_deg,rh2_mean_pct,run_time_utc,window_local,source
-1,Bacia Hidrográfica do Cubatão (sub-bacia),489.72,100.0,15.892,1.804,18.3,12.8,23.7,3.11,5.5,64,90.2,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-7,Bacia Hidrográfica do Itapocuzinho,390.36,100.0,15.693,1.735,19.0,13.1,24.5,2.86,6.05,70,88.1,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-2,Bacia Hidrográfica do Palmital,343.86,100.0,12.756,1.501,19.7,14.6,25.0,2.71,4.9,62,89.1,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-6,Bacia Hidrográfica do Piraí,578.87,100.0,10.853,1.344,20.3,15.1,25.8,2.42,4.93,72,86.7,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-3,Bacias independentes da vertente leste,135.57,100.0,9.075,1.012,21.0,18.0,24.4,2.84,5.81,68,88.3,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-4,Bacia Hidrográfica do Rio Cachoeira,74.11,100.0,8.247,1.06,21.0,16.3,26.0,2.44,5.01,68,83.5,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
-5,Bacia Hidrográfica da vertente sul,79.06,100.0,7.08,0.765,21.0,16.8,25.5,2.52,5.25,66,86.3,2026-11-11 00:00:00,2026-11-10 22:00 .. 2026-11-13 21:00,CPTEC/INPE WRF AMS 7km
+1,Bacia Hidrográfica do Cubatão (sub-bacia),489.72,100.0,7.029,1.579,19.0,15.1,24.3,2.59,4.85,95,89.2,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+2,Bacia Hidrográfica do Palmital,343.86,100.0,6.23,1.338,20.3,15.9,25.4,2.54,4.53,126,87.8,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+7,Bacia Hidrográfica do Itapocuzinho,390.36,100.0,5.339,1.335,19.6,15.0,25.6,2.4,5.12,94,87.4,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+6,Bacia Hidrográfica do Piraí,578.87,100.0,4.064,0.893,20.9,16.5,25.8,2.25,4.54,118,85.6,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+4,Bacia Hidrográfica do Rio Cachoeira,74.11,100.0,3.676,0.568,21.6,16.9,26.6,2.33,4.74,119,82.4,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+3,Bacias independentes da vertente leste,135.57,100.0,3.572,0.658,21.3,17.8,24.5,2.63,4.98,127,88.4,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
+5,Bacia Hidrográfica da vertente sul,79.06,100.0,2.664,0.296,21.5,17.4,25.9,2.42,4.87,123,85.5,2026-11-12 00:00:00,2026-11-11 22:00 .. 2026-11-14 21:00,CPTEC/INPE WRF AMS 7km
